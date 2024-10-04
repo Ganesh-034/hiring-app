@@ -13,14 +13,16 @@ pipeline {
                 sh "docker build . -t ganesh034/hiring-app:$BUILD_NUMBER"
             }
         }
-        stage('Docker Push') {
-            steps {
-                withCredentials([string(credentialsId: 'Dockerhub1', variable: 'hubPwd')]) {
-                    sh "docker login -u ganesh034 -p ${hubPwd}"
-                    sh "docker push ganesh034/hiring-app:$BUILD_NUMBER"
-                }
-            }
+    stage('Docker Push') {
+    steps {
+        withCredentials([usernamePassword(credentialsId: 'Dockerhub1', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'hubPwd')]) {
+            sh '''
+                echo "${hubPwd}" | docker login -u ${DOCKER_USERNAME} --password-stdin
+            '''
+            sh "docker push ganesh034/hiring-app:$BUILD_NUMBER"
         }
+    }
+}
         stage('Checkout K8S manifest SCM'){
             steps {
               git branch: 'main', url: 'https://github.com/Ganesh-034/hiring-app.git'
