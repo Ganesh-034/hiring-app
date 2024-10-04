@@ -1,6 +1,6 @@
 FROM tomcat:8.0.20-jre8
 # Define environment variables for Nexus repository and the artifact to download
-ENV NEXUS_REPO_URL="http://54.198.124.115:8081/repository/hiring-init/"
+ENV NEXUS_REPO_URL="http://54.167.240.18:8081/repository/hiring-init/"
 ENV ARTIFACT_PATH="in/javahome/devops/0.0.1/devops-0.0.1.war"
 
 # Download the WAR file from Nexus and copy it to the Tomcat webapps directory
