@@ -6,7 +6,7 @@ pipeline{
     stages{
         stage('checkout the code'){
             steps{
-                git url:'https://github.com/bcreddydevops/chinna-app.git', branch: 'main'
+                git url:'https://github.com/Ganesh-034/hiring-app.git', branch: 'main'
             }
         }
         stage('build the code'){
@@ -16,7 +16,7 @@ pipeline{
         }
         stage('Generate sonarqube-analysis'){
             steps{
-                withSonarQubeEnv(installationName: 'sonarqube-8', credentialsId: 'jenkins-sonar-token') {
+                withSonarQubeEnv(installationName: 'sonarqube', credentialsId: 'sonarqube') {
                  sh 'mvn sonar:sonar'
                 }
             }
@@ -31,26 +31,14 @@ pipeline{
                      type: 'war'
                 ]
             ], 
-            credentialsId: 'nexus-credentials', 
+            credentialsId: 'Nexus', 
             groupId: 'in.javahome', 
-            nexusUrl: '52.90.34.45:8081', 
+            nexusUrl: 'http://54.162.74.234:8081/', 
             nexusVersion: 'nexus3', 
             protocol: 'http', 
-            repository: 'spring-initial', 
+            repository: 'hiring-init', 
             version: '0.0.1'
             }
         }
-		stage('Deploy War file to Tommcat'){
-            steps{
-               sshagent(['tomcat-credentials']) {
-                  sh """
-                    scp -o StrictHostKeyChecking=no target/*.war ubuntu@54.173.252.57:/opt/apache-tomcat-9.0.72/webapps
-                    ssh -o StrictHostKeyChecking=no ubuntu@54.173.252.57 /opt/apache-tomcat-9.0.72/bin/shutdown.sh
-                    ssh -o StrictHostKeyChecking=no ubuntu@54.173.252.57 /opt/apache-tomcat-9.0.72/bin/startup.sh
-					
-		          """          
-               }
-            }
-        }
-    }   
+     }   
  }
