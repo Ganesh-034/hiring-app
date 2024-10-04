@@ -10,20 +10,20 @@ pipeline {
        
         stage('Docker Build') {
             steps {
-                sh "docker build . -t sabair0509/hiring-app:$BUILD_NUMBER"
+                sh "docker build . -t ganesh034/hiring-app:$BUILD_NUMBER"
             }
         }
         stage('Docker Push') {
             steps {
-                withCredentials([string(credentialsId: 'docker-hub', variable: 'hubPwd')]) {
-                    sh "docker login -u sabair0509 -p ${hubPwd}"
-                    sh "docker push sabair0509/hiring-app:$BUILD_NUMBER"
+                withCredentials([string(credentialsId: 'Dockerhub', variable: 'hubPwd')]) {
+                    sh "docker login -u ganesh034 -p ${hubPwd}"
+                    sh "docker push ganesh034/hiring-app:$BUILD_NUMBER"
                 }
             }
         }
         stage('Checkout K8S manifest SCM'){
             steps {
-              git branch: 'main', url: 'https://github.com/betawins/Hiring-app-argocd.git'
+              git branch: 'main', url: 'https://github.com/Ganesh-034/hiring-app.git'
             }
         } 
         stage('Update K8S manifest & push to Repo'){
