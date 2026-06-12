@@ -1,0 +1,26 @@
+$plans = az appservice plan list | ConvertFrom-Json
+
+Write-Host "Checking App Service Plans..."
+Write-Host "------------------------------------------------------------"
+
+foreach ($plan in $plans) {
+    $name = $plan.name
+    $rg = $plan.resourceGroup
+    $instances = $plan.sku.capacity
+
+    # Get apps under this plan
+    $apps = az webapp list --query "[?contains(serverFarmId, '$name')]" | ConvertFrom-Json
+    $appCount = $apps.Count
+
+    # Defender cost calculation
+    $cost = [math]::Round($instances * 14.6, 2)
+
+    Write-Host "Plan: $name | RG: $rg"
+    Write-Host "Instances: $instances | Apps: $appCount | Estimated Cost: $$cost/month"
+
+    if ($appCount -eq 0) {
+        Write-Host "⚠️ UNUSED PLAN → COST WITHOUT USAGE" -ForegroundColor Yellow
+    }
+
+    Write-Host "------------------------------------------------------------"
+}
