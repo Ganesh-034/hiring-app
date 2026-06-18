@@ -1,0 +1,151 @@
+Connected!
+2026-06-18T05:20:42.3956801Z ApplicationInsights:Instrumentation key was invalid, please check the iKey []
+2026-06-18T05:21:27.2741306Z 2026-06-18T05:21:27.265Z [[32minfo[39m]: {"requestId":"506d3142-0216-47c0-b437-73a29bef4a4a","method":"GET","route":"/healthz","service":"API API","event":"REQUEST_SUMMARY","statusCode":200,"durationMs":1,"data":{"keys":["status"]},"message":"Request completed successfully."}
+2026-06-18T05:21:27.4332199Z ApplicationInsights:Instrumentation key was invalid, please check the iKey []
+2026-06-18T05:21:42.7276751Z ApplicationInsights:Instrumentation key was invalid, please check the iKey []
+2026-06-18T05:22:13.1307702Z ApplicationInsights:Instrumentation key was invalid, please check the iKey []
+2026-06-18T05:22:25.8069982Z ApplicationInsights:Instrumentation key was invalid, please check the iKey []
+2026-06-18T05:22:27.4829875Z 2026-06-18T05:22:27.465Z [[32minfo[39m]: {"requestId":"1be87da2-6573-4123-b118-0e9583d92e05","method":"GET","route":"/healthz","service":"API API","event":"REQUEST_SUMMARY","statusCode":200,"durationMs":96,"data":{"keys":["status"]},"message":"Request completed successfully."}
+2026-06-18T05:22:27.7220248Z ApplicationInsights:Instrumentation key was invalid, please check the iKey []
+2026-06-18T05:22:43.0212046Z ApplicationInsights:Instrumentation key was invalid, please check the iKey []
+2026-06-18T05:23:27.5423967Z 2026-06-18T05:23:27.532Z [[32minfo[39m]: {"requestId":"92c7543e-e4cb-4dbf-a3f0-03e30bc399ba","method":"GET","route":"/healthz","service":"API API","event":"REQUEST_SUMMARY","statusCode":200,"durationMs":170,"data":{"keys":["status"]},"message":"Request completed successfully."}
+2026-06-18T05:23:27.8379659Z ApplicationInsights:Instrumentation key was invalid, please check the iKey []
+2026-06-18T05:23:42.611618Z ApplicationInsights:Instrumentation key was invalid, please check the iKey []
+2026-06-18T05:24:27.4803728Z 2026-06-18T05:24:27.470Z [[32minfo[39m]: {"requestId":"5c2fd70b-009c-4ca6-9dcf-94f408b944dc","method":"GET","route":"/healthz","service":"API API","event":"REQUEST_SUMMARY","statusCode":200,"durationMs":108,"data":{"keys":["status"]},"message":"Request completed successfully."}
+2026-06-18T05:24:27.641638Z ApplicationInsights:Instrumentation key was invalid, please check the iKey []
+2026-06-18T05:24:42.4981768Z ApplicationInsights:Instrumentation key was invalid, please check the iKey []
+2026-06-18T05:25:13.243319Z [Poller:6a0ff7f8f6ecd268a00c7e20] AD "ADLSB.hmst.co.th" HeartbeatCount: 14
+2026-06-18T05:25:13.3028121Z [Poller:6a14370f4969d215b10e9e10] Firewall "cmwt-Virtual-Machine" workspace "90682fc5-80d1-46c1-9cdf-1a58ea32d0bf" count: 23423
+2026-06-18T05:25:13.5638434Z [Poller:6a02f0cd29499130e1091930] Firewall "syslogls" — CSL empty, trying Syslog fallback.
+2026-06-18T05:25:13.8528172Z [Poller:6a02f0cd29499130e1091930] Firewall "syslogls" workspace "4dab506e-aae6-4da9-827f-96fa4558a7ae" count: 175178
+2026-06-18T05:25:27.2766656Z 2026-06-18T05:25:27.267Z [[32minfo[39m]: {"requestId":"8a5c6666-f2ad-4780-a0a0-8d9084cb9ca8","method":"GET","route":"/healthz","service":"API API","event":"REQUEST_SUMMARY","statusCode":200,"durationMs":13,"data":{"keys":["status"]},"message":"Request completed successfully."}
+2026-06-18T05:25:27.5531218Z ApplicationInsights:Instrumentation key was invalid, please check the iKey []
+2026-06-18T05:25:29.576696Z AUDIT [medium]: security_error {
+2026-06-18T05:25:29.5768091Z   error: 'No authorization token was found',
+2026-06-18T05:25:29.5768299Z   status: 401,
+2026-06-18T05:25:29.5768401Z   path: '/',
+2026-06-18T05:25:29.5768582Z   method: 'GET'
+2026-06-18T05:25:29.5768683Z }
+2026-06-18T05:25:32.0008188Z GET tour - req.auth: {
+2026-06-18T05:25:32.0009362Z   aud: '481b1a97-87dc-412c-a4e5-fc6b0523ca1f',
+2026-06-18T05:25:32.0009687Z   iss: 'https://login.microsoftonline.com/fe8c6234-bf85-48c7-b462-1eefe98d567d/v2.0',
+2026-06-18T05:25:32.0009816Z   iat: 1781760030,
+2026-06-18T05:25:32.0009915Z   nbf: 1781760030,
+2026-06-18T05:25:32.0010004Z   exp: 1781764102,
+2026-06-18T05:25:32.0010137Z   aio: 'AVQAq/8cAAAAOq/EDchulTv6t8/oWsAIaTTnty2GCCyIC4r4jcTsLFtrLn1TdaYW4u0RxUm9Kt2XEinpq9ROtNx16l06RGqdW8/mF4j0/EtbzEfW3z+YSCg=',
+2026-06-18T05:25:32.0010258Z   azp: '34b2905a-5a6a-4be2-ad78-27430e2aa896',
+2026-06-18T05:25:32.0097564Z   azpacr: '0',
+2026-06-18T05:25:32.009812Z   name: 'Pranay',
+2026-06-18T05:25:32.0098293Z   oid: 'a63c4da8-a244-47fe-bf12-08df3ab6818b',
+2026-06-18T05:25:32.0098405Z   preferred_username: 'Pranay@ToyotaTsushoSystemsIndia.onmicrosoft.com',
+2026-06-18T05:25:32.0098519Z   rh: '1.ASsANGKM_oW_x0i0Yh7v6Y1WfZcaG0jchyxBpOX8awUjyh8qAP0rAA.',
+2026-06-18T05:25:32.0098621Z   roles: [ 'SOC-Admin' ],
+2026-06-18T05:25:32.0098757Z   scp: 'access_as_user',
+2026-06-18T05:25:32.0098859Z   sid: '005e548a-0f5e-c4f4-171f-0f9cd3398225',
+2026-06-18T05:25:32.0098964Z   sub: 'SsmSLBUdpP8JOgPsIVZtGs65M9A7kqm0l8BE9eAZ-3Y',
+2026-06-18T05:25:32.0099065Z   tid: 'fe8c6234-bf85-48c7-b462-1eefe98d567d',
+2026-06-18T05:25:32.0099197Z   uti: 'BllaBhkjBEyjs8Gy9VsQAA',
+2026-06-18T05:25:32.0099295Z   ver: '2.0',
+2026-06-18T05:25:32.0099399Z   xms_ftd: 'bWB1EtEZltU47R6XNt_th1JySKaq-DKfSEiHUQP7cEQBa29yZWFzb3V0aC1kc21z',
+2026-06-18T05:25:32.0099498Z   customer_name: 'ajinomoto-cambodia-ajc'
+2026-06-18T05:25:32.0099591Z }
+2026-06-18T05:25:32.0099715Z GET tour - roles: [ 'SOC-Admin' ]
+2026-06-18T05:25:32.0099815Z GET tour - oid: a63c4da8-a244-47fe-bf12-08df3ab6818b
+2026-06-18T05:25:32.0099907Z GET tour - roleKey: socadmin
+2026-06-18T05:25:32.1381317Z GET tour - req.auth: {
+2026-06-18T05:25:32.1382488Z   aud: '481b1a97-87dc-412c-a4e5-fc6b0523ca1f',
+2026-06-18T05:25:32.1382692Z   iss: 'https://login.microsoftonline.com/fe8c6234-bf85-48c7-b462-1eefe98d567d/v2.0',
+2026-06-18T05:25:32.1382807Z   iat: 1781760030,
+2026-06-18T05:25:32.1382907Z   nbf: 1781760030,
+2026-06-18T05:25:32.138303Z   exp: 1781764102,
+2026-06-18T05:25:32.1383135Z   aio: 'AVQAq/8cAAAAOq/EDchulTv6t8/oWsAIaTTnty2GCCyIC4r4jcTsLFtrLn1TdaYW4u0RxUm9Kt2XEinpq9ROtNx16l06RGqdW8/mF4j0/EtbzEfW3z+YSCg=',
+2026-06-18T05:25:32.1383251Z   azp: '34b2905a-5a6a-4be2-ad78-27430e2aa896',
+2026-06-18T05:25:32.1383347Z   azpacr: '0',
+2026-06-18T05:25:32.1383468Z   name: 'Pranay',
+2026-06-18T05:25:32.1383571Z   oid: 'a63c4da8-a244-47fe-bf12-08df3ab6818b',
+2026-06-18T05:25:32.1395642Z   preferred_username: 'Pranay@ToyotaTsushoSystemsIndia.onmicrosoft.com',
+2026-06-18T05:25:32.1396052Z   rh: '1.ASsANGKM_oW_x0i0Yh7v6Y1WfZcaG0jchyxBpOX8awUjyh8qAP0rAA.',
+2026-06-18T05:25:32.1396207Z   roles: [ 'SOC-Admin' ],
+2026-06-18T05:25:32.1396319Z   scp: 'access_as_user',
+2026-06-18T05:25:32.139642Z   sid: '005e548a-0f5e-c4f4-171f-0f9cd3398225',
+2026-06-18T05:25:32.1396522Z   sub: 'SsmSLBUdpP8JOgPsIVZtGs65M9A7kqm0l8BE9eAZ-3Y',
+2026-06-18T05:25:32.1396656Z   tid: 'fe8c6234-bf85-48c7-b462-1eefe98d567d',
+2026-06-18T05:25:32.1396754Z   uti: 'BllaBhkjBEyjs8Gy9VsQAA',
+2026-06-18T05:25:32.1396851Z   ver: '2.0',
+2026-06-18T05:25:32.1396954Z   xms_ftd: 'bWB1EtEZltU47R6XNt_th1JySKaq-DKfSEiHUQP7cEQBa29yZWFzb3V0aC1kc21z',
+2026-06-18T05:25:32.1397092Z   customer_name: 'ajinomoto-cambodia-ajc'
+2026-06-18T05:25:32.1397194Z }
+2026-06-18T05:25:32.1491534Z GET tour - roles: [ 'SOC-Admin' ]
+2026-06-18T05:25:32.1492173Z GET tour - oid: a63c4da8-a244-47fe-bf12-08df3ab6818b
+2026-06-18T05:25:32.1492293Z GET tour - roleKey: socadmin
+2026-06-18T05:25:33.597256Z GET tour - req.auth: {
+2026-06-18T05:25:33.5973461Z   aud: '481b1a97-87dc-412c-a4e5-fc6b0523ca1f',
+2026-06-18T05:25:33.5973667Z   iss: 'https://login.microsoftonline.com/fe8c6234-bf85-48c7-b462-1eefe98d567d/v2.0',
+2026-06-18T05:25:33.5973781Z   iat: 1781760030,
+2026-06-18T05:25:33.5974004Z   nbf: 1781760030,
+2026-06-18T05:25:33.5974094Z   exp: 1781764102,
+2026-06-18T05:25:33.5974198Z   aio: 'AVQAq/8cAAAAOq/EDchulTv6t8/oWsAIaTTnty2GCCyIC4r4jcTsLFtrLn1TdaYW4u0RxUm9Kt2XEinpq9ROtNx16l06RGqdW8/mF4j0/EtbzEfW3z+YSCg=',
+2026-06-18T05:25:33.5974309Z   azp: '34b2905a-5a6a-4be2-ad78-27430e2aa896',
+2026-06-18T05:25:33.5974437Z   azpacr: '0',
+2026-06-18T05:25:33.5974536Z   name: 'Pranay',
+2026-06-18T05:25:33.5974633Z   oid: 'a63c4da8-a244-47fe-bf12-08df3ab6818b',
+2026-06-18T05:25:33.5974733Z   preferred_username: 'Pranay@ToyotaTsushoSystemsIndia.onmicrosoft.com',
+2026-06-18T05:25:33.5974871Z   rh: '1.ASsANGKM_oW_x0i0Yh7v6Y1WfZcaG0jchyxBpOX8awUjyh8qAP0rAA.',
+2026-06-18T05:25:33.597497Z   roles: [ 'SOC-Admin' ],
+2026-06-18T05:25:33.5975069Z   scp: 'access_as_user',
+2026-06-18T05:25:33.5975164Z   sid: '005e548a-0f5e-c4f4-171f-0f9cd3398225',
+2026-06-18T05:25:33.5975285Z   sub: 'SsmSLBUdpP8JOgPsIVZtGs65M9A7kqm0l8BE9eAZ-3Y',
+2026-06-18T05:25:33.5975386Z   tid: 'fe8c6234-bf85-48c7-b462-1eefe98d567d',
+2026-06-18T05:25:33.5975483Z   uti: 'BllaBhkjBEyjs8Gy9VsQAA',
+2026-06-18T05:25:33.5975577Z   ver: '2.0',
+2026-06-18T05:25:33.597568Z   xms_ftd: 'bWB1EtEZltU47R6XNt_th1JySKaq-DKfSEiHUQP7cEQBa29yZWFzb3V0aC1kc21z',
+2026-06-18T05:25:33.5975807Z   customer_name: 'ajinomoto-cambodia-ajc'
+2026-06-18T05:25:33.5975903Z }
+2026-06-18T05:25:33.6345974Z GET tour - roles: [ 'SOC-Admin' ]
+2026-06-18T05:25:33.6346675Z GET tour - oid: a63c4da8-a244-47fe-bf12-08df3ab6818b
+2026-06-18T05:25:33.6346868Z GET tour - roleKey: socadmin
+2026-06-18T05:25:34.0781559Z 2026-06-18T05:25:34.071Z [[32minfo[39m]: {"service":"Startup","name":"System","event":"USER_LOGIN","userId":"a63c4da8-a244-47fe-bf12-08df3ab6818b","userName":"Pranay","customerName":"ajinomoto-cambodia-ajc","message":"USER_LOGIN"}
+2026-06-18T05:25:34.1530057Z 2026-06-18T05:25:34.152Z [[32minfo[39m]: [DashboardAdminfetching] Found 5 admin-dashboard-active customers
+2026-06-18T05:25:34.1561301Z 2026-06-18T05:25:34.155Z [[32minfo[39m]: [DashboardAdminfetching] Enriched 5 customers with SAS URLs
+2026-06-18T05:25:34.2328797Z 2026-06-18T05:25:34.232Z [[32minfo[39m]: {"requestId":"cd2ba51f-077a-4f97-b421-f2090a49413c","method":"GET","route":"/api/customers/admin-dashboard-active","service":"Customer Admin Dashboard Active API","userId":"a63c4da8-a244-47fe-bf12-08df3ab6818b","name":"Pranay","email":"Pranay@ToyotaTsushoSystemsIndia.onmicrosoft.com","customerName":"ajinomoto-cambodia-ajc","roles":["SOC-Admin"],"tenantId":"fe8c6234-bf85-48c7-b462-1eefe98d567d","event":"ADMIN_CUSTOMERS_FETCH_SUCCESS","statusCode":200,"durationMs":133,"data":{"message":"Admin customers fetched successfully","dataKeys":["count","customers"]},"message":"Fetched 5 admin-dashboard-active customers with SAS URLs"}
+2026-06-18T05:25:34.5864001Z PARAM ROUTE HIT: /api/cost_management/devices
+2026-06-18T05:25:34.6559663Z 🔍 Route called: POST /cost_management/devices
+2026-06-18T05:25:34.6657481Z 🔍 User authenticated: true
+2026-06-18T05:25:34.6755654Z 🔍 User OID: a63c4da8...
+2026-06-18T05:25:34.8517472Z PARAM ROUTE HIT: /api/cost_management/chart?customerKeys=centralmotorwheel-thailand%2CHino+Motor-+HMST%2CPT.RKNForge%2Cpt-tokairika-indonesia%2Ctaiho-thailand&groupBy=customer
+2026-06-18T05:25:34.8606299Z LEGACY ROUTE HIT: /api/cost_management/devices
+2026-06-18T05:25:34.8808229Z PARAM ROUTE HIT: /api/cost_management/chart?customerKeys=centralmotorwheel-thailand%2CHino+Motor-+HMST%2CPT.RKNForge%2Cpt-tokairika-indonesia%2Ctaiho-thailand&startDate=2026-05-19T00%3A00%3A00.000Z&endDate=2026-06-17T00%3A00%3A00.000Z&groupBy=customer
+2026-06-18T05:25:34.9455621Z 🔍 Route called: GET /cost_management/chart
+2026-06-18T05:25:34.9728393Z 🔍 User authenticated: true
+2026-06-18T05:25:34.9922351Z 🔍 User OID: a63c4da8...
+2026-06-18T05:25:35.0234342Z 🔍 Route called: GET /cost_management/chart
+2026-06-18T05:25:35.0253856Z 🔍 User authenticated: true
+2026-06-18T05:25:35.0261679Z 🔍 User OID: a63c4da8...
+2026-06-18T05:25:35.0421158Z PARAM ROUTE HIT: /api/cost_management/kpis
+2026-06-18T05:25:35.0858651Z LEGACY ROUTE HIT: /api/cost_management/chart?customerKeys=centralmotorwheel-thailand%2CHino+Motor-+HMST%2CPT.RKNForge%2Cpt-tokairika-indonesia%2Ctaiho-thailand&groupBy=customer
+2026-06-18T05:25:35.1395408Z LEGACY ROUTE HIT: /api/cost_management/chart?customerKeys=centralmotorwheel-thailand%2CHino+Motor-+HMST%2CPT.RKNForge%2Cpt-tokairika-indonesia%2Ctaiho-thailand&startDate=2026-05-19T00%3A00%3A00.000Z&endDate=2026-06-17T00%3A00%3A00.000Z&groupBy=customer
+2026-06-18T05:25:35.2564285Z 🔍 Route called: POST /cost_management/kpis
+2026-06-18T05:25:35.2566067Z 🔍 User authenticated: true
+2026-06-18T05:25:35.2566212Z 🔍 User OID: a63c4da8...
+2026-06-18T05:25:35.2566374Z 2026-06-18T05:25:35.236Z [[32minfo[39m]: {"requestId":"60ebf397-e7ca-4ee1-a7ee-be292c4b17d0","method":"POST","route":"/api/cost_management/devices","service":"Cost Management API","userId":"a63c4da8-a244-47fe-bf12-08df3ab6818b","name":"Pranay","email":"Pranay@ToyotaTsushoSystemsIndia.onmicrosoft.com","customerName":"ajinomoto-cambodia-ajc","roles":["SOC-Admin"],"tenantId":"fe8c6234-bf85-48c7-b462-1eefe98d567d","event":"REQUEST_SUMMARY","statusCode":200,"durationMs":705,"data":{"dataKeys":["totalDevices","page","rowsPerPage","items"]},"message":"Request completed successfully."}
+2026-06-18T05:25:35.521355Z LEGACY ROUTE HIT: /api/cost_management/kpis
+2026-06-18T05:25:35.8678297Z 2026-06-18T05:25:35.861Z [[33mwarn[39m]: {"requestId":"112ad230-467f-479c-9d34-64c26e682982","method":"GET","route":"/api/cost_management/chart?customerKeys=centralmotorwheel-thailand%2CHino+Motor-+HMST%2CPT.RKNForge%2Cpt-tokairika-indonesia%2Ctaiho-thailand&groupBy=customer","service":"Cost Management API","userId":"a63c4da8-a244-47fe-bf12-08df3ab6818b","name":"Pranay","email":"Pranay@ToyotaTsushoSystemsIndia.onmicrosoft.com","customerName":"ajinomoto-cambodia-ajc","roles":["SOC-Admin"],"tenantId":"fe8c6234-bf85-48c7-b462-1eefe98d567d","event":"REQUEST_SUMMARY","statusCode":200,"durationMs":1266,"data":{"dataCount":145},"message":"Request completed successfully."}
+2026-06-18T05:25:35.9011918Z 2026-06-18T05:25:35.899Z [[33mwarn[39m]: {"requestId":"0f08725d-b745-4fc9-8aaa-11746465f4a4","method":"GET","route":"/api/cost_management/chart?customerKeys=centralmotorwheel-thailand%2CHino+Motor-+HMST%2CPT.RKNForge%2Cpt-tokairika-indonesia%2Ctaiho-thailand&startDate=2026-05-19T00%3A00%3A00.000Z&endDate=2026-06-17T00%3A00%3A00.000Z&groupBy=customer","service":"Cost Management API","userId":"a63c4da8-a244-47fe-bf12-08df3ab6818b","name":"Pranay","email":"Pranay@ToyotaTsushoSystemsIndia.onmicrosoft.com","customerName":"ajinomoto-cambodia-ajc","roles":["SOC-Admin"],"tenantId":"fe8c6234-bf85-48c7-b462-1eefe98d567d","event":"REQUEST_SUMMARY","statusCode":200,"durationMs":1280,"data":{"dataCount":150},"message":"Request completed successfully."}
+2026-06-18T05:25:36.0708942Z 2026-06-18T05:25:36.069Z [[33mwarn[39m]: {"requestId":"21b285df-3e59-4f6a-98ce-76d671ea8f89","method":"POST","route":"/api/cost_management/kpis","service":"Cost Management API","userId":"a63c4da8-a244-47fe-bf12-08df3ab6818b","name":"Pranay","email":"Pranay@ToyotaTsushoSystemsIndia.onmicrosoft.com","customerName":"ajinomoto-cambodia-ajc","roles":["SOC-Admin"],"tenantId":"fe8c6234-bf85-48c7-b462-1eefe98d567d","event":"COST_MGMT_KPIS_FETCHED","statusCode":200,"durationMs":1231,"data":{"customerKeys":["centralmotorwheel-thailand","Hino Motor- HMST","PT.RKNForge","pt-tokairika-indonesia","taiho-thailand"],"totalLogVolumeGB":219.53,"totalCostUSD":858.34,"totalDevices":12},"message":"Request completed successfully."}
+2026-06-18T05:25:42.282219Z ApplicationInsights:Instrumentation key was invalid, please check the iKey []
+2026-06-18T05:26:27.2770915Z 2026-06-18T05:26:27.276Z [[32minfo[39m]: {"requestId":"b8fde607-6375-41a6-801a-532fee361b2a","method":"GET","route":"/healthz","service":"API API","event":"REQUEST_SUMMARY","statusCode":200,"durationMs":9,"data":{"keys":["status"]},"message":"Request completed successfully."}
+2026-06-18T05:26:27.6272302Z ApplicationInsights:Instrumentation key was invalid, please check the iKey []
+2026-06-18T05:26:42.2807268Z ApplicationInsights:Instrumentation key was invalid, please check the iKey []
+2026-06-18T05:27:27.3932037Z 2026-06-18T05:27:27.384Z [[32minfo[39m]: {"requestId":"dfdb82dd-6261-4823-a67f-2c98c66ace01","method":"GET","route":"/healthz","service":"API API","event":"REQUEST_SUMMARY","statusCode":200,"durationMs":63,"data":{"keys":["status"]},"message":"Request completed successfully."}
+2026-06-18T05:27:28.0011971Z ApplicationInsights:Instrumentation key was invalid, please check the iKey []
+2026-06-18T05:27:42.5113851Z ApplicationInsights:Instrumentation key was invalid, please check the iKey []
+2026-06-18T05:28:27.2867747Z 2026-06-18T05:28:27.276Z [[32minfo[39m]: {"requestId":"4cc92350-821d-452a-b9c8-0409f4367078","method":"GET","route":"/healthz","service":"API API","event":"REQUEST_SUMMARY","statusCode":200,"durationMs":17,"data":{"keys":["status"]},"message":"Request completed successfully."}
+2026-06-18T05:28:27.6851137Z ApplicationInsights:Instrumentation key was invalid, please check the iKey []
+2026-06-18T05:28:42.2816167Z ApplicationInsights:Instrumentation key was invalid, please check the iKey []
+2026-06-18T05:29:27.3355071Z 2026-06-18T05:29:27.335Z [[32minfo[39m]: {"requestId":"10e22cc2-9e90-46b4-82e0-9a04e9469db2","method":"GET","route":"/healthz","service":"API API","event":"REQUEST_SUMMARY","statusCode":200,"durationMs":17,"data":{"keys":["status"]},"message":"Request completed successfully."}
+2026-06-18T05:29:27.7010984Z ApplicationInsights:Instrumentation key was invalid, please check the iKey []
+2026-06-18T05:29:42.3433816Z ApplicationInsights:Instrumentation key was invalid, please check the iKey []
+2026-06-18T05:30:10.1535369Z 2026-06-18T05:30:10.152Z [[32minfo[39m]: {"service":"Startup","name":"System","event":"USER_LOGIN","userId":"0c82f967-e15b-42c6-8018-429e413f2941","userName":"Hibah Fathima","customerName":"Hino Motor- HMST","message":"USER_LOGIN"}
+2026-06-18T05:30:10.2511262Z PARAM ROUTE HIT: /api/cpm/company-profiles/Hino%20Motor-%20HMST
+2026-06-18T05:30:10.3554499Z 🔍 Route called: GET /cpm/company-profiles/Hino%20Motor-%20HMST
+2026-06-18T05:30:10.4287738Z 🔍 User authenticated: true
