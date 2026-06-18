@@ -149,3 +149,40 @@ Connected!
 2026-06-18T05:30:10.2511262Z PARAM ROUTE HIT: /api/cpm/company-profiles/Hino%20Motor-%20HMST
 2026-06-18T05:30:10.3554499Z 🔍 Route called: GET /cpm/company-profiles/Hino%20Motor-%20HMST
 2026-06-18T05:30:10.4287738Z 🔍 User authenticated: true
+
+
+
+2026-06-18T06:50:07.1899451Z npm warn config production Use `--omit=dev` instead.
+2026-06-18T06:50:10.9392946Z
+2026-06-18T06:50:10.9394094Z > soc_watchtower_backend@1.0.0 start
+2026-06-18T06:50:10.939429Z > node src/server.js
+2026-06-18T06:50:10.9394392Z
+2026-06-18T06:52:50.9567525Z 2026-06-18T06:52:50.716Z [[32minfo[39m]: {"service":"Startup","name":"System","event":"CONFIG_LOAD","message":"Loading server configuration..."}
+2026-06-18T06:52:51.3900079Z ***********************
+2026-06-18T06:52:51.3901416Z 2026-06-18T06:52:51.369Z [[32minfo[39m]: 🔐 Loading secrets from Azure Key Vault...
+2026-06-18T06:53:29.7398202Z (node:20) [MONGOOSE] Warning: Duplicate schema index on {"key":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+2026-06-18T06:53:29.7399254Z (Use `node --trace-warnings ...` to show where the warning was created)
+2026-06-18T06:53:29.739943Z (node:20) Warning: Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.
+2026-06-18T06:57:01.1362279Z npm warn config production Use `--omit=dev` instead.
+2026-06-18T06:57:04.9514455Z
+2026-06-18T06:57:04.9518633Z > soc_watchtower_backend@1.0.0 start
+2026-06-18T06:57:04.9518923Z > node src/server.js
+2026-06-18T06:57:04.9519028Z
+2026-06-18T06:59:35.8344661Z 2026-06-18T06:59:35.805Z [[32minfo[39m]: {"service":"Startup","name":"System","event":"CONFIG_LOAD","message":"Loading server configuration..."}
+2026-06-18T06:59:35.9420236Z ***********************
+2026-06-18T06:59:35.9421157Z 2026-06-18T06:59:35.922Z [[32minfo[39m]: 🔐 Loading secrets from Azure Key Vault...
+2026-06-18T06:59:40.0849696Z (node:20) [MONGOOSE] Warning: Duplicate schema index on {"key":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+2026-06-18T06:59:40.0855282Z (Use `node --trace-warnings ...` to show where the warning was created)
+2026-06-18T06:59:40.0878616Z (node:20) Warning: Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.
+2026-06-18T07:00:10.4267334Z 2026-06-18T07:00:10.417Z [[32minfo[39m]: ✅ Secrets loaded successfully
+2026-06-18T07:03:32.987Z No new trace in the past 1 min(s).
+2026-06-18T07:04:32.987Z No new trace in the past 2 min(s).
+2026-06-18T07:05:32.987Z No new trace in the past 3 min(s).
+2026-06-18T07:06:32.987Z No new trace in the past 4 min(s).
+2026-06-18T07:07:32.987Z No new trace in the past 5 min(s).
+2026-06-18T07:07:28.3339538Z npm warn config production Use `--omit=dev` instead.
+2026-06-18T07:07:29.9096034Z
+2026-06-18T07:07:29.9097275Z > soc_watchtower_backend@1.0.0 start
+2026-06-18T07:07:29.9097479Z > node src/server.js
+2026-06-18T07:07:29.9108537Z
+2026-06-18T07:09:29.813Z No new trace in the past 1 min(s).
