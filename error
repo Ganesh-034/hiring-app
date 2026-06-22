@@ -1,47 +1,25 @@
 
-Static Web Apps
-Toyota Tsusho Systems India Private Limited (ToyotaTsushoSystemsIndia.onmicrosoft.com)
-
-soc-watchtower-frontend-dev | Application Insights
-Static Web App
-Search
-
-Overview
-Activity log
-Access control (IAM)
-Tags
-Diagnose and solve problems
-Resource visualizer
-
-Settings
-Configuration
-Snippets
-Environment variables
-Application Insights
-Custom domains
-APIs
-Environments
-Role management
-Identity
-Enterprise-grade edge
-Hosting Plan
-Private endpoints
-Locks
-
-Monitoring
-Metrics
-
-Automation
-
-Help
-Add or remove favorites by pressing Ctrl+Shift+F
-
-App Insights is only applicable to Static Web Apps with at least one function. Add a function to your app to enable App Insights.
- 
-Collect application monitoring data using Application Insights. Learn more
-Enable Application Insights
-No
-  	Yes
- 
-Application Insights
-Region
+Uncaught Error: useAuth must be used within an AuthProvider
+26
+outerMessage
+Uncaught Error: useAuth must be used within an AuthProvider
+Count
+26
+Uncaught TypeError: Cannot read properties of undefined (reading 'length')
+13
+outerMessage
+Uncaught TypeError: Cannot read properties of undefined (reading 'length')
+Count
+13
+useAuth must be used within an AuthProvider
+11
+outerMessage
+useAuth must be used within an AuthProvider
+Count
+11
+PromiseRejectionEvent: ReferenceError: isSearch is not defined
+2
+outerMessage
+PromiseRejectionEvent: ReferenceError: isSearch is not defined
+Count
+2
