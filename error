@@ -1,39 +1,47 @@
-// src/services/appInsights.js
-import { ApplicationInsights } from '@microsoft/applicationinsights-web';
-import { ReactPlugin } from '@microsoft/applicationinsights-react-js';
 
+Static Web Apps
+Toyota Tsusho Systems India Private Limited (ToyotaTsushoSystemsIndia.onmicrosoft.com)
 
-const reactPlugin = new ReactPlugin();
-let appInsights = null;
+soc-watchtower-frontend-dev | Application Insights
+Static Web App
+Search
 
-export function initAppInsights() {
-  if (appInsights) return appInsights; // already initialized
+Overview
+Activity log
+Access control (IAM)
+Tags
+Diagnose and solve problems
+Resource visualizer
 
-const connectionString = import.meta.env.VITE_APPINSIGHTS_CONNECTION_STRING;
-  if (!connectionString) return null; // disabled (e.g. local dev where var is blank)
+Settings
+Configuration
+Snippets
+Environment variables
+Application Insights
+Custom domains
+APIs
+Environments
+Role management
+Identity
+Enterprise-grade edge
+Hosting Plan
+Private endpoints
+Locks
 
-  appInsights = new ApplicationInsights({
-    config: {
-      connectionString,
-      extensions: [reactPlugin],
-      enableAutoRouteTracking: true, // page views on SPA route change (React Router v6)
-      autoTrackPageVisitTime: true, // page load / time-on-page
-      disableFetchTracking: false, // track fetch() calls -> failed AJAX
-      disableAjaxTracking: false, // track axios/XHR -> failed AJAX
-      enableAjaxErrorStatusText: true, // include status text on failed calls
-      enableUnhandledPromiseRejectionTracking: true,
-      enableCorsCorrelation: false, // ⚠️ keep false — see note below
-      loggingLevelConsole: 0,
-    },
-  });
+Monitoring
+Metrics
 
-  appInsights.loadAppInsights();
-  appInsights.trackPageView(); // initial load
-  return appInsights;
-}
+Automation
 
-export function getAppInsights() {
-  return appInsights;
-}
+Help
+Add or remove favorites by pressing Ctrl+Shift+F
 
-export { reactPlugin };
+App Insights is only applicable to Static Web Apps with at least one function. Add a function to your app to enable App Insights.
+ 
+Collect application monitoring data using Application Insights. Learn more
+Enable Application Insights
+No
+  	Yes
+ 
+Application Insights
+Region
