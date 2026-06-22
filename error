@@ -1,39 +1,90 @@
-// src/services/appInsights.js
-import { ApplicationInsights } from '@microsoft/applicationinsights-web';
-import { ReactPlugin } from '@microsoft/applicationinsights-react-js';
-
-
-const reactPlugin = new ReactPlugin();
-let appInsights = null;
-
-export function initAppInsights() {
-  if (appInsights) return appInsights; // already initialized
-
-const connectionString = import.meta.env.VITE_APPINSIGHTS_CONNECTION_STRING;
-  if (!connectionString) return null; // disabled (e.g. local dev where var is blank)
-
-  appInsights = new ApplicationInsights({
-    config: {
-      connectionString,
-      extensions: [reactPlugin],
-      enableAutoRouteTracking: true, // page views on SPA route change (React Router v6)
-      autoTrackPageVisitTime: true, // page load / time-on-page
-      disableFetchTracking: false, // track fetch() calls -> failed AJAX
-      disableAjaxTracking: false, // track axios/XHR -> failed AJAX
-      enableAjaxErrorStatusText: true, // include status text on failed calls
-      enableUnhandledPromiseRejectionTracking: true,
-      enableCorsCorrelation: false, // ⚠️ keep false — see note below
-      loggingLevelConsole: 0,
-    },
-  });
-
-  appInsights.loadAppInsights();
-  appInsights.trackPageView(); // initial load
-  return appInsights;
-}
-
-export function getAppInsights() {
-  return appInsights;
-}
-
-export { reactPlugin };
+soc-watchtower-api.azure-api.net
+0
+339
+target
+soc-watchtower-api.azure-api.net
+resultCode
+0
+FailedCalls
+339
+target
+localhost:5000
+resultCode
+0
+FailedCalls
+211
+target
+localhost:5000
+resultCode
+500
+FailedCalls
+66
+target
+soc-watchtower-api.azure-api.net
+resultCode
+404
+FailedCalls
+54
+target
+localhost:5000
+resultCode
+404
+FailedCalls
+54
+target
+soc-watchtower-api.azure-api.net
+resultCode
+429
+FailedCalls
+29
+target
+login.microsoftonline.com
+resultCode
+0
+FailedCalls
+23
+target
+localhost:5000
+resultCode
+400
+FailedCalls
+16
+target
+soc-watchtower-api.azure-api.net
+resultCode
+403
+FailedCalls
+7
+target
+socwatchtowerreports.blob.core.windows.net
+resultCode
+0
+FailedCalls
+6
+localhost:5173
+0
+5
+target
+localhost:5173
+resultCode
+0
+FailedCalls
+5
+localhost:5000
+429
+3
+target
+localhost:5000
+resultCode
+429
+FailedCalls
+3
+soc-watchtower-api.azure-api.net
+400
+1
+target
+soc-watchtower-api.azure-api.net
+resultCode
+400
+FailedCalls
+1
