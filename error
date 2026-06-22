@@ -1,25 +1,39 @@
+// src/services/appInsights.js
+import { ApplicationInsights } from '@microsoft/applicationinsights-web';
+import { ReactPlugin } from '@microsoft/applicationinsights-react-js';
 
-Uncaught Error: useAuth must be used within an AuthProvider
-26
-outerMessage
-Uncaught Error: useAuth must be used within an AuthProvider
-Count
-26
-Uncaught TypeError: Cannot read properties of undefined (reading 'length')
-13
-outerMessage
-Uncaught TypeError: Cannot read properties of undefined (reading 'length')
-Count
-13
-useAuth must be used within an AuthProvider
-11
-outerMessage
-useAuth must be used within an AuthProvider
-Count
-11
-PromiseRejectionEvent: ReferenceError: isSearch is not defined
-2
-outerMessage
-PromiseRejectionEvent: ReferenceError: isSearch is not defined
-Count
-2
+
+const reactPlugin = new ReactPlugin();
+let appInsights = null;
+
+export function initAppInsights() {
+  if (appInsights) return appInsights; // already initialized
+
+const connectionString = import.meta.env.VITE_APPINSIGHTS_CONNECTION_STRING;
+  if (!connectionString) return null; // disabled (e.g. local dev where var is blank)
+
+  appInsights = new ApplicationInsights({
+    config: {
+      connectionString,
+      extensions: [reactPlugin],
+      enableAutoRouteTracking: true, // page views on SPA route change (React Router v6)
+      autoTrackPageVisitTime: true, // page load / time-on-page
+      disableFetchTracking: false, // track fetch() calls -> failed AJAX
+      disableAjaxTracking: false, // track axios/XHR -> failed AJAX
+      enableAjaxErrorStatusText: true, // include status text on failed calls
+      enableUnhandledPromiseRejectionTracking: true,
+      enableCorsCorrelation: false, // ⚠️ keep false — see note below
+      loggingLevelConsole: 0,
+    },
+  });
+
+  appInsights.loadAppInsights();
+  appInsights.trackPageView(); // initial load
+  return appInsights;
+}
+
+export function getAppInsights() {
+  return appInsights;
+}
+
+export { reactPlugin };
