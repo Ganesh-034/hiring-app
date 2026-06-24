@@ -1,90 +1,86 @@
-soc-watchtower-api.azure-api.net
-0
-339
-target
-soc-watchtower-api.azure-api.net
-resultCode
-0
-FailedCalls
-339
-target
-localhost:5000
-resultCode
-0
-FailedCalls
-211
-target
-localhost:5000
-resultCode
-500
-FailedCalls
-66
-target
-soc-watchtower-api.azure-api.net
-resultCode
-404
-FailedCalls
-54
-target
-localhost:5000
-resultCode
-404
-FailedCalls
-54
-target
-soc-watchtower-api.azure-api.net
-resultCode
-429
-FailedCalls
-29
-target
+
+6/24/2026, 10:33:25.406 AM
+29dd078fad10413e
 login.microsoftonline.com
-resultCode
-0
-FailedCalls
-23
-target
-localhost:5000
-resultCode
-400
-FailedCalls
-16
-target
+Fetch
+POST https://login.microsoftonline.com/fe8c6234-bf85-48c7-b462-1eefe98d567d/oauth2/v2.0/token?client-request-id=019ef802-fad4-7cf4-92e0-9662d33d5f4d
+POST https://login.microsoftonline.com/fe8c6234-bf85-48c7-b462-1eefe98d567d/oauth2/v2.0/token?client-request-id=019ef802-fad4-7cf4-92e0-9662d33d5f4d
+True
+6/24/2026, 1:40:39.929 AM
+c82c612cab44435e
 soc-watchtower-api.azure-api.net
-resultCode
-403
-FailedCalls
-7
-target
-socwatchtowerreports.blob.core.windows.net
-resultCode
-0
-FailedCalls
-6
-localhost:5173
-0
-5
-target
-localhost:5173
-resultCode
-0
-FailedCalls
-5
-localhost:5000
-429
-3
-target
-localhost:5000
-resultCode
-429
-FailedCalls
-3
+Fetch
+GET https://soc-watchtower-api.azure-api.net/dev/api/conversations?limit=50&offset=0&search=firewall+incidents+last+3+m
+GET https://soc-watchtower-api.azure-api.net/dev/api/conversations?limit=50&offset=0&search=firewall+incidents+last+3+m
+True
+6/24/2026, 1:40:25.982 AM
+aa238bf8f0fc4b35
 soc-watchtower-api.azure-api.net
-400
-1
-target
+Fetch
+GET https://soc-watchtower-api.azure-api.net/dev/api/conversations?limit=10&offset=10
+GET https://soc-watchtower-api.azure-api.net/dev/api/conversations?limit=10&offset=10
+True
+6/24/2026, 1:40:25.982 AM
+aa238bf8f0fc4b35
 soc-watchtower-api.azure-api.net
-resultCode
-400
-FailedCalls
-1
+Fetch
+GET https://soc-watchtower-api.azure-api.net/dev/api/conversations?limit=10&offset=10
+GET https://soc-watchtower-api.azure-api.net/dev/api/conversations?limit=10&offset=10
+True
+6/24/2026, 1:40:25.047 AM
+fc720a9e0ecc4285
+soc-watchtower-api.azure-api.net
+Fetch
+GET https://soc-watchtower-api.azure-api.net/dev/api/conversations?limit=10&offset=0
+GET https://soc-watchtower-api.azure-api.net/dev/api/conversations?limit=10&offset=0
+True
+6/24/2026, 1:40:25.047 AM
+fc720a9e0ecc4285
+soc-watchtower-api.azure-api.net
+Fetch
+GET https://soc-watchtower-api.azure-api.net/dev/api/conversations?limit=10&offset=0
+GET https://soc-watchtower-api.azure-api.net/dev/api/conversations?limit=10&offset=0
+True
+6/24/2026, 1:40:21.367 AM
+8a27177268fa453c
+soc-watchtower-api.azure-api.net
+Fetch
+GET https://soc-watchtower-api.azure-api.net/dev/api/conversations?limit=10&offset=0
+GET https://soc-watchtower-api.azure-api.net/dev/api/conversations?limit=10&offset=0
+True
+6/24/2026, 1:40:21.367 AM
+8a27177268fa453c
+soc-watchtower-api.azure-api.net
+Fetch
+GET https://soc-watchtower-api.azure-api.net/dev/api/conversations?limit=10&offset=0
+GET https://soc-watchtower-api.azure-api.net/dev/api/conversations?limit=10&offset=0
+True
+6/24/2026, 1:40:19.298 AM
+8fffcb22bfb84705
+soc-watchtower-api.azure-api.net
+Fetch
+GET https://soc-watchtower-api.azure-api.net/dev/api/conversations?limit=50&offset=0&search=high-priority
+GET https://soc-watchtower-api.azure-api.net/dev/api/conversations?limit=50&offset=0&search=high-priority
+True
+6/24/2026, 1:40:19.298 AM
+8fffcb22bfb84705
+soc-watchtower-api.azure-api.net
+Fetch
+GET https://soc-watchtower-api.azure-api.net/dev/api/conversations?limit=50&offset=0&search=high-priority
+GET https://soc-watchtower-api.azure-api.net/dev/api/conversations?limit=50&offset=0&search=high-priority
+True
+6/24/2026, 1:40:15.097 AM
+3ba357d8a9724703
+soc-watchtower-api.azure-api.net
+Fetch
+GET https://soc-watchtower-api.azure-api.net/dev/api/conversations?limit=50&offset=0&search=high+priority
+GET https://soc-watchtower-api.azure-api.net/dev/api/conversations?limit=50&offset=0&search=high+priority
+True
+6/24/2026, 1:40:15.097 AM
+3ba357d8a9724703
+soc-watchtower-api.azure-api.net
+Fetch
+GET https://soc-watchtower-api.azure-api.net/dev/api/conversations?limit=50&offset=0&search=high+priority
+GET https://soc-watchtower-api.azure-api.net/dev/api/conversations?limit=50&offset=0&search=high+priority
+True
+6/24/2026, 1:40:08.402 AM
