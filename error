@@ -1,60 +1,38 @@
-6/19/2026, 5:26:23.390 AM
-POST /api/chat
-500
-POST /api/chat
-https://soc-watchtower-backend-dev-epfsh5f4fcbgbsd4.southeastasia-01.azurewebsites.net/api/chat
-6/19/2026, 5:26:23.390 AM
-POST /api/chat
-500
-POST /api/chat
-https://soc-watchtower-backend-dev-epfsh5f4fcbgbsd4.southeastasia-01.azurewebsites.net/api/chat
-6/19/2026, 5:26:06.987 AM
-POST /api/chat
-500
-POST /api/chat
-https://soc-watchtower-backend-dev-epfsh5f4fcbgbsd4.southeastasia-01.azurewebsites.net/api/chat
-6/19/2026, 5:26:06.987 AM
-POST /api/chat
-500
-POST /api/chat
-https://soc-watchtower-backend-dev-epfsh5f4fcbgbsd4.southeastasia-01.azurewebsites.net/api/chat
-6/19/2026, 4:30:58.616 AM
-POST /api/chat
-500
-POST /api/chat
-https://soc-watchtower-backend-dev-epfsh5f4fcbgbsd4.southeastasia-01.azurewebsites.net/api/chat
-6/19/2026, 4:30:58.616 AM
-POST /api/chat
-500
-POST /api/chat
-https://soc-watchtower-backend-dev-epfsh5f4fcbgbsd4.southeastasia-01.azurewebsites.net/api/chat
-6/19/2026, 3:56:31.212 AM
-POST /api/chat
-500
-POST /api/chat
-https://soc-watchtower-backend-dev-epfsh5f4fcbgbsd4.southeastasia-01.azurewebsites.net/api/chat
-6/19/2026, 3:56:31.212 AM
-POST /api/chat
-500
-POST /api/chat
-https://soc-watchtower-backend-dev-epfsh5f4fcbgbsd4.southeastasia-01.azurewebsites.net/api/chat
-6/19/2026, 3:55:37.931 AM
-POST /api/chat
-500
-POST /api/chat
-https://soc-watchtower-backend-dev-epfsh5f4fcbgbsd4.southeastasia-01.azurewebsites.net/api/chat
-6/19/2026, 3:55:37.931 AM
-POST /api/chat
-500
-POST /api/chat
-https://soc-watchtower-backend-dev-epfsh5f4fcbgbsd4.southeastasia-01.azurewebsites.net/api/chat
-6/19/2026, 3:31:20.604 AM
-POST /api/chat
-500
-POST /api/chat
-https://soc-watchtower-backend-dev-epfsh5f4fcbgbsd4.southeastasia-01.azurewebsites.net/api/chat
-6/19/2026, 3:31:20.604 AM
-POST /api/chat
-500
-POST /api/chat
-https://soc-watchtower-backend-dev-epfsh5f4fcbgbsd4.southeastasia-01.azurewebsites.net/api/chat
+// src/services/appInsights.js
+import { ApplicationInsights } from '@microsoft/applicationinsights-web';
+import { ReactPlugin } from '@microsoft/applicationinsights-react-js';
+
+const reactPlugin = new ReactPlugin();
+let appInsights = null;
+
+export function initAppInsights() {
+  if (appInsights) return appInsights; // already initialized
+
+  const connectionString = import.meta.env.VITE_APPINSIGHTS_CONNECTION_STRING;
+  if (!connectionString) return null; // disabled (e.g. local dev where var is blank)
+
+  appInsights = new ApplicationInsights({
+    config: {
+      connectionString,
+      extensions: [reactPlugin],
+      enableAutoRouteTracking: true, // page views on SPA route change (React Router v6)
+      autoTrackPageVisitTime: true, // page load / time-on-page
+      disableFetchTracking: false, // track fetch() calls -> failed AJAX
+      disableAjaxTracking: false, // track axios/XHR -> failed AJAX
+      enableAjaxErrorStatusText: true, // include status text on failed calls
+      enableUnhandledPromiseRejectionTracking: true,
+      enableCorsCorrelation: false, // ⚠️ keep false — see note below
+      loggingLevelConsole: 0,
+    },
+  });
+
+  appInsights.loadAppInsights();
+  appInsights.trackPageView(); // initial load
+  return appInsights;
+}
+
+export function getAppInsights() {
+  return appInsights;
+}
+
+export { reactPlugin };
