@@ -1,38 +1,224 @@
-// src/services/appInsights.js
-import { ApplicationInsights } from '@microsoft/applicationinsights-web';
-import { ReactPlugin } from '@microsoft/applicationinsights-react-js';
+// src/config/logger.js
+import fs from 'fs';
+import path from 'path';
+import winston from 'winston';
+import { fileURLToPath } from 'url';
+import { AsyncLocalStorage } from 'async_hooks';
 
-const reactPlugin = new ReactPlugin();
-let appInsights = null;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-export function initAppInsights() {
-  if (appInsights) return appInsights; // already initialized
+const AZURE_DEFAULT_DIR = '/home/LogFiles/app';
+const FALLBACK_LOCAL_DIR = path.resolve(process.cwd(), 'logs');
 
-  const connectionString = import.meta.env.VITE_APPINSIGHTS_CONNECTION_STRING;
-  if (!connectionString) return null; // disabled (e.g. local dev where var is blank)
-
-  appInsights = new ApplicationInsights({
-    config: {
-      connectionString,
-      extensions: [reactPlugin],
-      enableAutoRouteTracking: true, // page views on SPA route change (React Router v6)
-      autoTrackPageVisitTime: true, // page load / time-on-page
-      disableFetchTracking: false, // track fetch() calls -> failed AJAX
-      disableAjaxTracking: false, // track axios/XHR -> failed AJAX
-      enableAjaxErrorStatusText: true, // include status text on failed calls
-      enableUnhandledPromiseRejectionTracking: true,
-      enableCorsCorrelation: false, // ⚠️ keep false — see note below
-      loggingLevelConsole: 0,
-    },
-  });
-
-  appInsights.loadAppInsights();
-  appInsights.trackPageView(); // initial load
-  return appInsights;
+let logDir = process.env.AZURE_LOG_DIR || AZURE_DEFAULT_DIR;
+try {
+  fs.mkdirSync(logDir, { recursive: true });
+} catch (e) {
+  console.error('Failed to create Azure log directory, falling back to local:', e?.message);
+  logDir = FALLBACK_LOCAL_DIR;
+  fs.mkdirSync(logDir, { recursive: true });
 }
 
-export function getAppInsights() {
-  return appInsights;
+// ---------- Per-request context ----------
+const logContext = new AsyncLocalStorage();
+
+function getLogContext() {
+  return logContext.getStore() || {};
 }
 
-export { reactPlugin };
+/** Start a FRESH context (used in request middleware) */
+export function runWithLogContext(initial = {}, fn) {
+  return logContext.run(initial, fn);
+}
+
+/** Merge/override context for current async flow */
+export function setLogContext(overrides = {}) {
+  const next = { ...getLogContext(), ...overrides };
+  logContext.enterWith(next);
+  return next;
+}
+
+// ---------- Formats ----------
+const auditFormat = winston.format.printf(({ timestamp, level, message, ...meta }) => {
+  if (
+    message === 'AUDIT:' ||
+    message === 'SECURITY:' ||
+    message === 'DATA_ACCESS:' ||
+    message === 'CONTENT_FILTER:'
+  ) {
+    // return `${timestamp} [${level}]: ${message}\n${JSON.stringify(meta, null, 2)}`;
+    return `${timestamp} [${level}]: ${message} ${JSON.stringify(meta)}`;
+  }
+  if (typeof message === 'object' || Object.keys(meta).length > 0) {
+    // const logData = typeof message === 'object' ? message : { message, ...meta };
+    const logData = typeof message === 'object' ? message : { ...meta, message };
+    return `${timestamp} [${level}]: ${JSON.stringify(logData)}`;
+  }
+  return `${timestamp} [${level}]: ${message}`;
+});
+
+const logger = winston.createLogger({
+  level: process.env.LOG_LEVEL || 'info',
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.errors({ stack: true }),
+    auditFormat
+  ),
+  transports: [
+    new winston.transports.Console({
+      format: winston.format.combine(
+        winston.format.colorize(),
+        winston.format.timestamp(),
+        auditFormat
+      ),
+    }),
+    new winston.transports.File({
+      filename: path.join(logDir, 'app.log'),
+      format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
+      maxsize: 10 * 1024 * 1024,
+      maxFiles: 5,
+      tailable: true,
+    }),
+    new winston.transports.File({
+      filename: path.join(logDir, 'audit.log'),
+      level: 'info',
+      format: winston.format.combine(
+        winston.format.timestamp(),
+        winston.format.json(),
+        winston.format((info) => {
+          if (
+            info.message === 'AUDIT:' ||
+            info.message === 'SECURITY:' ||
+            info.message === 'DATA_ACCESS:'
+          ) {
+            return info;
+          }
+          return false;
+        })()
+      ),
+      maxsize: 10 * 1024 * 1024,
+      maxFiles: 5,
+      tailable: true,
+    }),
+    new winston.transports.File({
+      filename: path.join(logDir, 'security.log'),
+      level: 'warn',
+      format: winston.format.combine(
+        winston.format.timestamp(),
+        winston.format.json(),
+        winston.format((info) => {
+          if (
+            info.message === 'SECURITY:' ||
+            info.message === 'CONTENT_FILTER:' ||
+            info.level === 'error'
+          ) {
+            return info;
+          }
+          return false;
+        })()
+      ),
+      maxsize: 10 * 1024 * 1024,
+      maxFiles: 5,
+      tailable: true,
+    }),
+  ],
+});
+
+const SENSITIVE_KEYS = new Set([
+  'password',
+  'pass',
+  'pwd',
+  'token',
+  'accessToken',
+  'refreshToken',
+  'authorization',
+  'auth',
+  'apiKey',
+  'secret',
+  'ssn',
+]);
+
+function maskSensitive(meta = {}) {
+  const out = {};
+  for (const [k, v] of Object.entries(meta)) {
+    if (SENSITIVE_KEYS.has(k)) {
+      out[k] = '[REDACTED]';
+    } else if (v && typeof v === 'object' && !(v instanceof Error)) {
+      out[k] = Array.isArray(v) ? v.slice(0, 50) : { ...v };
+    } else {
+      out[k] = v;
+    }
+  }
+  return out;
+}
+
+function pruneUndefined(meta = {}) {
+  const out = {};
+  for (const [k, v] of Object.entries(meta)) {
+    if (v !== undefined) out[k] = v;
+  }
+  return out;
+}
+
+function attachHelpers(lgr) {
+  lgr.audit = (data) => lgr.info('AUDIT:', data);
+  lgr.security = (data) => lgr.warn('SECURITY:', data);
+  lgr.dataAccess = (data) => lgr.info('DATA_ACCESS:', data);
+  lgr.contentFilter = (data) => lgr.error('CONTENT_FILTER:', data);
+
+  lgr.logEvent = ({ type = 'info', event, message, data = {} } = {}) => {
+    if (!event) {
+      return lgr.warn('SECURITY:', {
+        warning: 'logEvent missing "event"',
+        type,
+        message,
+        ...pruneUndefined(maskSensitive(getLogContext())),
+      });
+    }
+
+    // const mergedMeta = pruneUndefined({
+    //   ...maskSensitive(getLogContext()),
+    //   event,
+    //   ...(message ? { message } : {}),
+    //   ...maskSensitive(data),
+    // });
+
+    const mergedMeta = pruneUndefined({
+      ...maskSensitive(getLogContext()),
+      event,
+      ...maskSensitive(data),
+    });
+
+    switch (type) {
+      case 'audit':
+        return lgr.audit(mergedMeta);
+      case 'security':
+        return lgr.security(mergedMeta);
+      case 'dataAccess':
+        return lgr.dataAccess(mergedMeta);
+      case 'contentFilter':
+        return lgr.contentFilter(mergedMeta);
+      case 'error':
+        return lgr.error(message || event, mergedMeta);
+      case 'warn':
+        return lgr.warn(message || event, mergedMeta);
+      case 'debug':
+        return (lgr.debug || lgr.info)(message || event, mergedMeta);
+      case 'info':
+      default:
+        return lgr.info(message || event, mergedMeta);
+    }
+  };
+
+  return lgr;
+}
+
+attachHelpers(logger);
+
+export const createScopedLogger = (defaultMeta = {}) => {
+  const child = logger.child(pruneUndefined(maskSensitive(defaultMeta)));
+  return attachHelpers(child);
+};
+
+export default logger;
