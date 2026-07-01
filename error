@@ -1,3 +1,4 @@
+Frontend:
 I have created a alerts frontend which is deployed in static web app using azure devops pipeline for dev environment.
 There are 100000 tests are free/moth in azure.
 alerts :
@@ -39,5 +40,51 @@ union pageViews, dependencies, exceptions, availabilityResults
 
 Totaltelemetry total 30mints, less than 1 in 30 mints
 Signal type –log search
+
+backend:
+
+Backend:
+
+6.	Availability test –0.10$/Day
+It will test the website url from two different locations and check the availability of the website.
+-	Website down
+-	DNS issue Occur
+-	SSL issue cause failure
+-	Node.js application crashed
+-	Deployment completed but app service failed.
+5760 tests/month
+Signal type --metric
+
+7.	Alert for 5xx erros –1.50$/month
+ 400’s errors are not configured for backend
+400 – Invalid or bad request
+429 – known issue
+404- Old url
+401 –unauthorized 
+500’s for server-side errors which are critical.
+1440 tests/month
+Signal type –log search
+Log query :
+requests
+| where timestamp > ago(30m)
+| where toint(resultCode) >= 500
+| summarize FailureCount=count()
+8.	High response time –1.50$/month
+Check the slow response time of the URL
+
+1440 tests/month
+Signal type –log search
+log query:
+requests
+| where timestamp > ago(30m)
+| summarize AvgResponseTime=avg(duration)
+
+9.	High CPU –0.10$/month
+1440/test/month
+Signal type --metrics
+10.	High Memory –0.10$/month
+1440tests/month
+Signal type --metrics
+
 
 
