@@ -1,33 +1,61 @@
+Backend:
+
+1. Backend-Prod-dependencies-Failure-Spike
+
+dependencies
+| where timestamp > ago(10m)
+| where success == false
+| summarize FailureCount = count()
+
+signal type --log search, failurecount 10min, threshold -5
+
+2. Backend-prod-http-5XX-ERRORS
+
+requests
+| where timestamp > ago(10m)
+| extend statusCode = toint(resultCode)
+| where statusCode >= 500
+| summarize FailureCount = count(), Total = count()
+
+signal type-log search, FailureCount 10min, threshold -3
+
+3. Backend-Prod-High-response-time
+
+requests
+| where timestamp > ago(10m)
+| summarize P95 = percentile(duration, 95)
+| where P95 > 2000
+
+signal type-log search, Tablerows 10min, threshold -1
+
+4. Backend-Prod-Js-Exceptions
+
+exceptions
+| where timestamp > ago(10m)
+| where problemId !contains "404"
+| where problemId != "OperationNotFound"
+| where type !contains "Http"
+| summarize count()
+
+signal type-log search, count total 10min, threshold -10
+
+5.backend-prod-availabilityResults
+
+metric--availability --every 5 mints, 3 locations
+
+
 Frontend:
-1.	Availability test   --- 0.10$/month 
-It will test the website URL from 3 different locations and check the availability of the website.
--	Website down
--	DNS issue Occur
--	SSL issue cause failure
-25920 tests/month  
-Signal type: Metric         
-2.	Java Script exception alerts –1.50$/month
-In dev environment I configured It to check for every 10min but in prod It will be 5mints.
-Query:
+
+1. Frontend prod Js-Exceptions
+
 exceptions
 | where timestamp > ago(15m)
-| summarize exceptionCount = count()
--	Application crashes
--	Runtime errors
--	User facing frontend errors
-4320 tests/months
-Signal type: log search
-3.	Availability Test duration: -- 1.50$/month (Frontend-Prod-website-Slow-Response)
-As availability check the website status not the runtime. This alert will check the response time of the URL.
-Configured for 10min in dev but in prod it will 5min
--	Performance degradation before outage.
-4320 tests/month
-Signal type: Metric         
-4.	Failure Count alert – 1.50$/month (Prod-SWA-Backend Failures and Auth Errors)
-If there is any failure status like 400 and 500 errors
-Frontend calling backend API but if backend Api not working as expected, this alert will trigger.
+| summarize exceptionCount = count() 
 
-Using query:
+signal type-log search, exceptionCount 10min, threshold -5
+
+2. Prod-SWA-backend failures and auth errors
+
 dependencies
 | where timestamp > ago(10m)
 | where target contains "soc-watchtower-api.azure-api.net"
@@ -36,76 +64,29 @@ dependencies
     backendFailures = countif(statusCode >= 500),
     authErrors = countif(statusCode in (401, 403))
 | extend totalIssues = backendFailures + authErrors
- 
-Configured for 10min in dev but in prod it will 5min
--Failure in Backend API.
-4320 tests/month
 
-JavaScript – Detect frontend browser code, failure aftecting user experience.
-Failure alert –Detect backed api communication alert
+signal type-log search, totalIssues 10min, threshold -3
 
-5.	No telemetry alert --1.50$/month
-If no telemetry is injected into application insights for more than 30min it will trigger.
-Application insights itself are not getting any data.
-1440 tests/month.
-Using query:
-union pageViews, dependencies, exceptions, availabilityResults
-| where timestamp > ago(30min)
+3. prod-swa-no-telemetry-30mints
+
+union availabilityResults, pageViews, dependencies, exceptions
+| where timestamp > ago(30m)
 | summarize TotalTelemetry=count()
 
-Totaltelemetry total 30mints, less than 1 in 30 mints
-Signal type –log search
+signal type-log search, TotalTelemetry 30min, threshold -1
 
+4. Dev-Backend-Hight-CPU-Ususge
 
-Backend:
+metric --CPU percetage --average-- greater than 80 --30mints
 
-1.	Availability test –0.10$/Day
-It will test the website URL from 3 different locations and check the availability of the website.
--	Website down
--	DNS issue Occur
--	SSL issue cause failure
--	Node.js application crashed
--	Deployment completed but app service failed.
-25920 tests/month
+5. Dev-Backend-Hight-memory-Ususge
 
-2.	Alert for 5xx errors –1.50$/month
- 400’s errors are not configured for backend
-400 – Invalid or bad request
-429 – known issue
-404- Old URL
-401 –unauthorized 
-Frequency of evaluation: 10min
-500’s for server-side errors which are critical.
-4320 tests/month
-Signal type –log search
-Query
-requests
-| where timestamp > ago(10m)
-| extend statusCode = toint(resultCode)
-| where statusCode >= 500
-| summarize FailureCount = count(), Total = count()
-3.	High response time –1.50$/month (Backend-Prod-High-ResponseTime)
-Log Query:
-requests
-| where timestamp > ago(10m)
-| summarize P95 = percentile(duration, 95)
-| where P95 > 2000
+metric --memory percetage --average-- greater than 90 --30mints
 
-4320 tests/month
+6. forntend-prod-website-slow-responce
 
-4.	Backend-Prod-Dependency-Failure-spike – 1.50$/month
-Log query:
-dependencies
-| where timestamp > ago(10m)
-| where success == false
-| summarize FailureCount = count()
-Frequency of time -10min
-              4320 test/month
-5.	Backend-Prod-High-ResponseTime –1.50$/month
-Log search query :
-requests
-| where timestamp > ago(10m)
-| summarize P95 = percentile(duration, 95)
-| where P95 > 2000
+metric-- availability test duration, avergae, greter than 3000ms
 
-              4320 test/month
+7. Frontend-prod-homepage-test
+
+metric--availability --every 5 mints, 3 locations
