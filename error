@@ -1,37 +1,20 @@
+2026-07-21 07:36:22 TTSIN-LT-A-114 scout[1942] INFO Running rule engine
+2026-07-21 07:36:22 TTSIN-LT-A-114 scout[1942] INFO Applying display filters
+2026-07-21 07:36:22 TTSIN-LT-A-114 scout[1942] INFO Running post-processing engine
+2026-07-21 07:36:22 TTSIN-LT-A-114 scout[1942] INFO Saving data to scoutsuite-report/scoutsuite-results/scoutsuite_results_azure-tenant-fe8c6234-bf85-48c7-b462-1eefe98d567d.js
+File 'scoutsuite-report/scoutsuite-results/scoutsuite_results_azure-tenant-fe8c6234-bf85-48c7-b462-1eefe98d567d.js' already exists. Do you want to overwrite it (y/n)? y
+2026-07-21 07:36:47 TTSIN-LT-A-114 scout[1942] INFO Saving data to scoutsuite-report/scoutsuite-results/scoutsuite_exceptions_azure-tenant-fe8c6234-bf85-48c7-b462-1eefe98d567d.js
+File 'scoutsuite-report/scoutsuite-results/scoutsuite_exceptions_azure-tenant-fe8c6234-bf85-48c7-b462-1eefe98d567d.js' already exists. Do you want to overwrite it (y/n)? y
+2026-07-21 07:36:49 TTSIN-LT-A-114 scout[1942] INFO Creating scoutsuite-report/azure-tenant-fe8c6234-bf85-48c7-b462-1eefe98d567d.html
+File 'scoutsuite-report/azure-tenant-fe8c6234-bf85-48c7-b462-1eefe98d567d.html' already exists. Do you want to overwrite it (y/n)? y
+2026-07-21 07:36:51 TTSIN-LT-A-114 scout[1942] INFO Opening the HTML report
+gio: file:///home/ganesh/tools/ScoutSuite/scoutsuite-report/azure-tenant-fe8c6234-bf85-48c7-b462-1eefe98d567d.html: Failed to find default application for content type ‘text/html’
+        zip warning: name not matched: scoutsuite
 
-Monitor | Workbooks | Unsaved Workbook - 7/10/2026, 1:51 PM
-Microsoft
-Search
-
-Overview
-Activity log
-Alerts
-Issues
-Metrics
-Logs
-Change Analysis
-Service health
-Workbooks
-Dashboards with Grafana
-
-Insights
-
-Managed Services
-
-Settings
-
-Support + Troubleshooting
-Add or remove favorites by pressing Ctrl+Shift+F
-
-1
-Editing text item:
- 
-text - 0
-Settings
-Advanced Settings
-Style
-Advanced Editor
-Text style
-Plain
-Markdown text
-Preview
+zip error: Nothing to do! (try: zip -r scoutsuite-report.zip . -i scoutsuite)
+cp: cannot stat 'scoutsuite-report.zip': No such file or directory
+==================================
+Scousuite automation completed
+Finished: Tue Jul 21 07:36:53 UTC 2026
+==================================
+ganesh@TTSIN-LT-A-114:~$
