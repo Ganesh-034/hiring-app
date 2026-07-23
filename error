@@ -7,9 +7,19 @@
 
 set -euo pipefail
 
-#############################
+##############################################################################
+# Environment Variables
+##############################################################################
+
+export HOME=/home/azureuser
+export USER=azureuser
+export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin
+
+cd "$HOME"
+
+##############################################################################
 # Variables
-#############################
+##############################################################################
 
 DATE=$(date +"%Y-%m-%d")
 TIMESTAMP=$(date +"%Y-%m-%d %H:%M:%S")
@@ -25,107 +35,117 @@ LOGFILE="$LOG_DIR/scoutsuite.log"
 STORAGE_ACCOUNT="scoutsuiterept"
 CONTAINER="reports"
 
-#############################
+##############################################################################
 # Create Log Folder
-#############################
+##############################################################################
 
 mkdir -p "$LOG_DIR"
 
+echo "" >> "$LOGFILE"
 echo "===================================================" >> "$LOGFILE"
 echo "Started : $TIMESTAMP" >> "$LOGFILE"
 echo "===================================================" >> "$LOGFILE"
 
-#############################
+##############################################################################
 # Login using Managed Identity
-#############################
+##############################################################################
 
 echo "Logging into Azure..."
 
-az login --identity >/dev/null
+az login --identity --allow-no-subscriptions >/dev/null
 
-#############################
+##############################################################################
 # Verify Azure Login
-#############################
+##############################################################################
 
-echo "Azure Account"
+ACCOUNT=$(az account show --query name -o tsv)
 
+echo "Logged into Subscription : $ACCOUNT"
+
+echo "Azure Account Information:" >> "$LOGFILE"
 az account show >> "$LOGFILE"
 
-#############################
+##############################################################################
 # Go to ScoutSuite Folder
-#############################
+##############################################################################
 
 cd "$SCOUT_HOME"
 
-#############################
+##############################################################################
 # Activate Python Environment
-#############################
+##############################################################################
 
 source scoutsuite-env/bin/activate
 
-#############################
-# Remove Old Report
-#############################
+echo "Python Version:" >> "$LOGFILE"
+python --version >> "$LOGFILE"
+
+echo "Python Location:" >> "$LOGFILE"
+which python >> "$LOGFILE"
+
+##############################################################################
+# Remove Previous Report
+##############################################################################
 
 echo "Removing previous report..."
 
 rm -rf "$REPORT_FOLDER"
 
-#############################
+##############################################################################
 # Run ScoutSuite
-#############################
+##############################################################################
 
 echo "Running ScoutSuite..."
 
-python scout.py azure -c >> "$LOGFILE" 2>&1
+python scout.py azure -c --no-browser >> "$LOGFILE" 2>&1
 
 echo "ScoutSuite scan completed."
 
-#############################
+##############################################################################
 # Verify Report
-#############################
+##############################################################################
 
 if [ ! -d "$REPORT_FOLDER" ]; then
 
-    echo "ERROR : ScoutSuite report folder not found."
+    echo "ERROR: ScoutSuite report folder not found." | tee -a "$LOGFILE"
 
     exit 1
 
 fi
 
-#############################
-# Remove today's zip if exists
-#############################
+##############################################################################
+# Delete Today's ZIP if Exists
+##############################################################################
 
 rm -f "$ZIP_NAME"
 
-#############################
+##############################################################################
 # Create ZIP
-#############################
+##############################################################################
 
 echo "Creating ZIP..."
 
 zip -rq "$ZIP_NAME" scoutsuite-report
 
-#############################
+##############################################################################
 # Verify ZIP
-#############################
+##############################################################################
 
 if [ ! -f "$ZIP_NAME" ]; then
 
-    echo "ZIP creation failed."
+    echo "ERROR: ZIP creation failed." | tee -a "$LOGFILE"
 
     exit 1
 
 fi
 
-echo "ZIP Created Successfully"
+echo "ZIP Created Successfully."
 
-#############################
-# Upload to Blob Storage
-#############################
+##############################################################################
+# Upload to Azure Blob Storage
+##############################################################################
 
-echo "Uploading to Azure Blob..."
+echo "Uploading ZIP to Azure Blob Storage..."
 
 az storage blob upload \
     --account-name "$STORAGE_ACCOUNT" \
@@ -137,69 +157,92 @@ az storage blob upload \
 
 echo "Upload Completed."
 
-#############################
-# Keep only latest TWO blobs
-#############################
+##############################################################################
+# Verify Upload
+##############################################################################
+
+echo "Verifying Upload..."
+
+UPLOAD_STATUS=$(az storage blob exists \
+    --account-name "$STORAGE_ACCOUNT" \
+    --container-name "$CONTAINER" \
+    --name "$ZIP_NAME" \
+    --auth-mode login \
+    --query exists \
+    -o tsv)
+
+if [ "$UPLOAD_STATUS" != "true" ]; then
+
+    echo "ERROR: Upload verification failed." | tee -a "$LOGFILE"
+
+    exit 1
+
+fi
+
+echo "Upload Verified Successfully."
+
+##############################################################################
+# Keep Only Latest TWO Blobs
+##############################################################################
 
 echo "Cleaning old blobs..."
 
 BLOBS=$(az storage blob list \
---account-name "$STORAGE_ACCOUNT" \
---container-name "$CONTAINER" \
---auth-mode login \
---query "sort_by([], &properties.lastModified)[].name" \
--o tsv)
+    --account-name "$STORAGE_ACCOUNT" \
+    --container-name "$CONTAINER" \
+    --auth-mode login \
+    --query "sort_by([], &properties.lastModified)[].name" \
+    -o tsv)
 
-COUNT=$(echo "$BLOBS" | wc -l)
+COUNT=$(echo "$BLOBS" | grep -c . || true)
 
 if [ "$COUNT" -gt 2 ]; then
 
-DELETE_COUNT=$((COUNT-2))
+    DELETE_COUNT=$((COUNT-2))
 
-echo "$BLOBS" | head -n "$DELETE_COUNT" | while read BLOB
-do
+    echo "$BLOBS" | head -n "$DELETE_COUNT" | while read BLOB
+    do
 
-echo "Deleting Blob : $BLOB"
+        echo "Deleting Blob : $BLOB"
 
-az storage blob delete \
-    --account-name "$STORAGE_ACCOUNT" \
-    --container-name "$CONTAINER" \
-    --name "$BLOB" \
-    --auth-mode login >/dev/null
+        az storage blob delete \
+            --account-name "$STORAGE_ACCOUNT" \
+            --container-name "$CONTAINER" \
+            --name "$BLOB" \
+            --auth-mode login >/dev/null
 
-done
+    done
 
 fi
 
-#############################
-# Keep only latest TWO Local ZIPs
-#############################
+##############################################################################
+# Keep Only Latest TWO Local ZIPs
+##############################################################################
 
-echo "Cleaning local ZIP files..."
+echo "Cleaning old local ZIP files..."
 
 cd "$SCOUT_HOME"
 
 ls -tp scoutsuite-report-*.zip 2>/dev/null | grep -v '/$' | tail -n +3 | while read FILE
 do
 
-echo "Deleting Local : $FILE"
+    echo "Deleting Local ZIP : $FILE"
 
-rm -f "$FILE"
+    rm -f "$FILE"
 
 done
 
-#############################
-# Finished
-#############################
+##############################################################################
+# Finish
+##############################################################################
 
+echo "" >> "$LOGFILE"
 echo "===================================================" >> "$LOGFILE"
-
 echo "Completed : $(date)" >> "$LOGFILE"
-
 echo "===================================================" >> "$LOGFILE"
 
 echo ""
 echo "=============================================="
-echo "ScoutSuite automation completed successfully."
+echo "ScoutSuite Automation Completed Successfully"
 echo "=============================================="
 echo ""
