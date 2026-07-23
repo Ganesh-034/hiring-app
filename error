@@ -1,40 +1,125 @@
-]
-azureuser@Scoutsuite-VM:~$ az account show
-{
-  "environmentName": "AzureCloud",
-  "homeTenantId": "fe8c6234-bf85-48c7-b462-1eefe98d567d",
-  "id": "0c123281-74e2-43d2-bbc3-8526be0786bc",
-  "isDefault": true,
-  "managedByTenants": [],
-  "name": "TTS-SOC-Watchtower(Prod)",
-  "state": "Enabled",
-  "tenantId": "fe8c6234-bf85-48c7-b462-1eefe98d567d",
-  "user": {
-    "assignedIdentityInfo": "MSI",
-    "name": "systemAssignedIdentity",
-    "type": "servicePrincipal"
+azureuser@Scoutsuite-VM:~$ cat ~/logs/scoutsuite.log
+===================================
+Started : Thu Jul 23 03:22:15 UTC 2026
+===================================
+[
+  {
+    "environmentName": "AzureCloud",
+    "homeTenantId": "fe8c6234-bf85-48c7-b462-1eefe98d567d",
+    "id": "0c123281-74e2-43d2-bbc3-8526be0786bc",
+    "isDefault": true,
+    "managedByTenants": [],
+    "name": "TTS-SOC-Watchtower(Prod)",
+    "state": "Enabled",
+    "tenantId": "fe8c6234-bf85-48c7-b462-1eefe98d567d",
+    "user": {
+      "assignedIdentityInfo": "MSI",
+      "name": "systemAssignedIdentity",
+      "type": "servicePrincipal"
+    }
   }
-}
-azureuser@Scoutsuite-VM:~$ pwd
-/home/azureuser
-azureuser@Scoutsuite-VM:~$ cd scripts/
-azureuser@Scoutsuite-VM:~/scripts$ ls
-azureuser@Scoutsuite-VM:~/scripts$ nano run_scoutsuite.sh
-azureuser@Scoutsuite-VM:~/scripts$ chmod +x ~/scripts/run_scoutsuite.sh
-azureuser@Scoutsuite-VM:~/scripts$ ls -l ~/scripts/
-total 4
--rwxrwxr-x 1 azureuser azureuser 1981 Jul 23 03:20 run_scoutsuite.sh
-azureuser@Scoutsuite-VM:~/scripts$ ls -l ~/scripts
-total 4
--rwxrwxr-x 1 azureuser azureuser 1981 Jul 23 03:20 run_scoutsuite.sh
-azureuser@Scoutsuite-VM:~/scripts$ ~/scripts/run_scoutsuite.sh
-azureuser@Scoutsuite-VM:~/scripts$ ls
-run_scoutsuite.sh
-azureuser@Scoutsuite-VM:~/scripts$ ^C
-azureuser@Scoutsuite-VM:~/scripts$ cd ~/tools/ScoutSuite/
-azureuser@Scoutsuite-VM:~/tools/ScoutSuite$ ls
-CODE_OF_CONDUCT.md  LICENSE      README.md   dev-requirements.txt  pytest.ini        scout.py        scoutsuite-report  tests
-CONTRIBUTING.md     MANIFEST.in  ScoutSuite  docker                requirements.txt  scoutsuite-env  setup.py           tools
-azureuser@Scoutsuite-VM:~/tools/ScoutSuite$ ls *.zip
-ls: cannot access '*.zip': No such file or directory
-azureuser@Scoutsuite-VM:~/tools/ScoutSuite$
+]
+2026-07-23 03:22:15 Scoutsuite-VM scout[14806] INFO Launching Scout
+2026-07-23 03:22:15 Scoutsuite-VM scout[14806] INFO Authenticating to cloud provider
+2026-07-23 03:22:17 Scoutsuite-VM scout[14806] INFO No subscription set, inferring
+2026-07-23 03:22:18 Scoutsuite-VM scout[14806] INFO Running against subscription 0c123281-74e2-43d2-bbc3-8526be0786bc
+2026-07-23 03:22:18 Scoutsuite-VM scout[14806] INFO Gathering data from APIs
+2026-07-23 03:22:18 Scoutsuite-VM scout[14806] INFO Fetching resources for the Azure Active Directory service
+2026-07-23 03:22:18 Scoutsuite-VM scout[14806] INFO Fetching resources for the RBAC service
+2026-07-23 03:22:18 Scoutsuite-VM scout[14806] INFO Fetching resources for the Security Center service
+2026-07-23 03:22:18 Scoutsuite-VM scout[14806] INFO Fetching resources for the SQL Database service
+2026-07-23 03:22:18 Scoutsuite-VM scout[14806] INFO Fetching resources for the Storage Accounts service
+2026-07-23 03:22:18 Scoutsuite-VM scout[14806] INFO Fetching resources for the Key Vault service
+2026-07-23 03:22:18 Scoutsuite-VM scout[14806] INFO Fetching resources for the Network service
+2026-07-23 03:22:18 Scoutsuite-VM scout[14806] INFO Fetching resources for the Virtual Machines service
+2026-07-23 03:22:18 Scoutsuite-VM scout[14806] INFO Fetching resources for the App Services service
+2026-07-23 03:22:18 Scoutsuite-VM scout[14806] INFO Fetching resources for the MySQL Database service
+2026-07-23 03:22:18 Scoutsuite-VM scout[14806] INFO Fetching resources for the PostgresSQL Database service
+2026-07-23 03:22:18 Scoutsuite-VM scout[14806] INFO Fetching resources for the Logging Monitoring service
+2026-07-23 03:22:19 Scoutsuite-VM scout[14806] ERROR Failed to query Microsoft Graph endpoint "users?$filter=userType+eq+%27Guest%27": status code 403
+2026-07-23 03:22:19 Scoutsuite-VM scout[14806] ERROR Failed to query Microsoft Graph endpoint "groups": status code 403
+2026-07-23 03:22:20 Scoutsuite-VM scout[14806] ERROR Failed to query Microsoft Graph endpoint "servicePrincipals": status code 403
+2026-07-23 03:22:21 Scoutsuite-VM scout[14806] ERROR Failed to query Microsoft Graph endpoint "applications": status code 403
+2026-07-23 03:22:21 Scoutsuite-VM scout[14806] ERROR Failed to query Microsoft Graph endpoint "policies/authorizationPolicy": status code 403
+2026-07-23 03:22:50 Scoutsuite-VM scout[14806] ERROR appservice.py L48: Failed to retrieve web app auth settings: (AuthorizationFailed) The client '5d8596e9-f431-42a6-ac9b-19509cbce4d0' with object id 'cbf4e500-3200-4aa0-9571-4e4e14958e34' does not have authorization to perform action 'Microsoft.Web/sites/config/list/action' over scope '/subscriptions/0c123281-74e2-43d2-bbc3-8526be0786bc/resourceGroups/soc-watchtower-dev/providers/Microsoft.Web/sites/soc-watchtower-backend-dev/config/authsettings' or the scope is invalid. If access was recently granted, please refresh your credentials.
+Code: AuthorizationFailed
+Message: The client '5d8596e9-f431-42a6-ac9b-19509cbce4d0' with object id 'cbf4e500-3200-4aa0-9571-4e4e14958e34' does not have authorization to perform action 'Microsoft.Web/sites/config/list/action' over scope '/subscriptions/0c123281-74e2-43d2-bbc3-8526be0786bc/resourceGroups/soc-watchtower-dev/providers/Microsoft.Web/sites/soc-watchtower-backend-dev/config/authsettings' or the scope is invalid. If access was recently granted, please refresh your credentials.
+2026-07-23 03:22:50 Scoutsuite-VM scout[14806] ERROR appservice.py L48: Failed to retrieve web app auth settings: (AuthorizationFailed) The client '5d8596e9-f431-42a6-ac9b-19509cbce4d0' with object id 'cbf4e500-3200-4aa0-9571-4e4e14958e34' does not have authorization to perform action 'Microsoft.Web/sites/config/list/action' over scope '/subscriptions/0c123281-74e2-43d2-bbc3-8526be0786bc/resourceGroups/soc-watchtower-dev/providers/Microsoft.Web/sites/Device-Monitoring-Time-Trigger-2/config/authsettings' or the scope is invalid. If access was recently granted, please refresh your credentials.
+Code: AuthorizationFailed
+Message: The client '5d8596e9-f431-42a6-ac9b-19509cbce4d0' with object id 'cbf4e500-3200-4aa0-9571-4e4e14958e34' does not have authorization to perform action 'Microsoft.Web/sites/config/list/action' over scope '/subscriptions/0c123281-74e2-43d2-bbc3-8526be0786bc/resourceGroups/soc-watchtower-dev/providers/Microsoft.Web/sites/Device-Monitoring-Time-Trigger-2/config/authsettings' or the scope is invalid. If access was recently granted, please refresh your credentials.
+2026-07-23 03:22:50 Scoutsuite-VM scout[14806] ERROR appservice.py L48: Failed to retrieve web app auth settings: (AuthorizationFailed) The client '5d8596e9-f431-42a6-ac9b-19509cbce4d0' with object id 'cbf4e500-3200-4aa0-9571-4e4e14958e34' does not have authorization to perform action 'Microsoft.Web/sites/config/list/action' over scope '/subscriptions/0c123281-74e2-43d2-bbc3-8526be0786bc/resourceGroups/appsvc_linux_southeastasia_basic/providers/Microsoft.Web/sites/soc-watchtower-backend/config/authsettings' or the scope is invalid. If access was recently granted, please refresh your credentials.
+Code: AuthorizationFailed
+Message: The client '5d8596e9-f431-42a6-ac9b-19509cbce4d0' with object id 'cbf4e500-3200-4aa0-9571-4e4e14958e34' does not have authorization to perform action 'Microsoft.Web/sites/config/list/action' over scope '/subscriptions/0c123281-74e2-43d2-bbc3-8526be0786bc/resourceGroups/appsvc_linux_southeastasia_basic/providers/Microsoft.Web/sites/soc-watchtower-backend/config/authsettings' or the scope is invalid. If access was recently granted, please refresh your credentials.
+2026-07-23 03:22:50 Scoutsuite-VM scout[14806] ERROR appservice.py L48: Failed to retrieve web app auth settings: (AuthorizationFailed) The client '5d8596e9-f431-42a6-ac9b-19509cbce4d0' with object id 'cbf4e500-3200-4aa0-9571-4e4e14958e34' does not have authorization to perform action 'Microsoft.Web/sites/config/list/action' over scope '/subscriptions/0c123281-74e2-43d2-bbc3-8526be0786bc/resourceGroups/soc-watchtower-dev/providers/Microsoft.Web/sites/mongo-scheduler-dev/config/authsettings' or the scope is invalid. If access was recently granted, please refresh your credentials.
+Code: AuthorizationFailed
+Message: The client '5d8596e9-f431-42a6-ac9b-19509cbce4d0' with object id 'cbf4e500-3200-4aa0-9571-4e4e14958e34' does not have authorization to perform action 'Microsoft.Web/sites/config/list/action' over scope '/subscriptions/0c123281-74e2-43d2-bbc3-8526be0786bc/resourceGroups/soc-watchtower-dev/providers/Microsoft.Web/sites/mongo-scheduler-dev/config/authsettings' or the scope is invalid. If access was recently granted, please refresh your credentials.
+2026-07-23 03:22:50 Scoutsuite-VM scout[14806] ERROR appservice.py L48: Failed to retrieve web app auth settings: (AuthorizationFailed) The client '5d8596e9-f431-42a6-ac9b-19509cbce4d0' with object id 'cbf4e500-3200-4aa0-9571-4e4e14958e34' does not have authorization to perform action 'Microsoft.Web/sites/config/list/action' over scope '/subscriptions/0c123281-74e2-43d2-bbc3-8526be0786bc/resourceGroups/soc-watchtower-dev/providers/Microsoft.Web/sites/costlogvolume-func/config/authsettings' or the scope is invalid. If access was recently granted, please refresh your credentials.
+Code: AuthorizationFailed
+Message: The client '5d8596e9-f431-42a6-ac9b-19509cbce4d0' with object id 'cbf4e500-3200-4aa0-9571-4e4e14958e34' does not have authorization to perform action 'Microsoft.Web/sites/config/list/action' over scope '/subscriptions/0c123281-74e2-43d2-bbc3-8526be0786bc/resourceGroups/soc-watchtower-dev/providers/Microsoft.Web/sites/costlogvolume-func/config/authsettings' or the scope is invalid. If access was recently granted, please refresh your credentials.
+2026-07-23 03:22:50 Scoutsuite-VM scout[14806] ERROR appservice.py L48: Failed to retrieve web app auth settings: (AuthorizationFailed) The client '5d8596e9-f431-42a6-ac9b-19509cbce4d0' with object id 'cbf4e500-3200-4aa0-9571-4e4e14958e34' does not have authorization to perform action 'Microsoft.Web/sites/config/list/action' over scope '/subscriptions/0c123281-74e2-43d2-bbc3-8526be0786bc/resourceGroups/soc-watchtower-dev/providers/Microsoft.Web/sites/presidio-webapi/config/authsettings' or the scope is invalid. If access was recently granted, please refresh your credentials.
+Code: AuthorizationFailed
+Message: The client '5d8596e9-f431-42a6-ac9b-19509cbce4d0' with object id 'cbf4e500-3200-4aa0-9571-4e4e14958e34' does not have authorization to perform action 'Microsoft.Web/sites/config/list/action' over scope '/subscriptions/0c123281-74e2-43d2-bbc3-8526be0786bc/resourceGroups/soc-watchtower-dev/providers/Microsoft.Web/sites/presidio-webapi/config/authsettings' or the scope is invalid. If access was recently granted, please refresh your credentials.
+2026-07-23 03:22:50 Scoutsuite-VM scout[14806] ERROR appservice.py L48: Failed to retrieve web app auth settings: (AuthorizationFailed) The client '5d8596e9-f431-42a6-ac9b-19509cbce4d0' with object id 'cbf4e500-3200-4aa0-9571-4e4e14958e34' does not have authorization to perform action 'Microsoft.Web/sites/config/list/action' over scope '/subscriptions/0c123281-74e2-43d2-bbc3-8526be0786bc/resourceGroups/soc-watchtower-dev/providers/Microsoft.Web/sites/Device-Monitoring-Time-Trigger/config/authsettings' or the scope is invalid. If access was recently granted, please refresh your credentials.
+Code: AuthorizationFailed
+Message: The client '5d8596e9-f431-42a6-ac9b-19509cbce4d0' with object id 'cbf4e500-3200-4aa0-9571-4e4e14958e34' does not have authorization to perform action 'Microsoft.Web/sites/config/list/action' over scope '/subscriptions/0c123281-74e2-43d2-bbc3-8526be0786bc/resourceGroups/soc-watchtower-dev/providers/Microsoft.Web/sites/Device-Monitoring-Time-Trigger/config/authsettings' or the scope is invalid. If access was recently granted, please refresh your credentials.
+2026-07-23 03:22:50 Scoutsuite-VM scout[14806] ERROR appservice.py L48: Failed to retrieve web app auth settings: (AuthorizationFailed) The client '5d8596e9-f431-42a6-ac9b-19509cbce4d0' with object id 'cbf4e500-3200-4aa0-9571-4e4e14958e34' does not have authorization to perform action 'Microsoft.Web/sites/config/list/action' over scope '/subscriptions/0c123281-74e2-43d2-bbc3-8526be0786bc/resourceGroups/soc-watchtower-dev/providers/Microsoft.Web/sites/socwatchtower-mde-report-dev/config/authsettings' or the scope is invalid. If access was recently granted, please refresh your credentials.
+Code: AuthorizationFailed
+Message: The client '5d8596e9-f431-42a6-ac9b-19509cbce4d0' with object id 'cbf4e500-3200-4aa0-9571-4e4e14958e34' does not have authorization to perform action 'Microsoft.Web/sites/config/list/action' over scope '/subscriptions/0c123281-74e2-43d2-bbc3-8526be0786bc/resourceGroups/soc-watchtower-dev/providers/Microsoft.Web/sites/socwatchtower-mde-report-dev/config/authsettings' or the scope is invalid. If access was recently granted, please refresh your credentials.
+2026-07-23 03:22:50 Scoutsuite-VM scout[14806] ERROR appservice.py L48: Failed to retrieve web app auth settings: (AuthorizationFailed) The client '5d8596e9-f431-42a6-ac9b-19509cbce4d0' with object id 'cbf4e500-3200-4aa0-9571-4e4e14958e34' does not have authorization to perform action 'Microsoft.Web/sites/config/list/action' over scope '/subscriptions/0c123281-74e2-43d2-bbc3-8526be0786bc/resourceGroups/soc-watchtower-prod/providers/Microsoft.Web/sites/mongo-scheduler/config/authsettings' or the scope is invalid. If access was recently granted, please refresh your credentials.
+Code: AuthorizationFailed
+Message: The client '5d8596e9-f431-42a6-ac9b-19509cbce4d0' with object id 'cbf4e500-3200-4aa0-9571-4e4e14958e34' does not have authorization to perform action 'Microsoft.Web/sites/config/list/action' over scope '/subscriptions/0c123281-74e2-43d2-bbc3-8526be0786bc/resourceGroups/soc-watchtower-prod/providers/Microsoft.Web/sites/mongo-scheduler/config/authsettings' or the scope is invalid. If access was recently granted, please refresh your credentials.
+2026-07-23 03:22:50 Scoutsuite-VM scout[14806] ERROR appservice.py L48: Failed to retrieve web app auth settings: (AuthorizationFailed) The client '5d8596e9-f431-42a6-ac9b-19509cbce4d0' with object id 'cbf4e500-3200-4aa0-9571-4e4e14958e34' does not have authorization to perform action 'Microsoft.Web/sites/config/list/action' over scope '/subscriptions/0c123281-74e2-43d2-bbc3-8526be0786bc/resourceGroups/soc-watchtower-dev/providers/Microsoft.Web/sites/cost-managment-function-app/config/authsettings' or the scope is invalid. If access was recently granted, please refresh your credentials.
+Code: AuthorizationFailed
+Message: The client '5d8596e9-f431-42a6-ac9b-19509cbce4d0' with object id 'cbf4e500-3200-4aa0-9571-4e4e14958e34' does not have authorization to perform action 'Microsoft.Web/sites/config/list/action' over scope '/subscriptions/0c123281-74e2-43d2-bbc3-8526be0786bc/resourceGroups/soc-watchtower-dev/providers/Microsoft.Web/sites/cost-managment-function-app/config/authsettings' or the scope is invalid. If access was recently granted, please refresh your credentials.
+2026-07-23 03:22:50 Scoutsuite-VM scout[14806] ERROR appservice.py L48: Failed to retrieve web app auth settings: (AuthorizationFailed) The client '5d8596e9-f431-42a6-ac9b-19509cbce4d0' with object id 'cbf4e500-3200-4aa0-9571-4e4e14958e34' does not have authorization to perform action 'Microsoft.Web/sites/config/list/action' over scope '/subscriptions/0c123281-74e2-43d2-bbc3-8526be0786bc/resourceGroups/soc-watchtower-prod/providers/Microsoft.Web/sites/soc-watchtower-function-app-db-prod/config/authsettings' or the scope is invalid. If access was recently granted, please refresh your credentials.
+Code: AuthorizationFailed
+Message: The client '5d8596e9-f431-42a6-ac9b-19509cbce4d0' with object id 'cbf4e500-3200-4aa0-9571-4e4e14958e34' does not have authorization to perform action 'Microsoft.Web/sites/config/list/action' over scope '/subscriptions/0c123281-74e2-43d2-bbc3-8526be0786bc/resourceGroups/soc-watchtower-prod/providers/Microsoft.Web/sites/soc-watchtower-function-app-db-prod/config/authsettings' or the scope is invalid. If access was recently granted, please refresh your credentials.
+2026-07-23 03:22:50 Scoutsuite-VM scout[14806] ERROR appservice.py L48: Failed to retrieve web app auth settings: (AuthorizationFailed) The client '5d8596e9-f431-42a6-ac9b-19509cbce4d0' with object id 'cbf4e500-3200-4aa0-9571-4e4e14958e34' does not have authorization to perform action 'Microsoft.Web/sites/config/list/action' over scope '/subscriptions/0c123281-74e2-43d2-bbc3-8526be0786bc/resourceGroups/soc-watchtower-dev/providers/Microsoft.Web/sites/costdeviceheartbeat-func/config/authsettings' or the scope is invalid. If access was recently granted, please refresh your credentials.
+Code: AuthorizationFailed
+Message: The client '5d8596e9-f431-42a6-ac9b-19509cbce4d0' with object id 'cbf4e500-3200-4aa0-9571-4e4e14958e34' does not have authorization to perform action 'Microsoft.Web/sites/config/list/action' over scope '/subscriptions/0c123281-74e2-43d2-bbc3-8526be0786bc/resourceGroups/soc-watchtower-dev/providers/Microsoft.Web/sites/costdeviceheartbeat-func/config/authsettings' or the scope is invalid. If access was recently granted, please refresh your credentials.
+2026-07-23 03:22:50 Scoutsuite-VM scout[14806] ERROR appservice.py L48: Failed to retrieve web app auth settings: (AuthorizationFailed) The client '5d8596e9-f431-42a6-ac9b-19509cbce4d0' with object id 'cbf4e500-3200-4aa0-9571-4e4e14958e34' does not have authorization to perform action 'Microsoft.Web/sites/config/list/action' over scope '/subscriptions/0c123281-74e2-43d2-bbc3-8526be0786bc/resourceGroups/soc-watchtower-prod/providers/Microsoft.Web/sites/device-monitoring-fw-prod/config/authsettings' or the scope is invalid. If access was recently granted, please refresh your credentials.
+Code: AuthorizationFailed
+Message: The client '5d8596e9-f431-42a6-ac9b-19509cbce4d0' with object id 'cbf4e500-3200-4aa0-9571-4e4e14958e34' does not have authorization to perform action 'Microsoft.Web/sites/config/list/action' over scope '/subscriptions/0c123281-74e2-43d2-bbc3-8526be0786bc/resourceGroups/soc-watchtower-prod/providers/Microsoft.Web/sites/device-monitoring-fw-prod/config/authsettings' or the scope is invalid. If access was recently granted, please refresh your credentials.
+2026-07-23 03:22:50 Scoutsuite-VM scout[14806] ERROR appservice.py L48: Failed to retrieve web app auth settings: (AuthorizationFailed) The client '5d8596e9-f431-42a6-ac9b-19509cbce4d0' with object id 'cbf4e500-3200-4aa0-9571-4e4e14958e34' does not have authorization to perform action 'Microsoft.Web/sites/config/list/action' over scope '/subscriptions/0c123281-74e2-43d2-bbc3-8526be0786bc/resourceGroups/soc-watchtower-prod/providers/Microsoft.Web/sites/socwatchtower-mde-report/config/authsettings' or the scope is invalid. If access was recently granted, please refresh your credentials.
+Code: AuthorizationFailed
+Message: The client '5d8596e9-f431-42a6-ac9b-19509cbce4d0' with object id 'cbf4e500-3200-4aa0-9571-4e4e14958e34' does not have authorization to perform action 'Microsoft.Web/sites/config/list/action' over scope '/subscriptions/0c123281-74e2-43d2-bbc3-8526be0786bc/resourceGroups/soc-watchtower-prod/providers/Microsoft.Web/sites/socwatchtower-mde-report/config/authsettings' or the scope is invalid. If access was recently granted, please refresh your credentials.
+2026-07-23 03:22:50 Scoutsuite-VM scout[14806] ERROR appservice.py L48: Failed to retrieve web app auth settings: (AuthorizationFailed) The client '5d8596e9-f431-42a6-ac9b-19509cbce4d0' with object id 'cbf4e500-3200-4aa0-9571-4e4e14958e34' does not have authorization to perform action 'Microsoft.Web/sites/config/list/action' over scope '/subscriptions/0c123281-74e2-43d2-bbc3-8526be0786bc/resourceGroups/soc-watchtower-prod/providers/Microsoft.Web/sites/cost-device-prod/config/authsettings' or the scope is invalid. If access was recently granted, please refresh your credentials.
+Code: AuthorizationFailed
+Message: The client '5d8596e9-f431-42a6-ac9b-19509cbce4d0' with object id 'cbf4e500-3200-4aa0-9571-4e4e14958e34' does not have authorization to perform action 'Microsoft.Web/sites/config/list/action' over scope '/subscriptions/0c123281-74e2-43d2-bbc3-8526be0786bc/resourceGroups/soc-watchtower-prod/providers/Microsoft.Web/sites/cost-device-prod/config/authsettings' or the scope is invalid. If access was recently granted, please refresh your credentials.
+2026-07-23 03:22:50 Scoutsuite-VM scout[14806] ERROR appservice.py L48: Failed to retrieve web app auth settings: (AuthorizationFailed) The client '5d8596e9-f431-42a6-ac9b-19509cbce4d0' with object id 'cbf4e500-3200-4aa0-9571-4e4e14958e34' does not have authorization to perform action 'Microsoft.Web/sites/config/list/action' over scope '/subscriptions/0c123281-74e2-43d2-bbc3-8526be0786bc/resourceGroups/soc-watchtower-prod/providers/Microsoft.Web/sites/cost-volume-prod/config/authsettings' or the scope is invalid. If access was recently granted, please refresh your credentials.
+Code: AuthorizationFailed
+Message: The client '5d8596e9-f431-42a6-ac9b-19509cbce4d0' with object id 'cbf4e500-3200-4aa0-9571-4e4e14958e34' does not have authorization to perform action 'Microsoft.Web/sites/config/list/action' over scope '/subscriptions/0c123281-74e2-43d2-bbc3-8526be0786bc/resourceGroups/soc-watchtower-prod/providers/Microsoft.Web/sites/cost-volume-prod/config/authsettings' or the scope is invalid. If access was recently granted, please refresh your credentials.
+2026-07-23 03:22:50 Scoutsuite-VM scout[14806] ERROR appservice.py L48: Failed to retrieve web app auth settings: (AuthorizationFailed) The client '5d8596e9-f431-42a6-ac9b-19509cbce4d0' with object id 'cbf4e500-3200-4aa0-9571-4e4e14958e34' does not have authorization to perform action 'Microsoft.Web/sites/config/list/action' over scope '/subscriptions/0c123281-74e2-43d2-bbc3-8526be0786bc/resourceGroups/soc-watchtower-prod/providers/Microsoft.Web/sites/device-monitoring-ad-prod/config/authsettings' or the scope is invalid. If access was recently granted, please refresh your credentials.
+Code: AuthorizationFailed
+Message: The client '5d8596e9-f431-42a6-ac9b-19509cbce4d0' with object id 'cbf4e500-3200-4aa0-9571-4e4e14958e34' does not have authorization to perform action 'Microsoft.Web/sites/config/list/action' over scope '/subscriptions/0c123281-74e2-43d2-bbc3-8526be0786bc/resourceGroups/soc-watchtower-prod/providers/Microsoft.Web/sites/device-monitoring-ad-prod/config/authsettings' or the scope is invalid. If access was recently granted, please refresh your credentials.
+2026-07-23 03:22:50 Scoutsuite-VM scout[14806] ERROR appservice.py L48: Failed to retrieve web app auth settings: (AuthorizationFailed) The client '5d8596e9-f431-42a6-ac9b-19509cbce4d0' with object id 'cbf4e500-3200-4aa0-9571-4e4e14958e34' does not have authorization to perform action 'Microsoft.Web/sites/config/list/action' over scope '/subscriptions/0c123281-74e2-43d2-bbc3-8526be0786bc/resourceGroups/soc-watchtower-prod/providers/Microsoft.Web/sites/soc-watchtower-function-app-db/config/authsettings' or the scope is invalid. If access was recently granted, please refresh your credentials.
+Code: AuthorizationFailed
+Message: The client '5d8596e9-f431-42a6-ac9b-19509cbce4d0' with object id 'cbf4e500-3200-4aa0-9571-4e4e14958e34' does not have authorization to perform action 'Microsoft.Web/sites/config/list/action' over scope '/subscriptions/0c123281-74e2-43d2-bbc3-8526be0786bc/resourceGroups/soc-watchtower-prod/providers/Microsoft.Web/sites/soc-watchtower-function-app-db/config/authsettings' or the scope is invalid. If access was recently granted, please refresh your credentials.
+2026-07-23 03:23:19 Scoutsuite-VM scout[14806] ERROR Failed to query Microsoft Graph endpoint "users?$filter=id+eq+%275f96bc12-2b5e-4a5c-ab33-c87f013f7a21%27": status code 403
+2026-07-23 03:23:20 Scoutsuite-VM scout[14806] ERROR Failed to query Microsoft Graph endpoint "users?$filter=id+eq+%2737976b8c-384b-43f3-ba87-4b45cc5b506a%27": status code 403
+2026-07-23 03:23:20 Scoutsuite-VM scout[14806] ERROR Failed to query Microsoft Graph endpoint "users?$filter=id+eq+%270d44bfa3-d7d0-48bd-8863-74f2f07a06e1%27": status code 403
+2026-07-23 03:23:21 Scoutsuite-VM scout[14806] ERROR Failed to query Microsoft Graph endpoint "users?$filter=id+eq+%27b1e7dfaf-e883-4b6b-8b9e-311b1f9a6549%27": status code 403
+2026-07-23 03:23:21 Scoutsuite-VM scout[14806] ERROR Failed to query Microsoft Graph endpoint "users?$filter=id+eq+%27d6befb72-70ad-4f48-a888-68381ac55737%27": status code 403
+2026-07-23 03:23:22 Scoutsuite-VM scout[14806] ERROR Failed to query Microsoft Graph endpoint "users?$filter=id+eq+%273f867250-42bd-4532-ad83-dc3e7635abc4%27": status code 403
+2026-07-23 03:23:23 Scoutsuite-VM scout[14806] ERROR Failed to query Microsoft Graph endpoint "users?$filter=id+eq+%2788918245-57d9-453c-af3f-c5406c5e0d02%27": status code 403
+2026-07-23 03:23:23 Scoutsuite-VM scout[14806] ERROR Failed to query Microsoft Graph endpoint "users?$filter=id+eq+%27da341b92-6015-41c2-9d64-e9cbc0fd5528%27": status code 403
+2026-07-23 03:23:24 Scoutsuite-VM scout[14806] ERROR Failed to query Microsoft Graph endpoint "users?$filter=id+eq+%27b22f8c96-d15f-4abb-9b1f-853f6bb4f8c0%27": status code 403
+2026-07-23 03:23:24 Scoutsuite-VM scout[14806] ERROR Failed to query Microsoft Graph endpoint "users?$filter=id+eq+%277f6107c3-b576-4ec6-b89b-1b00b23b461c%27": status code 403
+2026-07-23 03:23:25 Scoutsuite-VM scout[14806] ERROR Failed to query Microsoft Graph endpoint "users?$filter=id+eq+%27fbc55031-e59b-4d43-9a50-8fc0f8438254%27": status code 403
+2026-07-23 03:23:25 Scoutsuite-VM scout[14806] ERROR Failed to query Microsoft Graph endpoint "users?$filter=id+eq+%2702afb4f0-770f-48b1-9c48-04e1a533492a%27": status code 403
+2026-07-23 03:23:26 Scoutsuite-VM scout[14806] ERROR Failed to query Microsoft Graph endpoint "users?$filter=id+eq+%270c82f967-e15b-42c6-8018-429e413f2941%27": status code 403
+2026-07-23 03:23:26 Scoutsuite-VM scout[14806] ERROR Failed to query Microsoft Graph endpoint "users?$filter=id+eq+%276841a1f3-21d2-470e-9072-4abeda8555bb%27": status code 403
+2026-07-23 03:23:27 Scoutsuite-VM scout[14806] ERROR Failed to query Microsoft Graph endpoint "users?$filter=id+eq+%27f7fb8d2d-10f6-45a8-a7fe-e8d68e5365e8%27": status code 403
+2026-07-23 03:23:27 Scoutsuite-VM scout[14806] ERROR Failed to query Microsoft Graph endpoint "users?$filter=id+eq+%27f95360a9-0497-4940-9d50-035c0a990604%27": status code 403
+2026-07-23 03:23:28 Scoutsuite-VM scout[14806] ERROR Failed to query Microsoft Graph endpoint "users?$filter=id+eq+%27462c32cf-e04b-4333-81c8-219f885e3315%27": status code 403
+2026-07-23 03:23:29 Scoutsuite-VM scout[14806] ERROR Failed to query Microsoft Graph endpoint "users?$filter=id+eq+%27a63c4da8-a244-47fe-bf12-08df3ab6818b%27": status code 403
+2026-07-23 03:23:29 Scoutsuite-VM scout[14806] INFO Running pre-processing engine
+2026-07-23 03:23:29 Scoutsuite-VM scout[14806] INFO Running rule engine
+2026-07-23 03:23:29 Scoutsuite-VM scout[14806] INFO Applying display filters
+2026-07-23 03:23:29 Scoutsuite-VM scout[14806] INFO Running post-processing engine
+2026-07-23 03:23:29 Scoutsuite-VM scout[14806] INFO Saving data to scoutsuite-report/scoutsuite-results/scoutsuite_results_azure-tenant-fe8c6234-bf85-48c7-b462-1eefe98d567d.js
+2026-07-23 03:23:29 Scoutsuite-VM scout[14806] INFO Saving data to scoutsuite-report/scoutsuite-results/scoutsuite_exceptions_azure-tenant-fe8c6234-bf85-48c7-b462-1eefe98d567d.js
+2026-07-23 03:23:29 Scoutsuite-VM scout[14806] INFO Saving data to scoutsuite-report/scoutsuite-results/scoutsuite_errors_azure-tenant-fe8c6234-bf85-48c7-b462-1eefe98d567d.json
+2026-07-23 03:23:29 Scoutsuite-VM scout[14806] INFO Creating scoutsuite-report/azure-tenant-fe8c6234-bf85-48c7-b462-1eefe98d567d.html
+2026-07-23 03:23:29 Scoutsuite-VM scout[14806] INFO Opening the HTML report
+azureuser@Scoutsu
