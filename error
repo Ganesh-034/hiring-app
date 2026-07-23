@@ -1,87 +1,40 @@
-#!/bin/bash
-
-set -e
-
-############################################
-# Variables
-############################################
-
-DATE=$(date +%Y-%m-%d-%H-%M)
-
-HOME_DIR="$HOME"
-
-SCOUT_DIR="$HOME/tools/ScoutSuite"
-
-REPORT_FOLDER="scoutsuite-report"
-
-ZIP_NAME="scoutsuite-report-$DATE.zip"
-
-STORAGE_ACCOUNT="scoutsuiterept"
-
-CONTAINER_NAME="reports"
-
-LOG_DIR="$HOME/logs"
-
-mkdir -p "$LOG_DIR"
-
-LOGFILE="$LOG_DIR/scoutsuite.log"
-
-echo "===================================" >> "$LOGFILE"
-echo "Started : $(date)" >> "$LOGFILE"
-echo "===================================" >> "$LOGFILE"
-
-############################################
-# Login using Managed Identity
-############################################
-
-az login --identity >> "$LOGFILE" 2>&1
-
-############################################
-# Go to ScoutSuite Folder
-############################################
-
-cd "$SCOUT_DIR"
-
-############################################
-# Activate Python Environment
-############################################
-
-source scoutsuite-env/bin/activate
-
-############################################
-# Remove Old Report Folder
-############################################
-
-rm -rf scoutsuite-report
-
-############################################
-# Run Scout Suite
-############################################
-
-python scout.py azure -c >> "$LOGFILE" 2>&1
-
-############################################
-# Create ZIP
-############################################
-
-zip -r "$ZIP_NAME" "$REPORT_FOLDER" >> "$LOGFILE" 2>&1
-
-############################################
-# Upload to Blob Storage
-############################################
-
-az storage blob upload \
---account-name "$STORAGE_ACCOUNT" \
---container-name "$CONTAINER_NAME" \
---name "$ZIP_NAME" \
---file "$ZIP_NAME" \
---auth-mode login \
---overwrite true >> "$LOGFILE" 2>&1
-
-echo "Upload Completed" >> "$LOGFILE"
-
-############################################
-# Finished
-############################################
-
-echo "Completed : $(date)" >> "$LOGFILE"
+]
+azureuser@Scoutsuite-VM:~$ az account show
+{
+  "environmentName": "AzureCloud",
+  "homeTenantId": "fe8c6234-bf85-48c7-b462-1eefe98d567d",
+  "id": "0c123281-74e2-43d2-bbc3-8526be0786bc",
+  "isDefault": true,
+  "managedByTenants": [],
+  "name": "TTS-SOC-Watchtower(Prod)",
+  "state": "Enabled",
+  "tenantId": "fe8c6234-bf85-48c7-b462-1eefe98d567d",
+  "user": {
+    "assignedIdentityInfo": "MSI",
+    "name": "systemAssignedIdentity",
+    "type": "servicePrincipal"
+  }
+}
+azureuser@Scoutsuite-VM:~$ pwd
+/home/azureuser
+azureuser@Scoutsuite-VM:~$ cd scripts/
+azureuser@Scoutsuite-VM:~/scripts$ ls
+azureuser@Scoutsuite-VM:~/scripts$ nano run_scoutsuite.sh
+azureuser@Scoutsuite-VM:~/scripts$ chmod +x ~/scripts/run_scoutsuite.sh
+azureuser@Scoutsuite-VM:~/scripts$ ls -l ~/scripts/
+total 4
+-rwxrwxr-x 1 azureuser azureuser 1981 Jul 23 03:20 run_scoutsuite.sh
+azureuser@Scoutsuite-VM:~/scripts$ ls -l ~/scripts
+total 4
+-rwxrwxr-x 1 azureuser azureuser 1981 Jul 23 03:20 run_scoutsuite.sh
+azureuser@Scoutsuite-VM:~/scripts$ ~/scripts/run_scoutsuite.sh
+azureuser@Scoutsuite-VM:~/scripts$ ls
+run_scoutsuite.sh
+azureuser@Scoutsuite-VM:~/scripts$ ^C
+azureuser@Scoutsuite-VM:~/scripts$ cd ~/tools/ScoutSuite/
+azureuser@Scoutsuite-VM:~/tools/ScoutSuite$ ls
+CODE_OF_CONDUCT.md  LICENSE      README.md   dev-requirements.txt  pytest.ini        scout.py        scoutsuite-report  tests
+CONTRIBUTING.md     MANIFEST.in  ScoutSuite  docker                requirements.txt  scoutsuite-env  setup.py           tools
+azureuser@Scoutsuite-VM:~/tools/ScoutSuite$ ls *.zip
+ls: cannot access '*.zip': No such file or directory
+azureuser@Scoutsuite-VM:~/tools/ScoutSuite$
