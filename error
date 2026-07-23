@@ -1,20 +1,87 @@
-2026-07-21 07:36:22 TTSIN-LT-A-114 scout[1942] INFO Running rule engine
-2026-07-21 07:36:22 TTSIN-LT-A-114 scout[1942] INFO Applying display filters
-2026-07-21 07:36:22 TTSIN-LT-A-114 scout[1942] INFO Running post-processing engine
-2026-07-21 07:36:22 TTSIN-LT-A-114 scout[1942] INFO Saving data to scoutsuite-report/scoutsuite-results/scoutsuite_results_azure-tenant-fe8c6234-bf85-48c7-b462-1eefe98d567d.js
-File 'scoutsuite-report/scoutsuite-results/scoutsuite_results_azure-tenant-fe8c6234-bf85-48c7-b462-1eefe98d567d.js' already exists. Do you want to overwrite it (y/n)? y
-2026-07-21 07:36:47 TTSIN-LT-A-114 scout[1942] INFO Saving data to scoutsuite-report/scoutsuite-results/scoutsuite_exceptions_azure-tenant-fe8c6234-bf85-48c7-b462-1eefe98d567d.js
-File 'scoutsuite-report/scoutsuite-results/scoutsuite_exceptions_azure-tenant-fe8c6234-bf85-48c7-b462-1eefe98d567d.js' already exists. Do you want to overwrite it (y/n)? y
-2026-07-21 07:36:49 TTSIN-LT-A-114 scout[1942] INFO Creating scoutsuite-report/azure-tenant-fe8c6234-bf85-48c7-b462-1eefe98d567d.html
-File 'scoutsuite-report/azure-tenant-fe8c6234-bf85-48c7-b462-1eefe98d567d.html' already exists. Do you want to overwrite it (y/n)? y
-2026-07-21 07:36:51 TTSIN-LT-A-114 scout[1942] INFO Opening the HTML report
-gio: file:///home/ganesh/tools/ScoutSuite/scoutsuite-report/azure-tenant-fe8c6234-bf85-48c7-b462-1eefe98d567d.html: Failed to find default application for content type ‘text/html’
-        zip warning: name not matched: scoutsuite
+#!/bin/bash
 
-zip error: Nothing to do! (try: zip -r scoutsuite-report.zip . -i scoutsuite)
-cp: cannot stat 'scoutsuite-report.zip': No such file or directory
-==================================
-Scousuite automation completed
-Finished: Tue Jul 21 07:36:53 UTC 2026
-==================================
-ganesh@TTSIN-LT-A-114:~$
+set -e
+
+############################################
+# Variables
+############################################
+
+DATE=$(date +%Y-%m-%d-%H-%M)
+
+HOME_DIR="$HOME"
+
+SCOUT_DIR="$HOME/tools/ScoutSuite"
+
+REPORT_FOLDER="scoutsuite-report"
+
+ZIP_NAME="scoutsuite-report-$DATE.zip"
+
+STORAGE_ACCOUNT="scoutsuiterept"
+
+CONTAINER_NAME="reports"
+
+LOG_DIR="$HOME/logs"
+
+mkdir -p "$LOG_DIR"
+
+LOGFILE="$LOG_DIR/scoutsuite.log"
+
+echo "===================================" >> "$LOGFILE"
+echo "Started : $(date)" >> "$LOGFILE"
+echo "===================================" >> "$LOGFILE"
+
+############################################
+# Login using Managed Identity
+############################################
+
+az login --identity >> "$LOGFILE" 2>&1
+
+############################################
+# Go to ScoutSuite Folder
+############################################
+
+cd "$SCOUT_DIR"
+
+############################################
+# Activate Python Environment
+############################################
+
+source scoutsuite-env/bin/activate
+
+############################################
+# Remove Old Report Folder
+############################################
+
+rm -rf scoutsuite-report
+
+############################################
+# Run Scout Suite
+############################################
+
+python scout.py azure -c >> "$LOGFILE" 2>&1
+
+############################################
+# Create ZIP
+############################################
+
+zip -r "$ZIP_NAME" "$REPORT_FOLDER" >> "$LOGFILE" 2>&1
+
+############################################
+# Upload to Blob Storage
+############################################
+
+az storage blob upload \
+--account-name "$STORAGE_ACCOUNT" \
+--container-name "$CONTAINER_NAME" \
+--name "$ZIP_NAME" \
+--file "$ZIP_NAME" \
+--auth-mode login \
+--overwrite true >> "$LOGFILE" 2>&1
+
+echo "Upload Completed" >> "$LOGFILE"
+
+############################################
+# Finished
+############################################
+
+echo "Completed : $(date)" >> "$LOGFILE"
