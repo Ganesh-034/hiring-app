@@ -6,7 +6,7 @@ param()
 
 $SubscriptionId = "0c123281-74e2-43d2-bbc3-8526be0786bc"
 
-$ResourceGroupName = "YOUR_RESOURCE_GROUP"
+$ResourceGroupName = "soc-watchtower-dev"
 
 $VMName = "Scoutsuite-VM"
 
