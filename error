@@ -1,7 +1,13 @@
 Enable succeeded: 
 [stdout]
-Hello from azure
-/var/lib/waagent/run-command/download/2
+root
+
+total 4
+drwxr-x--- 9 azureuser azureuser 4096 Jul 23 03:10 azureuser
+total 12
+drwxrwxr-x 2 azureuser azureuser 4096 Jul 23 03:22 logs
+drwxrwxr-x 2 azureuser azureuser 4096 Jul 23 04:59 scripts
+drwxrwxr-x 3 azureuser azureuser 4096 Jul 23 02:24 tools
 
 [stderr]
-ls: cannot access '~/scripts': No such file or directory
+ls: cannot access '/home/azureuser/scrpits': No such file or directory
