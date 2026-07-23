@@ -1,205 +1,25 @@
-#!/bin/bash
-
-##############################################################################
-# ScoutSuite Azure Automation Script
-# Production Version
-##############################################################################
-
-set -euo pipefail
-
-#############################
-# Variables
-#############################
-
-DATE=$(date +"%Y-%m-%d")
-TIMESTAMP=$(date +"%Y-%m-%d %H:%M:%S")
-
-SCOUT_HOME="$HOME/tools/ScoutSuite"
-REPORT_FOLDER="$SCOUT_HOME/scoutsuite-report"
-
-ZIP_NAME="scoutsuite-report-$DATE.zip"
-
-LOG_DIR="$HOME/logs"
-LOGFILE="$LOG_DIR/scoutsuite.log"
-
-STORAGE_ACCOUNT="scoutsuiterept"
-CONTAINER="reports"
-
-#############################
-# Create Log Folder
-#############################
-
-mkdir -p "$LOG_DIR"
-
-echo "===================================================" >> "$LOGFILE"
-echo "Started : $TIMESTAMP" >> "$LOGFILE"
-echo "===================================================" >> "$LOGFILE"
-
-#############################
-# Login using Managed Identity
-#############################
-
-echo "Logging into Azure..."
-
-az login --identity >/dev/null
-
-#############################
-# Verify Azure Login
-#############################
-
-echo "Azure Account"
-
-az account show >> "$LOGFILE"
-
-#############################
-# Go to ScoutSuite Folder
-#############################
-
-cd "$SCOUT_HOME"
-
-#############################
-# Activate Python Environment
-#############################
-
-source scoutsuite-env/bin/activate
-
-#############################
-# Remove Old Report
-#############################
-
-echo "Removing previous report..."
-
-rm -rf "$REPORT_FOLDER"
-
-#############################
-# Run ScoutSuite
-#############################
-
-echo "Running ScoutSuite..."
-
-python scout.py azure -c >> "$LOGFILE" 2>&1 || true
-
-echo "ScoutSuite scan completed."
-
-#############################
-# Verify Report
-#############################
-
-if [ ! -d "$REPORT_FOLDER" ]; then
-
-    echo "ERROR : ScoutSuite report folder not found."
-
-    exit 1
-
-fi
-
-#############################
-# Remove today's zip if exists
-#############################
-
-rm -f "$ZIP_NAME"
-
-#############################
-# Create ZIP
-#############################
-
-echo "Creating ZIP..."
-
-zip -rq "$ZIP_NAME" scoutsuite-report
-
-#############################
-# Verify ZIP
-#############################
-
-if [ ! -f "$ZIP_NAME" ]; then
-
-    echo "ZIP creation failed."
-
-    exit 1
-
-fi
-
-echo "ZIP Created Successfully"
-
-#############################
-# Upload to Blob Storage
-#############################
-
-echo "Uploading to Azure Blob..."
-
-az storage blob upload \
-    --account-name "$STORAGE_ACCOUNT" \
-    --container-name "$CONTAINER" \
-    --name "$ZIP_NAME" \
-    --file "$ZIP_NAME" \
-    --overwrite true \
-    --auth-mode login >> "$LOGFILE"
-
-echo "Upload Completed."
-
-#############################
-# Keep only latest TWO blobs
-#############################
-
-echo "Cleaning old blobs..."
-
-BLOBS=$(az storage blob list \
---account-name "$STORAGE_ACCOUNT" \
---container-name "$CONTAINER" \
---auth-mode login \
---query "sort_by([], &properties.lastModified)[].name" \
--o tsv)
-
-COUNT=$(echo "$BLOBS" | wc -l)
-
-if [ "$COUNT" -gt 2 ]; then
-
-DELETE_COUNT=$((COUNT-2))
-
-echo "$BLOBS" | head -n "$DELETE_COUNT" | while read BLOB
-do
-
-echo "Deleting Blob : $BLOB"
-
-az storage blob delete \
-    --account-name "$STORAGE_ACCOUNT" \
-    --container-name "$CONTAINER" \
-    --name "$BLOB" \
-    --auth-mode login >/dev/null
-
-done
-
-fi
-
-#############################
-# Keep only latest TWO Local ZIPs
-#############################
-
-echo "Cleaning local ZIP files..."
-
-cd "$SCOUT_HOME"
-
-ls -tp scoutsuite-report-*.zip 2>/dev/null | grep -v '/$' | tail -n +3 | while read FILE
-do
-
-echo "Deleting Local : $FILE"
-
-rm -f "$FILE"
-
-done
-
-#############################
-# Finished
-#############################
-
-echo "===================================================" >> "$LOGFILE"
-
-echo "Completed : $(date)" >> "$LOGFILE"
-
-echo "===================================================" >> "$LOGFILE"
-
-echo ""
-echo "=============================================="
-echo "ScoutSuite automation completed successfully."
-echo "=============================================="
-echo ""
+Azure Automation Account
+          │
+          ▼
+Hybrid Runbook Worker (Azure VM)
+          │
+          ▼
+WSL/Linux or Native Linux
+          │
+          ▼
+Scout Suite
+          │
+          ▼
+Generate HTML Report
+          │
+          ▼
+Zip Report
+          │
+          ▼
+Upload to Azure Storage
+          │
+          ▼
+Keep Last 2 Reports
+          │
+          ▼
+Email / Teams Notification
