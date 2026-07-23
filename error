@@ -1,248 +1,92 @@
-#!/bin/bash
+param()
 
-##############################################################################
-# ScoutSuite Azure Automation Script
-# Production Version
-##############################################################################
-
-set -euo pipefail
-
-##############################################################################
-# Environment Variables
-##############################################################################
-
-export HOME=/home/azureuser
-export USER=azureuser
-export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin
-
-cd "$HOME"
-
-##############################################################################
+#==========================
 # Variables
-##############################################################################
+#==========================
 
-DATE=$(date +"%Y-%m-%d")
-TIMESTAMP=$(date +"%Y-%m-%d %H:%M:%S")
+$SubscriptionId = "0c123281-74e2-43d2-bbc3-8526be0786bc"
 
-SCOUT_HOME="/home/azureuser/tools/ScoutSuite"
-REPORT_FOLDER="$SCOUT_HOME/scoutsuite-report"
+$ResourceGroupName = "YOUR_RESOURCE_GROUP"
 
-ZIP_NAME="scoutsuite-report-$DATE.zip"
+$VMName = "Scoutsuite-VM"
 
-LOG_DIR="/home/azureuser/logs"
-LOGFILE="$LOG_DIR/scoutsuite.log"
+$ScriptPath = "/home/azureuser/scripts/run_scoutsuite.sh"
 
-STORAGE_ACCOUNT="scoutsuiterept"
-CONTAINER="reports"
+#==========================
+# Login
+#==========================
 
-##############################################################################
-# Create Log Folder
-##############################################################################
+Connect-AzAccount -Identity
 
-mkdir -p "$LOG_DIR"
+Set-AzContext -SubscriptionId $SubscriptionId
 
-echo "" >> "$LOGFILE"
-echo "===================================================" >> "$LOGFILE"
-echo "Started : $TIMESTAMP" >> "$LOGFILE"
-echo "===================================================" >> "$LOGFILE"
+Write-Output "Connected successfully."
 
-##############################################################################
-# Login using Managed Identity
-##############################################################################
+#==========================
+# Start VM
+#==========================
 
-echo "Logging into Azure..."
+Write-Output "Starting VM..."
 
-az login --identity --allow-no-subscriptions >/dev/null
+Start-AzVM `
+    -ResourceGroupName $ResourceGroupName `
+    -Name $VMName
 
-##############################################################################
-# Verify Azure Login
-##############################################################################
+Write-Output "Waiting for VM..."
 
-ACCOUNT=$(az account show --query name -o tsv)
-
-echo "Logged into Subscription : $ACCOUNT"
-
-echo "Azure Account Information:" >> "$LOGFILE"
-az account show >> "$LOGFILE"
-
-##############################################################################
-# Go to ScoutSuite Folder
-##############################################################################
-
-cd "$SCOUT_HOME"
-
-##############################################################################
-# Activate Python Environment
-##############################################################################
-
-source scoutsuite-env/bin/activate
-
-echo "Python Version:" >> "$LOGFILE"
-python --version >> "$LOGFILE"
-
-echo "Python Location:" >> "$LOGFILE"
-which python >> "$LOGFILE"
-
-##############################################################################
-# Remove Previous Report
-##############################################################################
-
-echo "Removing previous report..."
-
-rm -rf "$REPORT_FOLDER"
-
-##############################################################################
-# Run ScoutSuite
-##############################################################################
-
-echo "Running ScoutSuite..."
-
-python scout.py azure -c --no-browser >> "$LOGFILE" 2>&1
-
-echo "ScoutSuite scan completed."
-
-##############################################################################
-# Verify Report
-##############################################################################
-
-if [ ! -d "$REPORT_FOLDER" ]; then
-
-    echo "ERROR: ScoutSuite report folder not found." | tee -a "$LOGFILE"
-
-    exit 1
-
-fi
-
-##############################################################################
-# Delete Today's ZIP if Exists
-##############################################################################
-
-rm -f "$ZIP_NAME"
-
-##############################################################################
-# Create ZIP
-##############################################################################
-
-echo "Creating ZIP..."
-
-zip -rq "$ZIP_NAME" scoutsuite-report
-
-##############################################################################
-# Verify ZIP
-##############################################################################
-
-if [ ! -f "$ZIP_NAME" ]; then
-
-    echo "ERROR: ZIP creation failed." | tee -a "$LOGFILE"
-
-    exit 1
-
-fi
-
-echo "ZIP Created Successfully."
-
-##############################################################################
-# Upload to Azure Blob Storage
-##############################################################################
-
-echo "Uploading ZIP to Azure Blob Storage..."
-
-az storage blob upload \
-    --account-name "$STORAGE_ACCOUNT" \
-    --container-name "$CONTAINER" \
-    --name "$ZIP_NAME" \
-    --file "$ZIP_NAME" \
-    --overwrite true \
-    --auth-mode login >> "$LOGFILE"
-
-echo "Upload Completed."
-
-##############################################################################
-# Verify Upload
-##############################################################################
-
-echo "Verifying Upload..."
-
-UPLOAD_STATUS=$(az storage blob exists \
-    --account-name "$STORAGE_ACCOUNT" \
-    --container-name "$CONTAINER" \
-    --name "$ZIP_NAME" \
-    --auth-mode login \
-    --query exists \
-    -o tsv)
-
-if [ "$UPLOAD_STATUS" != "true" ]; then
-
-    echo "ERROR: Upload verification failed." | tee -a "$LOGFILE"
-
-    exit 1
-
-fi
-
-echo "Upload Verified Successfully."
-
-##############################################################################
-# Keep Only Latest TWO Blobs
-##############################################################################
-
-echo "Cleaning old blobs..."
-
-BLOBS=$(az storage blob list \
-    --account-name "$STORAGE_ACCOUNT" \
-    --container-name "$CONTAINER" \
-    --auth-mode login \
-    --query "sort_by([], &properties.lastModified)[].name" \
-    -o tsv)
-
-COUNT=$(echo "$BLOBS" | grep -c . || true)
-
-if [ "$COUNT" -gt 2 ]; then
-
-    DELETE_COUNT=$((COUNT-2))
-
-    echo "$BLOBS" | head -n "$DELETE_COUNT" | while read BLOB
-    do
-
-        echo "Deleting Blob : $BLOB"
-
-        az storage blob delete \
-            --account-name "$STORAGE_ACCOUNT" \
-            --container-name "$CONTAINER" \
-            --name "$BLOB" \
-            --auth-mode login >/dev/null
-
-    done
-
-fi
-
-##############################################################################
-# Keep Only Latest TWO Local ZIPs
-##############################################################################
-
-echo "Cleaning old local ZIP files..."
-
-cd "$SCOUT_HOME"
-
-ls -tp scoutsuite-report-*.zip 2>/dev/null | grep -v '/$' | tail -n +3 | while read FILE
 do
+{
+    Start-Sleep -Seconds 20
 
-    echo "Deleting Local ZIP : $FILE"
+    $status = Get-AzVM `
+        -ResourceGroupName $ResourceGroupName `
+        -Name $VMName `
+        -Status
 
-    rm -f "$FILE"
+    $powerState = (
+        $status.Statuses |
+        Where-Object {$_.Code -like "PowerState/*"}
+    ).DisplayStatus
 
-done
+    Write-Output $powerState
 
-##############################################################################
-# Finish
-##############################################################################
+}
+until ($powerState -eq "VM running")
 
-echo "" >> "$LOGFILE"
-echo "===================================================" >> "$LOGFILE"
-echo "Completed : $(date)" >> "$LOGFILE"
-echo "===================================================" >> "$LOGFILE"
+Write-Output "VM Started Successfully."
 
-echo ""
-echo "=============================================="
-echo "ScoutSuite Automation Completed Successfully"
-echo "=============================================="
-echo ""
+#==========================
+# Run ScoutSuite Script
+#==========================
+
+Write-Output "Running ScoutSuite..."
+
+$result = Invoke-AzVMRunCommand `
+    -ResourceGroupName $ResourceGroupName `
+    -VMName $VMName `
+    -CommandId "RunShellScript" `
+    -ScriptString @(
+        "chmod +x $ScriptPath",
+        "$ScriptPath"
+    )
+
+Write-Output "======================================"
+
+$result.Value.Message
+
+Write-Output "======================================"
+
+#==========================
+# Stop VM
+#==========================
+
+Write-Output "Stopping VM..."
+
+Stop-AzVM `
+    -ResourceGroupName $ResourceGroupName `
+    -Name $VMName `
+    -Force
+
+Write-Output "VM Stopped Successfully."
+
+Write-Output "ScoutSuite Automation Completed."
