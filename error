@@ -1,25 +1,7 @@
-Azure Automation Account
-          │
-          ▼
-Hybrid Runbook Worker (Azure VM)
-          │
-          ▼
-WSL/Linux or Native Linux
-          │
-          ▼
-Scout Suite
-          │
-          ▼
-Generate HTML Report
-          │
-          ▼
-Zip Report
-          │
-          ▼
-Upload to Azure Storage
-          │
-          ▼
-Keep Last 2 Reports
-          │
-          ▼
-Email / Teams Notification
+Enable succeeded: 
+[stdout]
+Hello from azure
+/var/lib/waagent/run-command/download/2
+
+[stderr]
+ls: cannot access '~/scripts': No such file or directory
