@@ -1,3 +1,230 @@
+script in VM
+
+azureuser@Scoutsuite-VM:~/scripts$ cat run_scoutsuite.sh
+#!/bin/bash
+
+##############################################################################
+# ScoutSuite Azure Automation Script
+##############################################################################
+
+set -u
+
+export HOME=/home/azureuser
+export USER=azureuser
+export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin
+
+STATUS_FILE="/tmp/scoutsuite.status"
+
+echo "RUNNING" > "$STATUS_FILE"
+
+DATE=$(date +"%Y-%m-%d")
+TIMESTAMP=$(date +"%Y-%m-%d %H:%M:%S")
+
+SCOUT_HOME="/home/azureuser/tools/ScoutSuite"
+REPORT_FOLDER="$SCOUT_HOME/scoutsuite-report"
+
+ZIP_NAME="scoutsuite-report-$DATE.zip"
+
+LOG_DIR="/home/azureuser/logs"
+LOGFILE="$LOG_DIR/scoutsuite.log"
+
+STORAGE_ACCOUNT="scoutsuiterept"
+CONTAINER="reports"
+
+mkdir -p "$LOG_DIR"
+
+echo "" >> "$LOGFILE"
+echo "===================================================" >> "$LOGFILE"
+echo "Started : $TIMESTAMP" >> "$LOGFILE"
+echo "===================================================" >> "$LOGFILE"
+
+log() {
+    echo "$1"
+    echo "$1" >> "$LOGFILE"
+}
+
+##############################################################################
+# Azure Login
+##############################################################################
+
+log "STEP 1 : Azure Login"
+
+az login --identity --allow-no-subscriptions >/dev/null 2>&1
+
+if [ $? -ne 0 ]; then
+    log "ERROR: Azure Login Failed"
+    echo "FAILED" > "$STATUS_FILE"
+    exit 1
+fi
+
+##############################################################################
+# ScoutSuite Folder
+##############################################################################
+
+log "STEP 2 : Change Directory"
+
+cd "$SCOUT_HOME" || {
+    log "ERROR: ScoutSuite folder not found"
+    echo "FAILED" > "$STATUS_FILE"
+    exit 1
+}
+
+##############################################################################
+# Python Environment
+##############################################################################
+
+log "STEP 3 : Activate Python"
+
+source scoutsuite-env/bin/activate || {
+    log "ERROR: Python environment activation failed"
+    echo "FAILED" > "$STATUS_FILE"
+    exit 1
+}
+
+##############################################################################
+# Remove Previous Report
+##############################################################################
+
+log "STEP 4 : Remove Previous Report"
+
+rm -rf "$REPORT_FOLDER"
+
+##############################################################################
+# Run ScoutSuite
+##############################################################################
+
+log "STEP 5 : Run ScoutSuite"
+
+python scout.py azure -c --no-browser >> "$LOGFILE" 2>&1
+
+SCOUT_RC=$?
+
+log "ScoutSuite Exit Code : $SCOUT_RC"
+
+##############################################################################
+# Verify Report Generated
+##############################################################################
+
+if [ ! -d "$REPORT_FOLDER" ]; then
+    log "ERROR: Report folder not generated"
+
+    echo "FAILED" > "$STATUS_FILE"
+    exit 1
+fi
+
+log "Report folder verified"
+
+##############################################################################
+# Create ZIP
+##############################################################################
+
+log "STEP 6 : Create ZIP"
+
+cd "$SCOUT_HOME"
+
+rm -f "$ZIP_NAME"
+
+zip -rq "$ZIP_NAME" scoutsuite-report
+
+if [ ! -f "$ZIP_NAME" ]; then
+    log "ERROR: ZIP creation failed"
+
+    echo "FAILED" > "$STATUS_FILE"
+    exit 1
+fi
+
+log "ZIP created successfully"
+
+##############################################################################
+# Upload ZIP
+##############################################################################
+
+log "STEP 7 : Upload ZIP"
+
+az storage blob upload \
+    --account-name "$STORAGE_ACCOUNT" \
+    --container-name "$CONTAINER" \
+    --name "$ZIP_NAME" \
+    --file "$ZIP_NAME" \
+    --overwrite true \
+    --auth-mode login >> "$LOGFILE" 2>&1
+
+if [ $? -ne 0 ]; then
+
+    log "ERROR: Blob upload failed"
+
+    echo "FAILED" > "$STATUS_FILE"
+    exit 1
+fi
+
+log "Upload completed"
+
+##############################################################################
+# Verify Upload
+##############################################################################
+
+log "STEP 8 : Verify Upload"
+
+UPLOAD_STATUS=$(az storage blob exists \
+    --account-name "$STORAGE_ACCOUNT" \
+    --container-name "$CONTAINER" \
+    --name "$ZIP_NAME" \
+    --auth-mode login \
+    --query exists \
+    -o tsv)
+
+if [ "$UPLOAD_STATUS" != "true" ]; then
+
+    log "ERROR: Upload verification failed"
+
+    echo "FAILED" > "$STATUS_FILE"
+    exit 1
+fi
+
+log "Upload verified successfully"
+
+##############################################################################
+# Success
+##############################################################################
+
+echo "SCOUTSUITE_SUCCESS" > "$STATUS_FILE"
+
+log "=============================================="
+log "SCOUTSUITE_SUCCESS"
+log "ScoutSuite Automation Completed Successfully"
+log "=============================================="
+
+exit 0
+azureuser@Scoutsuite-VM:~/scripts$
+
+
+giving results:
+
+azureuser@Scoutsuite-VM:~/scripts$ ~/scripts/run_scoutsuite.sh
+STEP 1 : Azure Login
+STEP 2 : Change Directory
+STEP 3 : Activate Python
+STEP 4 : Remove Previous Report
+STEP 5 : Run ScoutSuite
+ScoutSuite Exit Code : 200
+Report folder verified
+STEP 6 : Create ZIP
+ZIP created successfully
+STEP 7 : Upload ZIP
+Upload completed
+STEP 8 : Verify Upload
+Upload verified successfully
+==============================================
+SCOUTSUITE_SUCCESS
+ScoutSuite Automation Completed Successfully
+==============================================
+azureuser@Scoutsuite-VM:~/scripts$
+
+
+and successfully sending the report to the storage account.
+
+and now in the automation :
+runbook:
 param()
 
 #==========================
@@ -6,7 +233,7 @@ param()
 
 $SubscriptionId = "0c123281-74e2-43d2-bbc3-8526be0786bc"
 
-$ResourceGroupName = "YOUR_RESOURCE_GROUP"
+$ResourceGroupName = "soc-watchtower-dev"
 
 $VMName = "Scoutsuite-VM"
 
@@ -90,3 +317,62 @@ Stop-AzVM `
 Write-Output "VM Stopped Successfully."
 
 Write-Output "ScoutSuite Automation Completed."
+
+givng output as :
+Environments                                                                                           Context
+------------                                                                                           -------
+{[AzureCloud, AzureCloud], [AzureUSGovernment, AzureUSGovernment], [AzureChinaCloud, AzureChinaCloud]} Microsoft.Azure.…
+
+
+Name               : TTS-SOC-Watchtower(Prod) (0c123281-74e2-43d2-bbc3-8526be0786bc) - 
+                     fe8c6234-bf85-48c7-b462-1eefe98d567d - MSI@50342
+Account            : MSI@50342
+Environment        : AzureCloud
+Subscription       : 0c123281-74e2-43d2-bbc3-8526be0786bc
+Tenant             : fe8c6234-bf85-48c7-b462-1eefe98d567d
+TokenCache         : 
+VersionProfile     : 
+ExtendedProperties : {}
+
+Connected successfully.
+
+Starting VM...
+
+
+OperationId : f356d9f3-e157-436d-86dd-88ae44ef2f71
+Status      : Succeeded
+StartTime   : 7/24/2026 11:59:18 AM
+EndTime     : 7/24/2026 11:59:29 AM
+Error       : 
+Name        : 
+
+Waiting for VM...
+
+VM running
+
+VM Started Successfully.
+
+Running ScoutSuite...
+
+======================================
+
+
+======================================
+
+Stopping VM...
+
+
+OperationId : 245b83b9-689e-4262-91b2-417964a7c753
+Status      : Succeeded
+StartTime   : 7/24/2026 11:59:53 AM
+EndTime     : 7/24/2026 12:00:33 PM
+Error       : 
+Name        : 
+
+VM Stopped Successfully.
+
+ScoutSuite Automation Completed.
+
+it was not sending any report to the storage account
+
+    
