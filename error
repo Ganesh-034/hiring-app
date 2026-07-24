@@ -1,153 +1,191 @@
-param()
-
-#############################################################
-# Variables
-#############################################################
-
-$SubscriptionId = "0c123281-74e2-43d2-bbc3-8526be0786bc"
-
-$ResourceGroupName = "soc-watchtower-dev"
-
-$VMName = "Scoutsuite-VM"
-
-$ScriptPath = "/home/azureuser/scripts/run_scoutsuite.sh"
-
-$StatusFile = "/tmp/scoutsuite.status"
-
-#############################################################
-# Login
-#############################################################
-
-Write-Output "=============================================="
-Write-Output "Connecting to Azure..."
-Write-Output "=============================================="
-
-Connect-AzAccount -Identity
-
-Set-AzContext -SubscriptionId $SubscriptionId
-
-Write-Output "Connected Successfully."
-
-#############################################################
-# Start VM
-#############################################################
-
-Write-Output ""
-Write-Output "=============================================="
-Write-Output "Starting VM..."
-Write-Output "=============================================="
-
-Start-AzVM `
-    -ResourceGroupName $ResourceGroupName `
-    -Name $VMName
-
-#############################################################
-# Wait until VM starts
-#############################################################
-
-Write-Output ""
-Write-Output "Waiting for VM to start..."
-
-do
-{
-    Start-Sleep -Seconds 20
-
-    $status = Get-AzVM `
-        -ResourceGroupName $ResourceGroupName `
-        -Name $VMName `
-        -Status
-
-    $powerState = (
-        $status.Statuses |
-        Where-Object {$_.Code -like "PowerState/*"}
-    ).DisplayStatus
-
-    Write-Output $powerState
-
-}
-until ($powerState -eq "VM running")
-
-Write-Output ""
-Write-Output "VM Started Successfully."
-
-#############################################################
-# Execute ScoutSuite
-#############################################################
-
-Write-Output ""
-Write-Output "=============================================="
-Write-Output "Running ScoutSuite..."
-Write-Output "=============================================="
-
-$result = Invoke-AzVMRunCommand `
-    -ResourceGroupName $ResourceGroupName `
-    -VMName $VMName `
-    -CommandId "RunShellScript" `
-    -ScriptString @(
-        "chmod +x $ScriptPath",
-        "bash $ScriptPath",
-        "echo",
-        "========== STATUS ==========",
-        "cat $StatusFile || true",
-        "echo",
-        "========== LAST 50 LOG LINES ==========",
-        "tail -50 /home/azureuser/logs/scoutsuite.log || true",
-        "echo",
-        "========== EXIT CODE ==========",
-        "echo \$?"
-    )
-
-Write-Output ""
-Write-Output "=============================================="
-Write-Output "RUN COMMAND OUTPUT"
-Write-Output "=============================================="
-
-$result.Value.Message
-
-#############################################################
-# Verify Success
-#############################################################
-
-if ($result.Value.Message -match "SCOUTSUITE_SUCCESS")
-{
-    Write-Output ""
-    Write-Output "=============================================="
-    Write-Output "ScoutSuite Completed Successfully"
-    Write-Output "ZIP uploaded to Storage Account"
-    Write-Output "=============================================="
-}
-else
-{
-    Write-Output ""
-    Write-Output "=============================================="
-    Write-Output "ScoutSuite FAILED"
-    Write-Output "VM will NOT be stopped."
-    Write-Output "Please review the log output above."
-    Write-Output "=============================================="
-
-    throw "ScoutSuite execution failed."
-}
-
-#############################################################
-# Stop VM
-#############################################################
-
-Write-Output ""
-Write-Output "=============================================="
-Write-Output "Stopping VM..."
-Write-Output "=============================================="
-
-Stop-AzVM `
-    -ResourceGroupName $ResourceGroupName `
-    -Name $VMName `
-    -Force
-
-Write-Output ""
-Write-Output "=============================================="
-Write-Output "VM Stopped Successfully"
-Write-Output "=============================================="
-
-Write-Output ""
-Write-Output "=============================================="
-Write-Output "ScoutSuite Automation Completed Successfully"
-Write-Output "=============================================="
+7/24/2026, 17:58:13
+Output
+==============================================
+7/24/2026, 17:58:14
+Output
+Connecting to Azure...
+7/24/2026, 17:58:14
+Output
+==============================================
+7/24/2026, 17:58:13
+Output
+==============================================
+7/24/2026, 17:58:14
+Output
+Connecting to Azure...
+7/24/2026, 17:58:14
+Output
+==============================================
+7/24/2026, 17:58:17
+Output
+7/24/2026, 17:58:19
+Output
+7/24/2026, 17:58:19
+Output
+Connected Successfully.
+7/24/2026, 17:58:19
+Output
+7/24/2026, 17:58:14
+Output
+Connecting to Azure...
+7/24/2026, 17:58:14
+Output
+==============================================
+7/24/2026, 17:58:17
+Output
+7/24/2026, 17:58:19
+Output
+7/24/2026, 17:58:19
+Output
+Connected Successfully.
+7/24/2026, 17:58:19
+Output
+7/24/2026, 17:58:19
+Output
+==============================================
+7/24/2026, 17:58:20
+Output
+Starting VM...
+7/24/2026, 17:58:20
+Output
+==============================================
+7/24/2026, 17:58:35
+Output
+7/24/2026, 17:58:35
+Output
+7/24/2026, 17:58:35
+Output
+Waiting for VM to start...
+7/24/2026, 17:58:13
+Output
+==============================================
+7/24/2026, 17:58:14
+Output
+Connecting to Azure...
+7/24/2026, 17:58:14
+Output
+==============================================
+7/24/2026, 17:58:17
+Output
+7/24/2026, 17:58:19
+Output
+7/24/2026, 17:58:19
+Output
+Connected Successfully.
+7/24/2026, 17:58:19
+Output
+7/24/2026, 17:58:19
+Output
+==============================================
+7/24/2026, 17:58:20
+Output
+Starting VM...
+7/24/2026, 17:58:20
+Output
+==============================================
+7/24/2026, 17:58:35
+Output
+7/24/2026, 17:58:35
+Output
+7/24/2026, 17:58:35
+Output
+Waiting for VM to start...
+7/24/2026, 17:58:55
+Output
+VM running
+7/24/2026, 17:58:55
+Output
+7/24/2026, 17:58:55
+Output
+VM Started Successfully.
+7/24/2026, 17:58:55
+Output
+7/24/2026, 17:58:55
+Output
+==============================================
+7/24/2026, 17:58:13
+Output
+==============================================
+7/24/2026, 17:58:14
+Output
+Connecting to Azure...
+7/24/2026, 17:58:14
+Output
+==============================================
+7/24/2026, 17:58:17
+Output
+7/24/2026, 17:58:19
+Output
+7/24/2026, 17:58:19
+Output
+Connected Successfully.
+7/24/2026, 17:58:19
+Output
+7/24/2026, 17:58:19
+Output
+==============================================
+7/24/2026, 17:58:20
+Output
+Starting VM...
+7/24/2026, 17:58:20
+Output
+==============================================
+7/24/2026, 17:58:35
+Output
+7/24/2026, 17:58:35
+Output
+7/24/2026, 17:58:35
+Output
+Waiting for VM to start...
+7/24/2026, 17:58:55
+Output
+VM running
+7/24/2026, 17:58:55
+Output
+7/24/2026, 17:58:55
+Output
+VM Started Successfully.
+7/24/2026, 17:58:55
+Output
+7/24/2026, 17:58:55
+Output
+==============================================
+7/24/2026, 17:58:55
+Output
+Running ScoutSuite...
+7/24/2026, 17:58:55
+Output
+==============================================
+7/24/2026, 17:58:57
+Error
+System.Management.Automation.ParameterBindingException: Cannot convert 'System.Object[]' to the type 'System.String' required by parameter 'ScriptString'. Specified method is not supported. ---> System.NotSupportedException: Specified method is not supported. at System.Management.Automation.ParameterBinderBase.CoerceTypeAsNeeded(CommandParameterInternal argument, String parameterName, Type toType, ParameterCollectionTypeInformation collectionTypeInfo, Object currentValue) --- End of inner exception stack trace --- at System.Management.Automation.ParameterBinderBase.CoerceTypeAsNeeded(CommandParameterInternal argument, String parameterName, Type toType, ParameterCollectionTypeInformation collectionTypeInfo, Object currentValue) at System.Management.Automation.ParameterBinderBase.BindParameter(CommandParameterInternal parameter, CompiledCommandParameter parameterMetadata, ParameterBindingFlags flags) at System.Management.Automation.CmdletParameterBinderController.BindParameter(CommandParameterInternal argument, MergedCompiledCommandParameter parameter, ParameterBindingFlags flags) at System.Management.Automation.CmdletParameterBinderController.BindParameter(UInt32 parameterSets, CommandParameterInternal argument, MergedCompiledCommandParameter parameter, ParameterBindingFlags flags) at System.Management.Automation.CmdletParameterBinderController.BindNamedParameter(UInt32 parameterSets, CommandParameterInternal argument, MergedCompiledCommandParameter parameter) at System.Management.Automation.ParameterBinderController.BindNamedParameters(UInt32 parameterSets, Collection`1 arguments) at System.Management.Automation.CmdletParameterBinderController.BindCommandLineParametersNoValidation(Collection`1 arguments) at System.Management.Automation.CmdletParameterBinderController.BindCommandLineParameters(Collection`1 arguments) at System.Management.Automation.CommandProcessor.BindCommandLineParameters() at System.Management.Automation.CommandProcessor.Prepare(IDictionary psDefaultParameterValues) at System.Management.Automation.CommandProcessorBase.DoPrepare(IDictionary psDefaultParameterValues) at System.Management.Automation.Internal.PipelineProcessor.Start(Boolean incomingStream) at System.Management.Automation.Internal.PipelineProcessor.SynchronousExecuteEnumerate(Object input) --- End of stack trace from previous location --- at System.Management.Automation.Internal.PipelineProcessor.SynchronousExecuteEnumerate(Object input) at System.Management.Automation.PipelineOps.InvokePipeline(Object input, Boolean ignoreInput, CommandParameterInternal[][] pipeElements, CommandBaseAst[] pipeElementAsts, CommandRedirection[][] commandRedirections, FunctionContext funcContext) at System.Management.Automation.Interpreter.ActionCallInstruction`6.Run(InterpretedFrame frame) at System.Management.Automation.Interpreter.EnterTryCatchFinallyInstruction.Run(InterpretedFrame frame) at System.Management.Automation.Interpreter.EnterTryCatchFinallyInstruction.Run(InterpretedFrame frame)
+7/24/2026, 17:58:57
+Output
+7/24/2026, 17:58:57
+Output
+==============================================
+7/24/2026, 17:58:57
+Output
+RUN COMMAND OUTPUT
+7/24/2026, 17:58:57
+Output
+==============================================
+7/24/2026, 17:58:57
+Output
+7/24/2026, 17:58:57
+Output
+7/24/2026, 17:58:57
+Output
+==============================================
+7/24/2026, 17:58:57
+Output
+ScoutSuite FAILED
+7/24/2026, 17:58:57
+Output
+VM will NOT be stopped.
+7/24/2026, 17:58:57
+Output
+Please review the log output above.
+7/24/2026, 17:58:57
+Output
+==============================================
