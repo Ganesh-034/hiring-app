@@ -1,58 +1,11 @@
-ganeshm [ ~ ]$ az acr task timer list --name acr-image-cleanup --registry acrsocwatchtowerbackenddev -o table
-NAME    PLATFORM    STATUS    SOURCE REPOSITORY    TRIGGERS
-------  ----------  --------  -------------------  ----------
-timer
-t1                  Enabled
-ganeshm [ ~ ]$ 
+PURGE_CMD="acr purge \
+  --filter 'soc-watchtower-backend:^[0-9]+$' \
+  --filter 'presidioapp:^[0-9]+$' \
+  --ago 0d \
+  --keep 5 \
+  --untagged"
 
-ganeshm [ ~ ]$ az acr task list-runs --registry acrsocwatchtowerbackenddev --top 10 -o table
-RUN ID    TASK               PLATFORM    STATUS     TRIGGER    STARTED               DURATION
---------  -----------------  ----------  ---------  ---------  --------------------  ----------
-cm6       acr-image-cleanup  linux       Succeeded  Manual     2026-08-14T07:11:32Z  00:00:06
-cm5       acr-image-cleanup  linux       Succeeded  Manual     2026-08-14T07:06:48Z  00:00:03
-cm4                          linux       Succeeded  Manual     2026-08-14T06:06:38Z  00:00:05
-cm3                          linux       Succeeded  Manual     2026-08-14T05:27:04Z  00:00:04
-cm2                          linux       Succeeded  Manual     2026-08-14T05:25:00Z  00:00:06
-cm1                          linux       Succeeded  Manual     2026-07-31T07:18:17Z  00:04:40
-
-ganeshm [ ~ ]$ az acr task show \
+az acr task update \
   --name acr-image-cleanup \
   --registry acrsocwatchtowerbackenddev \
-  --query "{name:name,status:status,triggers:trigger,step:step}" \
-  -o json
-{
-  "name": "acr-image-cleanup",
-  "status": "Enabled",
-  "step": {
-    "baseImageDependencies": null,
-    "contextAccessToken": null,
-    "contextPath": null,
-    "encodedTaskContent": "dmVyc2lvbjogdjEuMS4wCnN0ZXBzOiAKICAtIGNtZDogYWNyIHB1cmdlIC0tZmlsdGVyICdzb2Mtd2F0Y2h0b3dlci1iYWNrZW5kOl5bMC05XSskJyAtLWZpbHRlciAncHJlc2lkaW9hcHA6XlswLTldKyQnIC0tYWdvIDBkIC0ta2VlcCA4IC0tdW50YWdnZWQKICAgIGRpc2FibGVXb3JraW5nRGlyZWN0b3J5T3ZlcnJpZGU6IHRydWUK",
-    "encodedValuesContent": null,
-    "type": "EncodedTask",
-    "values": []
-  },
-  "triggers": {
-    "baseImageTrigger": {
-      "baseImageTriggerType": "Runtime",
-      "name": "defaultBaseimageTriggerName",
-      "status": "Enabled",
-      "updateTriggerEndpoint": null,
-      "updateTriggerPayloadType": "Default"
-    },
-    "sourceTriggers": null,
-    "timerTriggers": [
-      {
-        "name": "timer",
-        "schedule": "40 8 14 8 *",
-        "status": null
-      },
-      {
-        "name": "t1",
-        "schedule": "0 2 * * *",
-        "status": "Enabled"
-      }
-    ]
-  }
-}
-ganeshm [ ~ ]$ 
+  --cmd "$PURGE_CMD"
