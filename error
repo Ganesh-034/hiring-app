@@ -2,7 +2,7 @@ PURGE_CMD="acr purge \
   --filter 'soc-watchtower-backend:^[0-9]+$' \
   --filter 'presidioapp:^[0-9]+$' \
   --ago 0d \
-  --keep 10 \
+  --keep 8 \
   --untagged \
   --dry-run"
 
