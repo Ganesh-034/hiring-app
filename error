@@ -5,7 +5,9 @@ PURGE_CMD="acr purge \
   --keep 5 \
   --untagged"
 
-az acr task update \
+az acr task create \
   --name acr-image-cleanup \
   --registry acrsocwatchtowerbackenddev \
-  --cmd "$PURGE_CMD"
+  --cmd "$PURGE_CMD" \
+  --schedule "0 2 1,16 * *" \
+  --context /dev/null
