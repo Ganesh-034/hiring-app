@@ -1,5 +1,16 @@
-az acr task show \
+]
+ganeshm [ ~ ]$ az acr task show \
   --name acr-image-cleanup \
   --registry acrsocwatchtowerbackenddev \
   --query "step" \
   -o json
+{
+  "baseImageDependencies": null,
+  "contextAccessToken": null,
+  "contextPath": null,
+  "encodedTaskContent": "dmVyc2lvbjogdjEuMS4wCnN0ZXBzOiAKICAtIGNtZDogYWNyIHB1cmdlICAgLS1maWx0ZXIgJ3NvYy13YXRjaHRvd2VyLWJhY2tlbmQ6XlswLTldKyQnICAgLS1maWx0ZXIgJ3ByZXNpZGlvYXBwOl5bMC05XSskJyAgIC0tYWdvIDBkICAgLS1rZWVwIDUgICAtLXVudGFnZ2VkCiAgICBkaXNhYmxlV29ya2luZ0RpcmVjdG9yeU92ZXJyaWRlOiB0cnVlCg==",
+  "encodedValuesContent": null,
+  "type": "EncodedTask",
+  "values": []
+}
+ganeshm [ ~ ]$ 
