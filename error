@@ -1,5 +1,12 @@
-az acr task show \
-  --name acr-image-cleanup \
+PURGE_CMD="acr purge \
+  --filter 'soc-watchtower-backend:^[0-9]+$' \
+  --filter 'presidioapp:^[0-9]+$' \
+  --ago 0d \
+  --keep 10 \
+  --untagged \
+  --dry-run"
+
+az acr run \
   --registry acrsocwatchtowerbackenddev \
-  --query "trigger.timerTriggers" \
-  -o json
+  --cmd "$PURGE_CMD" \
+  /dev/null
