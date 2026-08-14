@@ -1,5 +1,5 @@
 az acr task show \
   --name acr-image-cleanup \
   --registry acrsocwatchtowerbackenddev \
-  --query "trigger.timerTriggers" \
+  --query "step" \
   -o json
