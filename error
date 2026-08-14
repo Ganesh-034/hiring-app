@@ -1,13 +1,17 @@
-PURGE_CMD="acr purge \
-  --filter 'soc-watchtower-backend:^[0-9]+$' \
-  --filter 'presidioapp:^[0-9]+$' \
-  --ago 0d \
-  --keep 10 \
-  --untagged"
+t1                  Enabled
+ganeshm [ ~ ]$ az acr task run \ --name acr-image-cleanup \ --registry acrsocwatchtowerbackenddev
+the following arguments are required: --name/-n, --registry/-r
 
-az acr task create \
-  --name acr-image-cleanup \
-  --registry acrsocwatchtowerbackenddev \
-  --cmd "$PURGE_CMD" \
-  --schedule "0 2 * * *" \
-  --context /dev/null
+Examples from command's help:
+az acr task run -n MyTask -r myregistry
+Trigger a task run.
+
+az acr task run -n MyTask -r myregistry --arg DOCKER_CLI_BASE_IMAGE=docker:18.03.0-ce-git
+Trigger a task run by adding or overriding build arguments set during Task create.
+
+az acr task run -n MyTask -r myregistry -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile
+Trigger a task run by overriding the context and file passed during Task create with a remote repository.
+
+https://aka.ms/cli_ref
+Read more about the command in reference docs
+ganeshm [ ~ ]$ 
