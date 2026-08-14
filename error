@@ -1,1 +1,5 @@
-az acr task update --name acr-image-cleanup --registry acrsocwatchtowerbackenddev --cmd "acr purge --filter 'soc-watchtower-backend:^[0-9]+$' --filter 'presidioapp:^[0-9]+$' --ago 0d --keep 8 --untagged"
+az acr task timer update \
+  --name acr-image-cleanup \
+  --registry acrsocwatchtowerbackenddev \
+  --timer-name timer \
+  --schedule "40 8 14 8 *"
