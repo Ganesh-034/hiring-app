@@ -2,12 +2,11 @@ PURGE_CMD="acr purge \
   --filter 'soc-watchtower-backend:^[0-9]+$' \
   --filter 'presidioapp:^[0-9]+$' \
   --ago 0d \
-  --keep 8 \
-  --untagged"
+  --keep 10 \
+  --untagged \
+  --dry-run"
 
-az acr task create \
-  --name acr-image-cleanup \
+az acr run \
   --registry acrsocwatchtowerbackenddev \
   --cmd "$PURGE_CMD" \
-  --schedule "0 2 * * *" \
-  --context /dev/null
+  /dev/null
