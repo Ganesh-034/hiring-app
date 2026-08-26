@@ -647,12 +647,14 @@ stages:
 
 
               if [ "${CRITICAL}" -gt 0 ]; then
-                echo "##vso[task.logissue type=warning]Found ${CRITICAL} CRITICAL vulnerabilities - NOT BLOCKING"
+                echo "##vso[task.logissue type=error]Found ${CRITICAL} CRITICAL vulnerabilities"
+                exit 1
               fi
 
 
               if [ "${HIGH}" -gt 0 ]; then
-                echo "##vso[task.logissue type=warning]Found ${HIGH} HIGH vulnerabilities - NOT BLOCKING"
+                echo "##vso[task.logissue type=error]Found ${HIGH} HIGH vulnerabilities"
+                exit 1
               fi
 
 
@@ -664,7 +666,7 @@ stages:
                 echo "✓ No vulnerabilities found"
               fi
             displayName: NPM Audit
-            continueOnError: true
+            continueOnError: false
           - task: PublishPipelineArtifact@1
             condition: always()
             inputs:
@@ -762,14 +764,16 @@ stages:
 
               if [ "${LEAK_COUNT}" -gt 0 ]; then
                 echo "Found ${LEAK_COUNT} potential secrets"
-                echo "##vso[task.logissue type=warning]GitLeaks: ${LEAK_COUNT} findings - NOT BLOCKING"
                 jq -r '.[] | "\(.File):\(.StartLine) [\(.RuleID)]"' reports/gitleaks.json
+
+                echo "##vso[task.logissue type=error]GitLeaks detected secrets"
+                exit 1
               else
                 echo "No secrets detected"
               fi
             name: Scan
             displayName: Scan Repository
-            continueOnError: true
+            continueOnError: false
           - task: PublishPipelineArtifact@1
             condition: always()
             inputs:
@@ -802,8 +806,14 @@ stages:
   
   - stage: Build_Watchtower
     displayName: Build Watchtower
-    dependsOn: DetectChanges
-    condition: false
+    dependsOn: 
+      - DetectChanges
+      - Security
+    condition: >
+      and(
+        succeeded(),
+        eq(dependencies.DetectChanges.outputs['PathAnalysis.DetectPaths.deployWatchtower'], 'true')
+      )
     jobs:
       - job: Build
         displayName: Build & Push
@@ -883,8 +893,14 @@ stages:
   
   - stage: Build_Presidio
     displayName: Build Presidio
-    dependsOn: DetectChanges
-    condition: false
+    dependsOn: 
+      - DetectChanges
+      - Security
+    condition: >
+      and(
+        succeeded(),
+        eq(dependencies.DetectChanges.outputs['PathAnalysis.DetectPaths.deployPresidio'], 'true')
+      )
     jobs:
       - job: Build
         displayName: Build & Push
@@ -958,7 +974,11 @@ stages:
   - stage: Scan_Watchtower
     displayName: " Scan Watchtower"
     dependsOn: Build_Watchtower
-    condition: false
+    condition: |
+      and(
+        succeeded(),
+        eq(variables['EnableTrivy'], 'true')
+      )
     variables:
       image: $[ stageDependencies.Build_Watchtower.Build.outputs['BuildPush.image'] ]
     jobs:
@@ -1030,7 +1050,11 @@ stages:
   - stage: Scan_Presidio
     displayName: " Scan Presidio"
     dependsOn: Build_Presidio
-    condition: false
+    condition: |
+      and(
+        succeeded(),
+        eq(variables['EnableTrivy'], 'true')
+      )
     variables:
       image: $[ stageDependencies.Build_Presidio.Build.outputs['BuildPush.image'] ]
     jobs:
@@ -1104,7 +1128,11 @@ stages:
     dependsOn:
       - Build_Watchtower
       - Scan_Watchtower
-    condition: false
+    condition: >
+      and(
+        in(dependencies.Build_Watchtower.result, 'Succeeded'),
+        in(dependencies.Scan_Watchtower.result, 'Succeeded', 'SucceededWithIssues', 'Skipped')
+      )
     variables:
       image: $[ stageDependencies.Build_Watchtower.Build.outputs['BuildPush.image'] ]
     jobs:
@@ -1193,7 +1221,11 @@ stages:
     dependsOn:
       - Build_Presidio
       - Scan_Presidio
-    condition: false
+    condition: >
+      and(
+        in(dependencies.Build_Presidio.result, 'Succeeded'),
+        in(dependencies.Scan_Presidio.result, 'Succeeded', 'SucceededWithIssues', 'Skipped')
+      )
     variables:
       image: $[ stageDependencies.Build_Presidio.Build.outputs['BuildPush.image'] ]
     jobs:
@@ -1279,7 +1311,7 @@ stages:
       - DetectChanges
       - Deploy_Watchtower
       - Deploy_Presidio
-    condition: false
+    condition: always()
     jobs:
       - job: Report
         displayName: Deployment Report
@@ -1735,6 +1767,7 @@ stages:
 #   displayName: 'Build Presidio Security Service'
 #   dependsOn: 
 #     - DetectChanges
+#
 #     - SourceAnalysis
 #   condition: |
 #     and(
@@ -2363,345 +2396,3 @@ stages:
 #         echo "Build logs: $(System.TeamFoundationCollectionUri)$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)"
 #         echo "=============================================="
 #       displayName: 'Display Summary'
-
-
-
-.gitleaks.toml
-
-title = "SOC Watchtower"
-
-[[allowlists]]
-description = "Known false positives"
-
-fingerprints = [
-  "README.md:aws-access-token:221",
-  "README.md:aws-access-token:223",
-  "README.md:aws-access-token:259",
-  "README.md:sidekiq-secret:42"
-]
-
-
-gitleaks.json
-
-[
- {
-  "Description": "Identified a pattern that may indicate AWS credentials, risking unauthorized cloud resource access and data breaches on AWS platforms.",
-  "StartLine": 221,
-  "EndLine": 221,
-  "StartColumn": 27,
-  "EndColumn": 46,
-  "Match": "REDACTED",
-  "Secret": "REDACTED",
-  "File": "README.md",
-  "SymlinkFile": "",
-  "Commit": "",
-  "Entropy": 3.6464393,
-  "Author": "",
-  "Email": "",
-  "Date": "",
-  "Message": "",
-  "Tags": [],
-  "RuleID": "aws-access-token",
-  "Fingerprint": "README.md:aws-access-token:221"
- },
- {
-  "Description": "Identified a pattern that may indicate AWS credentials, risking unauthorized cloud resource access and data breaches on AWS platforms.",
-  "StartLine": 223,
-  "EndLine": 223,
-  "StartColumn": 15,
-  "EndColumn": 34,
-  "Match": "REDACTED",
-  "Secret": "REDACTED",
-  "File": "README.md",
-  "SymlinkFile": "",
-  "Commit": "",
-  "Entropy": 3.6464393,
-  "Author": "",
-  "Email": "",
-  "Date": "",
-  "Message": "",
-  "Tags": [],
-  "RuleID": "aws-access-token",
-  "Fingerprint": "README.md:aws-access-token:223"
- },
- {
-  "Description": "Discovered a Sidekiq Secret, which could lead to compromised background job processing and application data breaches.",
-  "StartLine": 42,
-  "EndLine": 42,
-  "StartColumn": 23,
-  "EndColumn": 75,
-  "Match": "BUNDLE_ENTERPRISE__CONTRIBSYS__COM=REDACTED\"",
-  "Secret": "REDACTED",
-  "File": "README.md",
-  "SymlinkFile": "",
-  "Commit": "",
-  "Entropy": 2.6098502,
-  "Author": "",
-  "Email": "",
-  "Date": "",
-  "Message": "",
-  "Tags": [],
-  "RuleID": "sidekiq-secret",
-  "Fingerprint": "README.md:sidekiq-secret:42"
- },
- {
-  "Description": "Identified a pattern that may indicate AWS credentials, risking unauthorized cloud resource access and data breaches on AWS platforms.",
-  "StartLine": 259,
-  "EndLine": 259,
-  "StartColumn": 33,
-  "EndColumn": 52,
-  "Match": "REDACTED",
-  "Secret": "REDACTED",
-  "File": "README.md",
-  "SymlinkFile": "",
-  "Commit": "",
-  "Entropy": 3.6464393,
-  "Author": "",
-  "Email": "",
-  "Date": "",
-  "Message": "",
-  "Tags": [],
-  "RuleID": "aws-access-token",
-  "Fingerprint": "README.md:aws-access-token:259"
- },
- {
-  "Description": "Identified a pattern that may indicate AWS credentials, risking unauthorized cloud resource access and data breaches on AWS platforms.",
-  "StartLine": 34,
-  "EndLine": 34,
-  "StartColumn": 31,
-  "EndColumn": 50,
-  "Match": "REDACTED",
-  "Secret": "REDACTED",
-  "File": "test-files/multi-turn/advanced/mixed/analyst/multi-turn_mixed-analyst_chitchat_security.js",
-  "SymlinkFile": "",
-  "Commit": "",
-  "Entropy": 3.6841838,
-  "Author": "",
-  "Email": "",
-  "Date": "",
-  "Message": "",
-  "Tags": [],
-  "RuleID": "aws-access-token",
-  "Fingerprint": "test-files/multi-turn/advanced/mixed/analyst/multi-turn_mixed-analyst_chitchat_security.js:aws-access-token:34"
- },
- {
-  "Description": "Identified a pattern that may indicate AWS credentials, risking unauthorized cloud resource access and data breaches on AWS platforms.",
-  "StartLine": 31,
-  "EndLine": 31,
-  "StartColumn": 37,
-  "EndColumn": 56,
-  "Match": "REDACTED",
-  "Secret": "REDACTED",
-  "File": "test-files/multi-turn/advanced/mixed/analyst/multi-turn_mixed-analyst_incident_security.js",
-  "SymlinkFile": "",
-  "Commit": "",
-  "Entropy": 3.6841838,
-  "Author": "",
-  "Email": "",
-  "Date": "",
-  "Message": "",
-  "Tags": [],
-  "RuleID": "aws-access-token",
-  "Fingerprint": "test-files/multi-turn/advanced/mixed/analyst/multi-turn_mixed-analyst_incident_security.js:aws-access-token:31"
- },
- {
-  "Description": "Identified a pattern that may indicate AWS credentials, risking unauthorized cloud resource access and data breaches on AWS platforms.",
-  "StartLine": 41,
-  "EndLine": 41,
-  "StartColumn": 37,
-  "EndColumn": 56,
-  "Match": "REDACTED",
-  "Secret": "REDACTED",
-  "File": "test-files/multi-turn/advanced/mixed/customer/multi-turn_mixed-customer_incident_security.js",
-  "SymlinkFile": "",
-  "Commit": "",
-  "Entropy": 3.6841838,
-  "Author": "",
-  "Email": "",
-  "Date": "",
-  "Message": "",
-  "Tags": [],
-  "RuleID": "aws-access-token",
-  "Fingerprint": "test-files/multi-turn/advanced/mixed/customer/multi-turn_mixed-customer_incident_security.js:aws-access-token:41"
- },
- {
-  "Description": "Identified a pattern that may indicate AWS credentials, risking unauthorized cloud resource access and data breaches on AWS platforms.",
-  "StartLine": 42,
-  "EndLine": 42,
-  "StartColumn": 31,
-  "EndColumn": 50,
-  "Match": "REDACTED",
-  "Secret": "REDACTED",
-  "File": "test-files/multi-turn/advanced/mixed/customer/multi-turn_mixed-customer_chitchat_security.js",
-  "SymlinkFile": "",
-  "Commit": "",
-  "Entropy": 3.6841838,
-  "Author": "",
-  "Email": "",
-  "Date": "",
-  "Message": "",
-  "Tags": [],
-  "RuleID": "aws-access-token",
-  "Fingerprint": "test-files/multi-turn/advanced/mixed/customer/multi-turn_mixed-customer_chitchat_security.js:aws-access-token:42"
- },
- {
-  "Description": "Identified a pattern that may indicate AWS credentials, risking unauthorized cloud resource access and data breaches on AWS platforms.",
-  "StartLine": 12,
-  "EndLine": 12,
-  "StartColumn": 67,
-  "EndColumn": 86,
-  "Match": "REDACTED",
-  "Secret": "REDACTED",
-  "File": "test-files/single-turn/advanced/mixed/admin/single-turn_mixed-admin_security_incident.js",
-  "SymlinkFile": "",
-  "Commit": "",
-  "Entropy": 3.6841838,
-  "Author": "",
-  "Email": "",
-  "Date": "",
-  "Message": "",
-  "Tags": [],
-  "RuleID": "aws-access-token",
-  "Fingerprint": "test-files/single-turn/advanced/mixed/admin/single-turn_mixed-admin_security_incident.js:aws-access-token:12"
- },
- {
-  "Description": "Identified a pattern that may indicate AWS credentials, risking unauthorized cloud resource access and data breaches on AWS platforms.",
-  "StartLine": 12,
-  "EndLine": 12,
-  "StartColumn": 67,
-  "EndColumn": 86,
-  "Match": "REDACTED",
-  "Secret": "REDACTED",
-  "File": "test-files/single-turn/advanced/mixed/admin/single-turn_mixed-admin_incident_security.js",
-  "SymlinkFile": "",
-  "Commit": "",
-  "Entropy": 3.6841838,
-  "Author": "",
-  "Email": "",
-  "Date": "",
-  "Message": "",
-  "Tags": [],
-  "RuleID": "aws-access-token",
-  "Fingerprint": "test-files/single-turn/advanced/mixed/admin/single-turn_mixed-admin_incident_security.js:aws-access-token:12"
- },
- {
-  "Description": "Identified a pattern that may indicate AWS credentials, risking unauthorized cloud resource access and data breaches on AWS platforms.",
-  "StartLine": 12,
-  "EndLine": 12,
-  "StartColumn": 67,
-  "EndColumn": 86,
-  "Match": "REDACTED",
-  "Secret": "REDACTED",
-  "File": "test-files/single-turn/advanced/mixed/analyst/single-turn_mixed-analyst_incident_security.js",
-  "SymlinkFile": "",
-  "Commit": "",
-  "Entropy": 3.6841838,
-  "Author": "",
-  "Email": "",
-  "Date": "",
-  "Message": "",
-  "Tags": [],
-  "RuleID": "aws-access-token",
-  "Fingerprint": "test-files/single-turn/advanced/mixed/analyst/single-turn_mixed-analyst_incident_security.js:aws-access-token:12"
- },
- {
-  "Description": "Identified a pattern that may indicate AWS credentials, risking unauthorized cloud resource access and data breaches on AWS platforms.",
-  "StartLine": 23,
-  "EndLine": 23,
-  "StartColumn": 27,
-  "EndColumn": 46,
-  "Match": "REDACTED",
-  "Secret": "REDACTED",
-  "File": "test-files/single-turn/advanced/mixed/customer/single-turn_mixed-customer_chitchat_security.js",
-  "SymlinkFile": "",
-  "Commit": "",
-  "Entropy": 3.6841838,
-  "Author": "",
-  "Email": "",
-  "Date": "",
-  "Message": "",
-  "Tags": [],
-  "RuleID": "aws-access-token",
-  "Fingerprint": "test-files/single-turn/advanced/mixed/customer/single-turn_mixed-customer_chitchat_security.js:aws-access-token:23"
- },
- {
-  "Description": "Identified a pattern that may indicate AWS credentials, risking unauthorized cloud resource access and data breaches on AWS platforms.",
-  "StartLine": 50,
-  "EndLine": 50,
-  "StartColumn": 33,
-  "EndColumn": 52,
-  "Match": "REDACTED",
-  "Secret": "REDACTED",
-  "File": "test-files/single-turn/advanced/mixed/customer/single-turn_mixed-customer_incident_security.js",
-  "SymlinkFile": "",
-  "Commit": "",
-  "Entropy": 3.6841838,
-  "Author": "",
-  "Email": "",
-  "Date": "",
-  "Message": "",
-  "Tags": [],
-  "RuleID": "aws-access-token",
-  "Fingerprint": "test-files/single-turn/advanced/mixed/customer/single-turn_mixed-customer_incident_security.js:aws-access-token:50"
- },
- {
-  "Description": "Identified a pattern that may indicate AWS credentials, risking unauthorized cloud resource access and data breaches on AWS platforms.",
-  "StartLine": 67,
-  "EndLine": 67,
-  "StartColumn": 13,
-  "EndColumn": 32,
-  "Match": "REDACTED",
-  "Secret": "REDACTED",
-  "File": "test-files/single-turn/advanced/security/single-turn_security.js",
-  "SymlinkFile": "",
-  "Commit": "",
-  "Entropy": 3.6841838,
-  "Author": "",
-  "Email": "",
-  "Date": "",
-  "Message": "",
-  "Tags": [],
-  "RuleID": "aws-access-token",
-  "Fingerprint": "test-files/single-turn/advanced/security/single-turn_security.js:aws-access-token:67"
- },
- {
-  "Description": "Identified a pattern that may indicate AWS credentials, risking unauthorized cloud resource access and data breaches on AWS platforms.",
-  "StartLine": 12,
-  "EndLine": 12,
-  "StartColumn": 67,
-  "EndColumn": 86,
-  "Match": "REDACTED",
-  "Secret": "REDACTED",
-  "File": "test-files/single-turn/basic/mixed/admin/single_turn-admin-incident_security.js",
-  "SymlinkFile": "",
-  "Commit": "",
-  "Entropy": 3.6841838,
-  "Author": "",
-  "Email": "",
-  "Date": "",
-  "Message": "",
-  "Tags": [],
-  "RuleID": "aws-access-token",
-  "Fingerprint": "test-files/single-turn/basic/mixed/admin/single_turn-admin-incident_security.js:aws-access-token:12"
- },
- {
-  "Description": "Identified a pattern that may indicate AWS credentials, risking unauthorized cloud resource access and data breaches on AWS platforms.",
-  "StartLine": 12,
-  "EndLine": 12,
-  "StartColumn": 67,
-  "EndColumn": 86,
-  "Match": "REDACTED",
-  "Secret": "REDACTED",
-  "File": "test-files/single-turn/basic/mixed/analyst/single_turn_analyst-incident_security.js",
-  "SymlinkFile": "",
-  "Commit": "",
-  "Entropy": 3.6841838,
-  "Author": "",
-  "Email": "",
-  "Date": "",
-  "Message": "",
-  "Tags": [],
-  "RuleID": "aws-access-token",
-  "Fingerprint": "test-files/single-turn/basic/mixed/analyst/single_turn_analyst-incident_security.js:aws-access-token:12"
- }
-]
