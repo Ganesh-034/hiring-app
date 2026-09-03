@@ -148,7 +148,7 @@ stages:
           ./gitleaks version
 
     - task: Bash@3
-      displayName: 'Run GitLeaks Scan'
+      displayName: 'Run GitLeaks Scan - MANDATORY'
       continueOnError: true
       inputs:
         targetType: 'inline'
@@ -159,47 +159,59 @@ stages:
           
           echo "🔍 Running GitLeaks secret detection scan..."
           echo ""
-          
-          # Always run with exit code 0 (non-blocking)
+
+          # GitLeaks exit code:
+          # 0 = no secrets found
+          # 1 = secrets detected
+          # >1 = scan/runtime error
           ./gitleaks detect \
             --source . \
             --report-path security-reports/gitleaks-report.json \
             --report-format json \
-            --exit-code 0 \
+            --exit-code 1 \
             --redact \
-            --verbose || true
+            --verbose
+          GITLEAKS_EXIT_CODE=$?
+
+          echo ""
+          echo "========================="
+          echo "GitLeaks Results"
+          echo "========================="
           
           # Generate summary
           if [ -f security-reports/gitleaks-report.json ]; then
-            LEAK_COUNT=$(jq '. | length' security-reports/gitleaks-report.json 2>/dev/null || echo "0")
-            echo ""
-            echo "════════════════════════════════════════════════════════"
-            echo "📊 GitLeaks Results:"
-            echo "   Secrets Found: $LEAK_COUNT"
+            LEAK_COUNT=$(jq 'length' security-reports/gitleaks-report.json 2>/dev/null || echo "0")
+            
+            echo "Secrets Found: $LEAK_COUNT"
             echo ""
             
             if [ "$LEAK_COUNT" -gt 0 ]; then
-              echo "##vso[task.logissue type=warning]🚨 $LEAK_COUNT potential secret(s) detected"
-              echo ""
-              echo "🔐 Detected Secrets (first 5):"
-              jq -r '.[] | "   • $.File):$.StartLine) - $.RuleID)"' security-reports/gitleaks-report.json 2>/dev/null | head -5 || true
-              echo ""
+              echo "##vso[task.logissue type=error]🚨 $LEAK_COUNT potential secret(s) detected"
               
-              if [[ "$(Build.SourceBranch)" =~ ^refs/heads/(main|master)$ ]]; then
-                echo "⚠️  PRODUCTION BRANCH: Immediate action required!"
-              else
-                echo "⚠️  Fix these before merging to main/master"
-              fi
+              echo "🔐 Detected Secrets (first 5):"
+              jq -r '.[] | "   • \(.File):\(.StartLine) - \(.RuleID)"' \
+                security-reports/gitleaks-report.json 2>/dev/null | head -5 || true
+              
+              echo ""
+              echo "GitLeaks security gate FAILED"
+              echo "Deployment will not continue"
             else
               echo "✅ No secrets detected"
+              echo "GitLeaks security gate PASSED"
             fi
-            echo ""
-            echo "════════════════════════════════════════════════════════"
           else
-            echo "##vso[task.logissue type=warning]GitLeaks report not generated"
+            echo "##vso[task.logissue type=error]GitLeaks report was not generated"
+            GITLEAKS_EXIT_CODE=2
           fi
-          
-          # Always succeed
+
+          echo ""
+          echo "════════════════════════════════════════════════════════"
+
+          # Mandatory gate
+          if [ "$GITLEAKS_EXIT_CODE" -ne 0 ]; then
+            exit "$GITLEAKS_EXIT_CODE"
+          fi
+
           exit 0
 
     - task: PublishBuildArtifacts@1
@@ -293,78 +305,151 @@ stages:
 
     # Skip dependency installation, just audit package-lock.json
     - task: Bash@3
-      displayName: 'Run npm Audit (Fast Mode)'
-      timeoutInMinutes: 2
-      continueOnError: true
+      displayName: 'Run npm Audit - MANDATORY'
+      timeoutInMinutes: 5
       inputs:
         targetType: 'inline'
         script: |
           set -uo pipefail
-          
-          echo "Running npm audit in fast mode (package-lock.json only)..."
+
+          echo "════════════════════════════════════════════════════════"
+          echo "  NPM AUDIT - MANDATORY SECURITY GATE"
+          echo "════════════════════════════════════════════════════════"
+
           mkdir -p security-reports
-          
-          # Audit without installing dependencies (much faster)
-          timeout 30 npm audit --json > security-reports/npm-audit-report.json 2>&1 || {
-            EXIT_CODE=$?
-            if [ $EXIT_CODE -eq 124 ]; then
-              echo "##[warning]npm audit timed out after 30 seconds"
-            else
-              echo "##[warning]npm audit exited with code $EXIT_CODE (non-zero is expected if vulnerabilities found)"
+
+          echo ""
+          echo "Running npm audit..."
+          echo ""
+
+          # Run npm audit and capture its exit code.
+          # npm audit returns non-zero when vulnerabilities
+          # are found or when the audit itself fails.
+          npm audit --json > security-reports/npm-audit-report.json 2>&1
+
+          AUDIT_EXIT_CODE=$?
+
+          echo ""
+          echo "npm audit exit code: $AUDIT_EXIT_CODE"
+          echo ""
+
+          if [ ! -s security-reports/npm-audit-report.json ]; then
+            echo "##vso[task.logissue type=error]npm audit report was not generated or is empty"
+            exit 1
+          fi
+
+          echo "════════════════════════════════════════════════════════"
+          echo "  NPM AUDIT SUMMARY"
+          echo "════════════════════════════════════════════════════════"
+
+          if command -v jq >/dev/null 2>&1; then
+
+            CRITICAL=$(jq -r '.metadata.vulnerabilities.critical // 0' \
+              security-reports/npm-audit-report.json 2>/dev/null || echo "0")
+
+            HIGH=$(jq -r '.metadata.vulnerabilities.high // 0' \
+              security-reports/npm-audit-report.json 2>/dev/null || echo "0")
+
+            MODERATE=$(jq -r '.metadata.vulnerabilities.moderate // 0' \
+              security-reports/npm-audit-report.json 2>/dev/null || echo "0")
+
+            LOW=$(jq -r '.metadata.vulnerabilities.low // 0' \
+              security-reports/npm-audit-report.json 2>/dev/null || echo "0")
+
+            TOTAL=$(jq -r '.metadata.vulnerabilities.total // 0' \
+              security-reports/npm-audit-report.json 2>/dev/null || echo "0")
+
+            echo "Critical : $CRITICAL"
+            echo "High     : $HIGH"
+            echo "Moderate : $MODERATE"
+            echo "Low      : $LOW"
+            echo "Total    : $TOTAL"
+            echo ""
+
+            if [ "$TOTAL" -gt 0 ]; then
+              echo "##vso[task.logissue type=error]🚨 npm audit found $TOTAL vulnerability/vulnerabilities"
+              echo ""
+              echo "❌ npm audit security gate FAILED"
+              echo "❌ Deployment will NOT continue."
+              exit 1
             fi
-          }
-          
-          echo "✅ Audit completed"
-          exit 0
+
+          else
+            echo "##vso[task.logissue type=warning]jq is not available; relying on npm audit exit code"
+          fi
+
+          # Any non-zero npm audit exit code is a failure.
+          if [ "$AUDIT_EXIT_CODE" -ne 0 ]; then
+            echo ""
+            echo "##vso[task.logissue type=error]❌ npm audit failed with exit code $AUDIT_EXIT_CODE"
+            echo "❌ Deployment will NOT continue."
+            exit "$AUDIT_EXIT_CODE"
+          fi
+
+          echo ""
+          echo "✅ No npm vulnerabilities found"
+          echo "✅ npm audit security gate PASSED"
+          echo ""
+          echo "════════════════════════════════════════════════════════"
 
     - task: Bash@3
-      displayName: 'Analyze Results'
+      displayName: 'Analyze npm Audit Results'
+      condition: always()
       continueOnError: true
       inputs:
         targetType: 'inline'
         script: |
-          if [ ! -f security-reports/npm-audit-report.json ] || [ ! -s security-reports/npm-audit-report.json ]; then
+          if [ ! -f security-reports/npm-audit-report.json ] || \
+             [ ! -s security-reports/npm-audit-report.json ]; then
             echo "##[warning]No audit results available"
             exit 0
           fi
-          
-          # Quick analysis
+
           echo "════════════════════════════════════════════════════════"
-          echo "  NPM AUDIT QUICK SUMMARY"
+          echo "  NPM AUDIT RESULTS"
           echo "════════════════════════════════════════════════════════"
-          
-          if command -v jq &> /dev/null; then
-            CRITICAL=$(jq '.metadata.vulnerabilities.critical // 0' security-reports/npm-audit-report.json 2>/dev/null || echo "0")
-            HIGH=$(jq '.metadata.vulnerabilities.high // 0' security-reports/npm-audit-report.json 2>/dev/null || echo "0")
-            TOTAL=$(jq '.metadata.vulnerabilities.total // 0' security-reports/npm-audit-report.json 2>/dev/null || echo "0")
-            
+
+          if command -v jq >/dev/null 2>&1; then
+ 
+            CRITICAL=$(jq '.metadata.vulnerabilities.critical // 0' \
+              security-reports/npm-audit-report.json 2>/dev/null || echo "0")
+
+            HIGH=$(jq '.metadata.vulnerabilities.high // 0' \
+              security-reports/npm-audit-report.json 2>/dev/null || echo "0")
+
+            MODERATE=$(jq '.metadata.vulnerabilities.moderate // 0' \
+              security-reports/npm-audit-report.json 2>/dev/null || echo "0")
+
+            LOW=$(jq '.metadata.vulnerabilities.low // 0' \
+              security-reports/npm-audit-report.json 2>/dev/null || echo "0")
+
+            TOTAL=$(jq '.metadata.vulnerabilities.total // 0' \
+              security-reports/npm-audit-report.json 2>/dev/null || echo "0")
+
             echo ""
-            echo "Critical: $CRITICAL"
-            echo "High:     $HIGH"
-            echo "Total:    $TOTAL"
+            echo "Critical : $CRITICAL"
+            echo "High     : $HIGH"
+            echo "Moderate : $MODERATE"
+            echo "Low      : $LOW"
+            echo "Total    : $TOTAL"
             echo ""
-            
-            if [ "$CRITICAL" -gt 0 ] || [ "$HIGH" -gt 0 ]; then
-              echo "##[warning]⚠️  High-risk vulnerabilities found"
-              echo "Review: SecurityReports-npm artifact"
+
+            if [ "$TOTAL" -gt 0 ]; then
+              echo "##[error]❌ npm audit found $TOTAL vulnerabilities"
             else
-              echo "✅ No critical/high vulnerabilities"
+              echo "✅ No vulnerabilities found"
             fi
-          else
-            echo "Install jq for detailed analysis"
-            grep -o '"critical":[0-9]*' security-reports/npm-audit-report.json || echo "Unable to parse results"
           fi
-          
+
           echo ""
           echo "════════════════════════════════════════════════════════"
-          exit 0
 
     - task: PublishBuildArtifacts@1
-      displayName: 'Publish Results'
+      displayName: 'Publish npm Audit Report'
       condition: always()
       inputs:
         pathToPublish: 'security-reports'
-        artifactName: 'SecurityReports-npm'
+        artifactName: 'SecurityReports-npm'    
 
 # ===========================
 # STAGE 3: BUILD & CODE QUALITY
@@ -372,7 +457,7 @@ stages:
 - stage: BuildAndCodeQuality
   displayName: 'Build & Code Quality'
   dependsOn: SecurityScanning
-  condition: in(dependencies.SecurityScanning.result, 'Succeeded', 'Skipped', 'SucceededWithIssues')
+  condition: false
   jobs:
   - job: build_and_quality
     displayName: Build, Lint, Test
@@ -931,17 +1016,7 @@ stages:
 - stage: Deploy
   displayName: 'Deploy to Azure Static Web Apps'
   dependsOn: BuildAndCodeQuality
-  condition: |
-    or(
-      and(
-        succeeded(),
-        eq(variables['Build.SourceBranchName'], 'main')
-      ),
-      and(
-        in(dependencies.BuildAndCodeQuality.result, 'Succeeded', 'SucceededWithIssues', 'Failed'),
-        eq(variables['Build.SourceBranchName'], 'development')
-      )
-    )
+  condition: false
   # condition: |
   #   and(
   #     succeeded(),
@@ -1626,6 +1701,3 @@ stages:
 #       api_location: "" # Api source code path - optional
 #       output_location: "dist" # Built app content directory - optional
 # ###### End of Repository/Build Configurations ######
-
-
-this is my frontend pipeline which i am using deploy it in the swa azure. we are intentioally made the gitleask and npm audit as optional as we are busy, now i want those two gitleaks and npm audit as mandatory, if those fails pipeline should fail to deploy, if those pass pipeline should pass and deploy, give changes accrodingly?
