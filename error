@@ -118,7 +118,7 @@ stages:
       continueOnError: true
 
 # ===========================
-# STAGE 2: SECURITY SCANNING (NON-FAILING)
+# STAGE 2: SECURITY SCANNING
 # ===========================
 - stage: SecurityScanning
   displayName: 'Security Scanning'
@@ -126,7 +126,7 @@ stages:
   condition: in(dependencies.DependencyManagement.result, 'Succeeded', 'Skipped', 'SucceededWithIssues')
   jobs:
   # ===========================
-  # JOB 1: GitLeaks Secret Scanning (NON-FAILING)
+  # JOB 1: GitLeaks Secret Scanning (MANDATORY)
   # ===========================
   - job: gitleaks_scan
     displayName: 'GitLeaks - Secret Detection'
@@ -149,7 +149,6 @@ stages:
 
     - task: Bash@3
       displayName: 'Run GitLeaks Scan - MANDATORY'
-      continueOnError: true
       inputs:
         targetType: 'inline'
         script: |
@@ -289,7 +288,7 @@ stages:
           # [INSERT THE COMPLETE SCRIPT FROM THE TOP OF THIS RESPONSE]
 
   # ===========================
-  # JOB 3: npm Audit (NON-FAILING)
+  # JOB 3: npm Audit (MANDATORY - HIGH/CRITICAL)
   # ===========================
   - job: npm_audit_scan
     displayName: 'npm Audit - Dependency Vulnerabilities'
@@ -325,7 +324,7 @@ stages:
           # Run npm audit and capture its exit code.
           # npm audit returns non-zero when vulnerabilities
           # are found or when the audit itself fails.
-          npm audit --json > security-reports/npm-audit-report.json 2>&1
+          npm audit --json --audit-level=high > security-reports/npm-audit-report.json 2>&1
 
           AUDIT_EXIT_CODE=$?
 
@@ -366,12 +365,21 @@ stages:
             echo "Total    : $TOTAL"
             echo ""
 
-            if [ "$TOTAL" -gt 0 ]; then
-              echo "##vso[task.logissue type=error]🚨 npm audit found $TOTAL vulnerability/vulnerabilities"
+            if [ "$CRITICAL" -gt 0 ] || [ "$HIGH" -gt 0 ]; then
+              echo "##vso[task.logissue type=error]❌ HIGH/CRITICAL vulnerabilities found"
               echo ""
-              echo "❌ npm audit security gate FAILED"
+              echo "npm audit security gate FAILED"
               echo "❌ Deployment will NOT continue."
               exit 1
+            fi
+
+            if [ "$MODERATE" -gt 0 ] || [ "$LOW" -gt 0 ]; then
+              echo "##vso[task.logissue type=warning]⚠️ MODERATE/LOW vulnerabilities found"
+              echo "These do not block deployment but should be addressed."
+            fi
+
+            else
+              echo "✅ No Critical or High vulnerabilities found"
             fi
 
           else
@@ -395,7 +403,6 @@ stages:
     - task: Bash@3
       displayName: 'Analyze npm Audit Results'
       condition: always()
-      continueOnError: true
       inputs:
         targetType: 'inline'
         script: |
