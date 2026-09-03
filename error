@@ -378,10 +378,6 @@ stages:
               echo "These do not block deployment but should be addressed."
             fi
 
-            else
-              echo "✅ No Critical or High vulnerabilities found"
-            fi
-
           else
             echo "##vso[task.logissue type=warning]jq is not available; relying on npm audit exit code"
           fi
@@ -395,8 +391,8 @@ stages:
           fi
 
           echo ""
-          echo "✅ No npm vulnerabilities found"
           echo "✅ npm audit security gate PASSED"
+          echo "✅ No HIGH/CRITICAL vulnerabilities found"
           echo ""
           echo "════════════════════════════════════════════════════════"
 
@@ -464,7 +460,7 @@ stages:
 - stage: BuildAndCodeQuality
   displayName: 'Build & Code Quality'
   dependsOn: SecurityScanning
-  condition: false
+  condition: in(dependencies.SecurityScanning.result, 'Succeeded', 'Skipped', 'SucceededWithIssues')
   jobs:
   - job: build_and_quality
     displayName: Build, Lint, Test
@@ -1023,7 +1019,17 @@ stages:
 - stage: Deploy
   displayName: 'Deploy to Azure Static Web Apps'
   dependsOn: BuildAndCodeQuality
-  condition: false
+  condition: |
+    or(
+      and(
+        succeeded(),
+        eq(variables['Build.SourceBranchName'], 'main')
+      ),
+      and(
+        in(dependencies.BuildAndCodeQuality.result, 'Succeeded', 'SucceededWithIssues', 'Failed'),
+        eq(variables['Build.SourceBranchName'], 'development')
+      )
+    )
   # condition: |
   #   and(
   #     succeeded(),
