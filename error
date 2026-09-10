@@ -1,249 +1,149 @@
-name: Renovate-$(Date:yyyyMMdd)
+   },
+               {
+                 "depName": "python",
+                 "packageName": "python",
+                 "currentValue": "3.10-slim",
+                 "replaceString": "python:3.10-slim",
+                 "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+                 "datasource": "docker",
+                 "depType": "final",
+                 "updates": [
+                   {
+                     "bucket": "non-major",
+                     "newVersion": "3.14",
+                     "newValue": "3.14-slim",
+                     "newMajor": 3,
+                     "newMinor": 14,
+                     "newPatch": null,
+                     "updateType": "minor",
+                     "isBreaking": false,
+                     "branchName": "renovate/python-3.x"
+                   }
+                 ],
+                 "versioning": "docker",
+                 "warnings": [],
+                 "registryUrl": "https://index.docker.io",
+                 "lookupName": "library/python",
+                 "currentVersion": "3.10",
+                 "isSingleVersion": true,
+                 "fixedVersion": "3.10-slim"
+               }
+             ],
+             "packageFile": "src/services/security/presidio/Dockerfile"
+           }
+         ],
+         "npm": [
+           {
 
-schedules:
-  - cron: "0 2 * * 1"
-    displayName: Weekly Renovate for demolocal
-    branches:
-      include:
-        - demolocal
-    always: true
 
-trigger: none
-pr: none
+  "fixedVersion": "1.1.0"
+               },
+               {
+                 "depType": "dependencies",
+                 "depName": "@azure/core-auth",
+                 "currentValue": "^1.10.1",
+                 "datasource": "npm",
+                 "prettyDepType": "dependency",
+                 "lockedVersion": "1.10.1",
+                 "updates": [
+                   {
+                     "bucket": "non-major",
+                     "newVersion": "1.11.0",
+                     "newValue": "^1.10.1",
+                     "releaseTimestamp": "2026-07-13T19:09:32.390Z",
+                     "newVersionAgeInDays": 58,
+                     "newMajor": 1,
+                     "newMinor": 11,
+                     "newPatch": 0,
+                     "updateType": "minor",
+                     "isBreaking": false,
+                     "isRange": true,
+                     "isLockfileUpdate": true,
+                     "libYears": 0.835699002283105,
+                     "branchName": "renovate/azure-core-auth-1.x-lockfile"
+                   }
+                 ],
+                 "packageName": "@azure/core-auth",
+MT)[90m (repository=Security AI Dashboard/soc_watchtower_backend, baseBranch=demolocal)[39m
+[34mDEBUG[39m: http cache: saving https://registry.npmjs.org/typescript-eslint (etag=W/"ae520929c9376d52cacc3895f94b94e2", lastModified=Mon, 07 Sep 2026 18:23:29 GMT)[90m (repository=Security AI Dashboard/soc_watchtower_backend, baseBranch=demolocal)[39m
+[34mDEBUG[39m: PackageFiles.add() - Package file saved for base branch[90m (repository=Security AI Dashboard/soc_watchtower_backend, baseBranch=demolocal)[39m
+[34mDEBUG[39m: Package releases lookups complete[90m (repository=Security AI Dashboard/soc_watchtower_backend, baseBranch=demolocal)[39m
+[34mDEBUG[39m: No currentVersionTimestamp for node[90m (repository=Security AI Dashboard/soc_watchtower_backend, baseBranch=demolocal)[39m
+[34mDEBUG[39m: Repository libYears[90m (repository=Security AI Dashboard/soc_w
 
-pool:
-  vmImage: "ubuntu-latest"
+[34mDEBUG[39m: packageFiles with updates[90m (repository=Security AI Dashboard/soc_watchtower_backend, baseBranch=demolocal)[39m
+       "config": {
+         "bicep": [
+           {
+             "deps": [
+               {
+                 "datasource": "azure-bicep-resource",
+                 "versioning": "azure-rest-api",
+                 "depName": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+                 "currentValue": "2022-11-01-preview",
+                 "autoReplaceStringTemplate": "'{{depName}}@{{newValue}}'",
+                 "replaceString": "'Microsoft.OperationalInsights/workspaces/providers/alertRules@2022-11-01-preview'",
+                 "updates": [],
+                 "packageName": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+                 "warnings": [
+                   {
+                     "topic": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+                     "message": "Failed to look up azure-bicep-resource package Microsoft.OperationalInsights/workspaces/providers/alertRules"
+                   }
+                 ]
+               }
+             ],
+             "packageFile": "src/templates/Template.bicep"
+           }
+         ],
+         "docker-compose": [{"deps": [], "packageFile": "docker-compose.yml"}],
+         "dockerfile": [
+           {
+             "deps": [
+               {
+                 "depName": "node",
+                 "packageName": "node",
+                 "currentValue": "22-bookworm-slim",
+                 "replaceString": "node:22-bookworm-slim",
+                 "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+                 "datasource": "docker",
+                 "depType": "final",
+                 "updates": [
+                   {
+                     "bucket": "major",
+                     "newVersion": "26",
+                     "newValue": "26-bookworm-slim",
+                     "newMajor": 26,
+                     "newMinor": null,
+                     "newPatch": null,
+                     "updateType": "major",
+                     "isBreaking": true,
+                     "branchName": "renovate/node-26.x"
+                   }
+                 ],
+                 "versioning": "docker",
+                 "warnings": [],
+                 "sourceUrl": "https://github.com/nodejs/node",
 
-variables:
-  RENOVATE_VERSION: "42.0.0"
 
-steps:
-  - checkout: self
-    displayName: Checkout Repository
-    persistCredentials: true
-    fetchDepth: 0
+keyvault-keys-4.x-lockfile)[39m
+[34mDEBUG[39m: Getting updated lock files[90m (repository=Security AI Dashboard/soc_watchtower_backend, baseBranch=demolocal, branch=renovate/azure-keyvault-keys-4.x-lockfile)[39m
+[34mDEBUG[39m: Writing package.json files[90m (repository=Security AI Dashboard/soc_watchtower_backend, baseBranch=demolocal, branch=renovate/azure-keyvault-keys-4.x-lockfile)[39m
+       "packageFiles": ["package.json"]
+[34mDEBUG[39m: Writing package-lock.json[90m (repository=Security AI Dashboard/soc_watchtower_backend, baseBranch=demolocal, branch=renovate/azure-keyvault-keys-4.x-lockfile)[39m
+[34mDEBUG[39m: Massaging npm lock file before writing to disk[90m (repository=Security AI Dashboard/soc_watchtower_backend, baseBranch=demolocal, branch=renovate/azure-keyvault-keys-4.x-lockfile)[39m
+[34mDEBUG[39m: Writing any updated package files[90m (repository=Security AI Dashboard/soc_watchtower_backend, baseBranch=demolocal, 
 
-  - bash: |
-      set -euo pipefail
 
-      echo "======================================"
-      echo "Environment Info"
-      echo "======================================"
-      echo "Node Version:   $(node --version)"
-      echo "npm Version:    $(npm --version)"
-      echo "Collection URI: $(System.CollectionUri)"
-      echo "Team Project:   $(System.TeamProject)"
-      echo "Repository:     $(Build.Repository.Name)"
-      echo "Source Branch:  $(Build.SourceBranch)"
-      echo "Build ID:       $(Build.BuildId)"
-      echo ""
-    displayName: Show Environment
+       "limits": [{"depName": "@azure/keyvault-keys", "prConcurrentLimit": 1}]
+[34mDEBUG[39m: Calculated lowest prConcurrentLimit among the upgrades present in this branch is 1.[90m (repository=Security AI Dashboard/soc_watchtower_backend, baseBranch=demolocal, branch=renovate/azure-keyvault-keys-4.x-lockfile)[39m
+[32m INFO[39m: PR created[90m (repository=Security AI Dashboard/soc_watchtower_backend, baseBranch=demolocal, branch=renovate/azure-keyvault-keys-4.x-lockfile)[39m
+       "pr": 682,
+       "prTitle": "Update dependency @azure/keyvault-keys to v4.10.2"
+[34mDEBUG[39m: addParticipants(pr=682)[90m (repository=Security AI Dashboard/soc_watchtower_backend, baseBranch=demolocal, branch=renovate/azure-keyvault-keys-4.x-lockfile)[39m
+[34mDEBUG[39m: setPrCache()[90m (repository=Security AI Dashboard/soc_watchtower_backend, baseBranch=demolocal, branch=renovate/az
 
-  - bash: |
-      set -euo pipefail
 
-      echo "======================================"
-      echo "Installing Renovate v$(RENOVATE_VERSION)"
-      echo "======================================"
 
-      npm install -g renovate@$(RENOVATE_VERSION)
 
-      echo ""
-      echo "Verifying installation..."
-      renovate --version
-      echo ""
-    displayName: Install Renovate
 
-  - bash: |
-      set -euo pipefail
-
-      echo "======================================"
-      echo "Renovate Effective Configuration"
-      echo "======================================"
-      echo "Platform:            azure"
-      echo "Repository:          $(System.TeamProject)/$(Build.Repository.Name)"
-      echo "Base branch:         demolocal"
-      echo "Preset:              config:recommended"
-      echo "Require config:      optional"
-      echo "Autodiscover:        false"
-      echo "Log level:           debug"
-      echo ""
-
-      if [ -f "renovate.json" ]; then
-        echo "NOTICE: renovate.json exists in the checked-out branch:"
-        cat renovate.json
-        echo ""
-        echo "The Renovate run is controlled by pipeline environment variables."
-      else
-        echo "No renovate.json found in the checked-out branch."
-        echo "The Renovate run will use pipeline environment variables."
-      fi
-
-      echo ""
-    displayName: Show Renovate Configuration
-
-  - bash: |
-      set -euo pipefail
-
-      REPO_FULL="$(System.TeamProject)/$(Build.Repository.Name)"
-
-      echo "======================================"
-      echo "Running Renovate"
-      echo "======================================"
-      echo "Version:        $(renovate --version)"
-      echo "Repository:     ${REPO_FULL}"
-      echo "Base branch:    demolocal"
-      echo "Preset:         config:recommended"
-      echo "Require config: optional"
-      echo "Log level:      debug"
-      echo ""
-
-      if [ -z "$(System.AccessToken)" ]; then
-        echo "ERROR: System.AccessToken is empty."
-        echo "Make sure the pipeline's build service has repository permissions."
-        exit 1
-      fi
-
-      echo "Starting Renovate..."
-      echo ""
-
-      echo "RENOVATE_PACKAGE_RULES=$RENOVATE_PACKAGE_RULES"
-      echo "RENOVATE_PR_CONCURRENT_LIMIT=$RENOVATE_PR_CONCURRENT_LIMIT"
-      echo "RENOVATE_BRANCH_CONCURRENT_LIMIT=$RENOVATE_BRANCH_CONCURRENT_LIMIT"
-      echo ""
-
-      set +e
-
-      renovate \
-        --platform=azure \
-        --endpoint="$(System.CollectionUri)" \
-        --token="$(System.AccessToken)" \
-        "${REPO_FULL}" \
-        2>&1 | tee renovate.log
-
-      RENOVATE_EXIT=${PIPESTATUS[0]}
-
-      set -e
-
-      echo ""
-      echo "======================================"
-
-      if [ "${RENOVATE_EXIT}" -eq 0 ]; then
-        echo "Renovate completed successfully."
-      else
-        echo "ERROR: Renovate failed with exit code ${RENOVATE_EXIT}."
-        exit "${RENOVATE_EXIT}"
-      fi
-
-      echo ""
-      echo "Verifying Renovate base branch..."
-
-      if grep "Dependency extraction complete" renovate.log \
-        | grep -q "baseBranch=demolocal"; then
-        echo "SUCCESS: Renovate scanned the demolocal branch."
-      else
-        echo "ERROR: Could not confirm that Renovate scanned demolocal."
-        echo ""
-        echo "Relevant log entries:"
-        grep -i \
-          "baseBranch\|baseBranchPatterns\|Setting current branch\|Dependency extraction complete" \
-          renovate.log \
-          | head -50 || true
-        exit 1
-      fi
-
-      if grep "Dependency extraction complete" renovate.log \
-        | grep -q "baseBranch=main"; then
-        echo "ERROR: Renovate unexpectedly scanned the main branch."
-        exit 1
-      fi
-
-      echo ""
-      echo "Base branch verification completed successfully."
-      echo "======================================"
-    displayName: Run Renovate
-    env:
-      LOG_LEVEL: debug
-      RENOVATE_AUTODISCOVER: "false"
-      RENOVATE_BASE_BRANCH_PATTERNS: '["demolocal"]'
-      RENOVATE_REQUIRE_CONFIG: "optional"
-      RENOVATE_ONBOARDING: "false"
-
-      RENOVATE_PR_CONCURRENT_LIMIT: "1"
-      RENOVATE_BRANCH_CONCURRENT_LIMIT: "1"
-
-      RENOVATE_PACKAGE_RULES: >
-        [
-          {
-            "matchManagers": [".*"],
-            "groupName": "all-dependencies"
-            "groupSlug": "all-dependencies"
-          }
-        ]
-
-  - bash: |
-      set -euo pipefail
-
-      echo "======================================"
-      echo "Renovate Summary"
-      echo "======================================"
-
-      if [ ! -f "renovate.log" ]; then
-        echo "No Renovate log file was generated."
-        exit 0
-      fi
-
-      echo ""
-      echo "Base branch details:"
-      grep -i \
-        "baseBranch\|Setting current branch\|Dependency extraction complete" \
-        renovate.log \
-        | head -30 || echo "No base branch details found."
-
-      echo ""
-      echo "Statistics:"
-      grep -i \
-        "repository started\|repository finished\|pr created\|branch created\|updates found" \
-        renovate.log \
-        | head -20 || echo "No statistics found."
-
-      echo ""
-      echo "Warnings, last 5:"
-      grep "WARN" renovate.log \
-        | tail -5 || echo "No warnings found."
-
-      echo ""
-      echo "Errors, last 5:"
-      grep "ERROR" renovate.log \
-        | tail -5 || echo "No errors found."
-
-      echo ""
-      echo "======================================"
-    displayName: Show Summary
-    condition: always()
-
-  - task: PublishPipelineArtifact@1
-    displayName: Publish Renovate Log
-    condition: always()
-    inputs:
-      targetPath: "$(System.DefaultWorkingDirectory)/renovate.log"
-      artifactName: "renovate-log-$(Build.BuildId)"
-
-  - bash: |
-      set -euo pipefail
-
-      echo ""
-      echo "=============================================="
-      echo "          RENOVATE RUN COMPLETED"
-      echo "=============================================="
-      echo ""
-      echo "Build ID:     $(Build.BuildId)"
-      echo "Repository:   $(Build.Repository.Name)"
-      echo "Base branch:  demolocal"
-      echo ""
-      echo "Check Pull Requests:"
-      echo "$(System.CollectionUri)$(System.TeamProject)/_git/$(Build.Repository.Name)/pullrequests"
-      echo ""
-      echo "=============================================="
-    displayName: Final Summary
-    condition: succeeded()
