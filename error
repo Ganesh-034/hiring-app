@@ -1,1716 +1,248 @@
-name: Azure Static Web Apps CI/CD
+name: Renovate-$(Date:yyyyMMdd)
 
-# Trigger on push to development and main/master
-trigger:
-  branches:
-    include:
-      - development
-      # - main
-# Trigger on PRs to development and main/master
-pr:
-  branches:
-    include:
-      - development
-      # - main
+schedules:
+  - cron: "0 2 * * 1"
+    displayName: Weekly Renovate for demolocal
+    branches:
+      include:
+        - demolocal
+    always: true
 
-# Pipeline-level variables
-variables:
-  runRenovate: false
-  npmAuditForce: false
-  coverageThreshold: 80
-  npm_config_cache: $(Pipeline.Workspace)/.npm
+trigger: none
+pr: none
 
 pool:
-  vmImage: ubuntu-latest
+  vmImage: "ubuntu-latest"
 
-# ===========================
-# STAGES
-# ===========================
-stages:
-# ===========================
-# STAGE 1: DEPENDENCY MANAGEMENT
-# ===========================
-- stage: DependencyManagement
-  displayName: 'Dependency Updates (Renovate)'
-  condition: and(succeeded(), eq(variables['runRenovate'], 'true'))
-  jobs:
-  - job: renovate
-    displayName: Run Renovate Bot
-    steps:
-    - checkout: self
+variables:
+  RENOVATE_VERSION: "42.0.0"
 
-    # Verify PAT Authentication
-    - task: PowerShell@2
-      displayName: 'Verify Azure DevOps PAT Authentication'
-      env:
-        AZURE_DEVOPS_PAT: $(AZURE_DEVOPS_PAT)
-      inputs:
-        targetType: 'inline'
-        script: |
-          Write-Host "Checking Azure DevOps PAT authentication..."
-          $pat = $env:AZURE_DEVOPS_PAT
-          if ([string]::IsNullOrEmpty($pat)) {
-            Write-Host "##vso[task.logissue type=error]PAT variable is empty or not linked to this job."
-            exit 1
-          }
-          $base64AuthInfo = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(":$pat"))
-          $url = "https://dev.azure.com/tts-devops-prod/_apis/projects?api-version=6.0"
-          
-          try {
-            $response = Invoke-RestMethod -Uri $url -Headers @{Authorization=("Basic {0}" -f $base64AuthInfo)} -Method Get
-            Write-Host "PAT authentication successful!"
-            $response.value | ForEach-Object { Write-Host "  - $($_.name)" }
-          }
-          catch {
-            Write-Host "##vso[task.logissue type=error]PAT authentication failed: $($_.Exception.Message)"
-            exit 1
-          }
+steps:
+  - checkout: self
+    displayName: Checkout Repository
+    persistCredentials: true
+    fetchDepth: 0
 
-    # Cache npm for Renovate
-    - task: Cache@2
-      displayName: 'Cache npm (Renovate CLI)'
-      inputs:
-        key: 'npm-renovate | "$(Agent.OS)" | renovate-cli-v3'
-        path: '$(Pipeline.Workspace)/.npm-cache'
-        restoreKeys: |
-          npm-renovate | "$(Agent.OS)"
+  - bash: |
+      set -euo pipefail
 
-    # Write Renovate config
-    - task: Bash@3
-      displayName: 'Write Renovate Config'
-      inputs:
-        targetType: 'inline'
-        script: |
-          set -euo pipefail
-          cat > renovate.global.json <<'JSON'
+      echo "======================================"
+      echo "Environment Info"
+      echo "======================================"
+      echo "Node Version:   $(node --version)"
+      echo "npm Version:    $(npm --version)"
+      echo "Collection URI: $(System.CollectionUri)"
+      echo "Team Project:   $(System.TeamProject)"
+      echo "Repository:     $(Build.Repository.Name)"
+      echo "Source Branch:  $(Build.SourceBranch)"
+      echo "Build ID:       $(Build.BuildId)"
+      echo ""
+    displayName: Show Environment
+
+  - bash: |
+      set -euo pipefail
+
+      echo "======================================"
+      echo "Installing Renovate v$(RENOVATE_VERSION)"
+      echo "======================================"
+
+      npm install -g renovate@$(RENOVATE_VERSION)
+
+      echo ""
+      echo "Verifying installation..."
+      renovate --version
+      echo ""
+    displayName: Install Renovate
+
+  - bash: |
+      set -euo pipefail
+
+      echo "======================================"
+      echo "Renovate Effective Configuration"
+      echo "======================================"
+      echo "Platform:            azure"
+      echo "Repository:          $(System.TeamProject)/$(Build.Repository.Name)"
+      echo "Base branch:         demolocal"
+      echo "Preset:              config:recommended"
+      echo "Require config:      optional"
+      echo "Autodiscover:        false"
+      echo "Log level:           debug"
+      echo ""
+
+      if [ -f "renovate.json" ]; then
+        echo "NOTICE: renovate.json exists in the checked-out branch:"
+        cat renovate.json
+        echo ""
+        echo "The Renovate run is controlled by pipeline environment variables."
+      else
+        echo "No renovate.json found in the checked-out branch."
+        echo "The Renovate run will use pipeline environment variables."
+      fi
+
+      echo ""
+    displayName: Show Renovate Configuration
+
+  - bash: |
+      set -euo pipefail
+
+      REPO_FULL="$(System.TeamProject)/$(Build.Repository.Name)"
+
+      echo "======================================"
+      echo "Running Renovate"
+      echo "======================================"
+      echo "Version:        $(renovate --version)"
+      echo "Repository:     ${REPO_FULL}"
+      echo "Base branch:    demolocal"
+      echo "Preset:         config:recommended"
+      echo "Require config: optional"
+      echo "Log level:      debug"
+      echo ""
+
+      if [ -z "$(System.AccessToken)" ]; then
+        echo "ERROR: System.AccessToken is empty."
+        echo "Make sure the pipeline's build service has repository permissions."
+        exit 1
+      fi
+
+      echo "Starting Renovate..."
+      echo ""
+
+      echo "RENOVATE_PACKAGE_RULES=$RENOVATE_PACKAGE_RULES"
+      echo "RENOVATE_PR_CONCURRENT_LIMIT=$RENOVATE_PR_CONCURRENT_LIMIT"
+      echo "RENOVATE_BRANCH_CONCURRENT_LIMIT=$RENOVATE_BRANCH_CONCURRENT_LIMIT"
+      echo ""
+
+      set +e
+
+      renovate \
+        --platform=azure \
+        --endpoint="$(System.CollectionUri)" \
+        --token="$(System.AccessToken)" \
+        "${REPO_FULL}" \
+        2>&1 | tee renovate.log
+
+      RENOVATE_EXIT=${PIPESTATUS[0]}
+
+      set -e
+
+      echo ""
+      echo "======================================"
+
+      if [ "${RENOVATE_EXIT}" -eq 0 ]; then
+        echo "Renovate completed successfully."
+      else
+        echo "ERROR: Renovate failed with exit code ${RENOVATE_EXIT}."
+        exit "${RENOVATE_EXIT}"
+      fi
+
+      echo ""
+      echo "Verifying Renovate base branch..."
+
+      if grep "Dependency extraction complete" renovate.log \
+        | grep -q "baseBranch=demolocal"; then
+        echo "SUCCESS: Renovate scanned the demolocal branch."
+      else
+        echo "ERROR: Could not confirm that Renovate scanned demolocal."
+        echo ""
+        echo "Relevant log entries:"
+        grep -i \
+          "baseBranch\|baseBranchPatterns\|Setting current branch\|Dependency extraction complete" \
+          renovate.log \
+          | head -50 || true
+        exit 1
+      fi
+
+      if grep "Dependency extraction complete" renovate.log \
+        | grep -q "baseBranch=main"; then
+        echo "ERROR: Renovate unexpectedly scanned the main branch."
+        exit 1
+      fi
+
+      echo ""
+      echo "Base branch verification completed successfully."
+      echo "======================================"
+    displayName: Run Renovate
+    env:
+      LOG_LEVEL: debug
+      RENOVATE_AUTODISCOVER: "false"
+      RENOVATE_BASE_BRANCH_PATTERNS: '["demolocal"]'
+      RENOVATE_REQUIRE_CONFIG: "optional"
+      RENOVATE_ONBOARDING: "false"
+
+      RENOVATE_PR_CONCURRENT_LIMIT: "1"
+      RENOVATE_BRANCH_CONCURRENT_LIMIT: "1"
+
+      RENOVATE_PACKAGE_RULES: >
+        [
           {
-            "platform": "azure",
-            "endpoint": "https://dev.azure.com/tts-devops-prod/",
-            "repositories": [
-              "tts-devops-prod/Security AI Dashboard/_git/soc_watchtower_frontend"
-            ],
-            "onboarding": false,
-            "requireConfig": "optional"
+            "matchManagers": [".*"],
+            "groupName": "all-dependencies"
           }
-          JSON
-          echo "Renovate config written successfully"
-
-    # Install and run Renovate
-    - task: Bash@3
-      displayName: 'Install & Run Renovate'
-      env:
-        RENOVATE_PLATFORM: azure
-        RENOVATE_TOKEN: $(AZURE_DEVOPS_PAT)
-        RENOVATE_ENDPOINT: https://dev.azure.com/tts-devops-prod/
-        RENOVATE_LOG_LEVEL: debug
-        RENOVATE_LOG_FORMAT: json
-        RENOVATE_CONFIG_FILE: $(System.DefaultWorkingDirectory)/renovate.global.json
-        npm_config_cache: $(Pipeline.Workspace)/.npm-cache
-      inputs:
-        targetType: 'inline'
-        script: |
-          set -euo pipefail
-          echo "Installing Renovate CLI..."
-          npm install -g renovate
-          
-          echo "Running Renovate..."
-          renovate "tts-devops-prod/Security%20AI%20Dashboard/_git/soc_watchtower_frontend"
-      continueOnError: true
-
-# ===========================
-# STAGE 2: SECURITY SCANNING
-# ===========================
-- stage: SecurityScanning
-  displayName: 'Security Scanning'
-  dependsOn: DependencyManagement
-  condition: in(dependencies.DependencyManagement.result, 'Succeeded', 'Skipped', 'SucceededWithIssues')
-  jobs:
-  # ===========================
-  # JOB 1: GitLeaks Secret Scanning (MANDATORY)
-  # ===========================
-  - job: gitleaks_scan
-    displayName: 'GitLeaks - Secret Detection'
-    steps:
-    - checkout: self
-      submodules: true
-
-    - task: Bash@3
-      displayName: 'Install GitLeaks'
-      inputs:
-        targetType: 'inline'
-        script: |
-          set -euo pipefail
-          GITLEAKS_VERSION=$(curl -s https://api.github.com/repos/gitleaks/gitleaks/releases/latest | grep tag_name | cut -d '"' -f 4)
-          echo "Downloading GitLeaks version $GITLEAKS_VERSION"
-          curl -L "https://github.com/gitleaks/gitleaks/releases/download/$GITLEAKS_VERSION/gitleaks_${GITLEAKS_VERSION#v}_linux_x64.tar.gz" -o gitleaks.tar.gz
-          tar -xzf gitleaks.tar.gz
-          chmod +x gitleaks
-          ./gitleaks version
-
-    - task: Bash@3
-      displayName: 'Run GitLeaks Scan - MANDATORY'
-      inputs:
-        targetType: 'inline'
-        script: |
-          set -uo pipefail
-          
-          mkdir -p security-reports
-          
-          echo "🔍 Running GitLeaks secret detection scan..."
-          echo ""
-
-          # GitLeaks exit code:
-          # 0 = no secrets found
-          # 1 = secrets detected
-          # >1 = scan/runtime error
-          ./gitleaks detect \
-            --source . \
-            --report-path security-reports/gitleaks-report.json \
-            --report-format json \
-            --exit-code 1 \
-            --redact \
-            --verbose
-          GITLEAKS_EXIT_CODE=$?
-
-          echo ""
-          echo "========================="
-          echo "GitLeaks Results"
-          echo "========================="
-          
-          # Generate summary
-          if [ -f security-reports/gitleaks-report.json ]; then
-            LEAK_COUNT=$(jq 'length' security-reports/gitleaks-report.json 2>/dev/null || echo "0")
-            
-            echo "Secrets Found: $LEAK_COUNT"
-            echo ""
-            
-            if [ "$LEAK_COUNT" -gt 0 ]; then
-              echo "##vso[task.logissue type=error]🚨 $LEAK_COUNT potential secret(s) detected"
-              
-              echo "🔐 Detected Secrets (first 5):"
-              jq -r '.[] | "   • \(.File):\(.StartLine) - \(.RuleID)"' \
-                security-reports/gitleaks-report.json 2>/dev/null | head -5 || true
-              
-              echo ""
-              echo "GitLeaks security gate FAILED"
-              echo "Deployment will not continue"
-            else
-              echo "✅ No secrets detected"
-              echo "GitLeaks security gate PASSED"
-            fi
-          else
-            echo "##vso[task.logissue type=error]GitLeaks report was not generated"
-            GITLEAKS_EXIT_CODE=2
-          fi
-
-          echo ""
-          echo "════════════════════════════════════════════════════════"
-
-          # Mandatory gate
-          if [ "$GITLEAKS_EXIT_CODE" -ne 0 ]; then
-            exit "$GITLEAKS_EXIT_CODE"
-          fi
-
-          exit 0
-
-    - task: PublishBuildArtifacts@1
-      displayName: 'Publish GitLeaks Report'
-      condition: always()
-      inputs:
-        pathToPublish: 'security-reports/gitleaks-report.json'
-        artifactName: 'SecurityReports-GitLeaks'
-
-  # ===========================
-  # JOB 2: MSDO Scan (NON-FAILING)
-  # ===========================
-  - job: msdo_scan
-    displayName: 'Microsoft Security DevOps (MSDO)'
-    steps:
-    - checkout: self
-      submodules: true
-
-    - task: NodeTool@0
-      displayName: 'Install Node.js'
-      inputs:
-        versionSpec: '20.x'
-
-    - task: Cache@2
-      displayName: 'Cache npm for MSDO'
-      inputs:
-        key: 'npm-msdo | "$(Agent.OS)" | package-lock.json'
-        path: $(npm_config_cache)
-        restoreKeys: |
-          npm-msdo | "$(Agent.OS)"
-
-    - task: Bash@3
-      displayName: 'Install Dependencies for Scanning'
-      continueOnError: true
-      inputs:
-        targetType: 'inline'
-        script: |
-          set +e
-
-          echo "Installing dependencies..."
-
-          npm ci --ignore-scripts --no-audit
-
-          if [ $? -ne 0 ]; then
-            echo "npm ci failed. Falling back to npm install..."
-            npm install --ignore-scripts --no-audit
-          fi
-
-          echo "Dependency installation completed."
-          exit 0
-
-    - task: MicrosoftSecurityDevOps@1
-      displayName: 'Run Microsoft Security DevOps Analysis'
-      continueOnError: true
-      inputs:
-        categories: 'secrets,code,artifacts,IaC,containers'
-        tools: 'eslint,templateanalyzer,trivy'
-        break: false
-
-    - task: PublishBuildArtifacts@1
-      displayName: 'Publish MSDO SARIF Results'
-      condition: always()
-      inputs:
-        pathToPublish: '$(Build.SourcesDirectory)/.gdn'
-        artifactName: 'SecurityReports-MSDO-SARIF'
-
-    # Use the corrected analysis script from above
-    - task: Bash@3
-      displayName: 'Analyze MSDO Results'
-      condition: always()
-      continueOnError: true
-      inputs:
-        targetType: 'inline'
-        script: |
-          # [INSERT THE COMPLETE SCRIPT FROM THE TOP OF THIS RESPONSE]
-
-  # ===========================
-  # JOB 3: npm Audit (MANDATORY - HIGH/CRITICAL)
-  # ===========================
-  - job: npm_audit_scan
-    displayName: 'npm Audit - Dependency Vulnerabilities'
-    timeoutInMinutes: 5
-    steps:
-    - checkout: self
-      fetchDepth: 1  # Shallow clone for speed
-
-    - task: NodeTool@0
-      displayName: 'Install Node.js'
-      inputs:
-        versionSpec: '20.x'
-
-    # Skip dependency installation, just audit package-lock.json
-    - task: Bash@3
-      displayName: 'Run npm Audit - MANDATORY'
-      timeoutInMinutes: 5
-      inputs:
-        targetType: 'inline'
-        script: |
-          set -uo pipefail
-
-          echo "════════════════════════════════════════════════════════"
-          echo "  NPM AUDIT - MANDATORY SECURITY GATE"
-          echo "════════════════════════════════════════════════════════"
-
-          mkdir -p security-reports
-
-          echo ""
-          echo "Running npm audit..."
-          echo ""
-
-          # Run npm audit and capture its exit code.
-          # npm audit returns non-zero when vulnerabilities
-          # are found or when the audit itself fails.
-          npm audit --json --audit-level=high > security-reports/npm-audit-report.json 2>&1
-
-          AUDIT_EXIT_CODE=$?
-
-          echo ""
-          echo "npm audit exit code: $AUDIT_EXIT_CODE"
-          echo ""
-
-          if [ ! -s security-reports/npm-audit-report.json ]; then
-            echo "##vso[task.logissue type=error]npm audit report was not generated or is empty"
-            exit 1
-          fi
-
-          echo "════════════════════════════════════════════════════════"
-          echo "  NPM AUDIT SUMMARY"
-          echo "════════════════════════════════════════════════════════"
-
-          if command -v jq >/dev/null 2>&1; then
-
-            CRITICAL=$(jq -r '.metadata.vulnerabilities.critical // 0' \
-              security-reports/npm-audit-report.json 2>/dev/null || echo "0")
-
-            HIGH=$(jq -r '.metadata.vulnerabilities.high // 0' \
-              security-reports/npm-audit-report.json 2>/dev/null || echo "0")
-
-            MODERATE=$(jq -r '.metadata.vulnerabilities.moderate // 0' \
-              security-reports/npm-audit-report.json 2>/dev/null || echo "0")
-
-            LOW=$(jq -r '.metadata.vulnerabilities.low // 0' \
-              security-reports/npm-audit-report.json 2>/dev/null || echo "0")
-
-            TOTAL=$(jq -r '.metadata.vulnerabilities.total // 0' \
-              security-reports/npm-audit-report.json 2>/dev/null || echo "0")
-
-            echo "Critical : $CRITICAL"
-            echo "High     : $HIGH"
-            echo "Moderate : $MODERATE"
-            echo "Low      : $LOW"
-            echo "Total    : $TOTAL"
-            echo ""
-
-            if [ "$CRITICAL" -gt 0 ] || [ "$HIGH" -gt 0 ]; then
-              echo "##vso[task.logissue type=error]❌ HIGH/CRITICAL vulnerabilities found"
-              echo ""
-              echo "npm audit security gate FAILED"
-              echo "❌ Deployment will NOT continue."
-              exit 1
-            fi
-
-            if [ "$MODERATE" -gt 0 ] || [ "$LOW" -gt 0 ]; then
-              echo "##vso[task.logissue type=warning]⚠️ MODERATE/LOW vulnerabilities found"
-              echo "These do not block deployment but should be addressed."
-            fi
-
-          else
-            echo "##vso[task.logissue type=warning]jq is not available; relying on npm audit exit code"
-          fi
-
-          # Any non-zero npm audit exit code is a failure.
-          if [ "$AUDIT_EXIT_CODE" -ne 0 ]; then
-            echo ""
-            echo "##vso[task.logissue type=error]❌ npm audit failed with exit code $AUDIT_EXIT_CODE"
-            echo "❌ Deployment will NOT continue."
-            exit "$AUDIT_EXIT_CODE"
-          fi
-
-          echo ""
-          echo "✅ npm audit security gate PASSED"
-          echo "✅ No HIGH/CRITICAL vulnerabilities found"
-          echo ""
-          echo "════════════════════════════════════════════════════════"
-
-    - task: Bash@3
-      displayName: 'Analyze npm Audit Results'
-      condition: always()
-      inputs:
-        targetType: 'inline'
-        script: |
-          if [ ! -f security-reports/npm-audit-report.json ] || \
-             [ ! -s security-reports/npm-audit-report.json ]; then
-            echo "##[warning]No audit results available"
-            exit 0
-          fi
-
-          echo "════════════════════════════════════════════════════════"
-          echo "  NPM AUDIT RESULTS"
-          echo "════════════════════════════════════════════════════════"
-
-          if command -v jq >/dev/null 2>&1; then
- 
-            CRITICAL=$(jq '.metadata.vulnerabilities.critical // 0' \
-              security-reports/npm-audit-report.json 2>/dev/null || echo "0")
-
-            HIGH=$(jq '.metadata.vulnerabilities.high // 0' \
-              security-reports/npm-audit-report.json 2>/dev/null || echo "0")
-
-            MODERATE=$(jq '.metadata.vulnerabilities.moderate // 0' \
-              security-reports/npm-audit-report.json 2>/dev/null || echo "0")
-
-            LOW=$(jq '.metadata.vulnerabilities.low // 0' \
-              security-reports/npm-audit-report.json 2>/dev/null || echo "0")
-
-            TOTAL=$(jq '.metadata.vulnerabilities.total // 0' \
-              security-reports/npm-audit-report.json 2>/dev/null || echo "0")
-
-            echo ""
-            echo "Critical : $CRITICAL"
-            echo "High     : $HIGH"
-            echo "Moderate : $MODERATE"
-            echo "Low      : $LOW"
-            echo "Total    : $TOTAL"
-            echo ""
-
-            if [ "$TOTAL" -gt 0 ]; then
-              echo "##[error]❌ npm audit found $TOTAL vulnerabilities"
-            else
-              echo "✅ No vulnerabilities found"
-            fi
-          fi
-
-          echo ""
-          echo "════════════════════════════════════════════════════════"
-
-    - task: PublishBuildArtifacts@1
-      displayName: 'Publish npm Audit Report'
-      condition: always()
-      inputs:
-        pathToPublish: 'security-reports'
-        artifactName: 'SecurityReports-npm'    
-
-# ===========================
-# STAGE 3: BUILD & CODE QUALITY
-# ===========================
-- stage: BuildAndCodeQuality
-  displayName: 'Build & Code Quality'
-  dependsOn: SecurityScanning
-  condition: in(dependencies.SecurityScanning.result, 'Succeeded', 'Skipped', 'SucceededWithIssues')
-  jobs:
-  - job: build_and_quality
-    displayName: Build, Lint, Test
-    pool:
-      vmImage: ubuntu-latest
-    variables:
-    - group: azure-static-web-apps-ashy-beach-variable-group
-    - name: npm_config_cache
-      value: $(Pipeline.Workspace)/.npm
-    
-    steps:
-    - checkout: self
-      submodules: true
-
-    # ===========================
-    # NODE.JS SETUP
-    # ===========================
-    - task: NodeTool@0
-      inputs:
-        versionSpec: '20.x'
-        checkLatest: false
-      displayName: 'Install Node.js v20'
-
-    # ===========================
-    # CACHE DEPENDENCIES
-    # ===========================
-    - task: Cache@2
-      displayName: 'Cache npm Dependencies'
-      inputs:
-        key: 'npm | "$(Agent.OS)" | $(Build.SourcesDirectory)/package-lock.json'
-        restoreKeys: |
-          npm | "$(Agent.OS)"
-        path: $(npm_config_cache)
-        cacheHitVar: 'CACHE_RESTORED'
-
-    # ===========================
-    # INSTALL DEPENDENCIES
-    # ===========================
-    - script: |
-        set -euo pipefail
-        
-        echo "════════════════════════════════════════"
-        echo "  NPM DEPENDENCY INSTALLATION"
-        echo "════════════════════════════════════════"
-        echo ""
-        echo "Cache directory: $(npm_config_cache)"
-        echo "Cache restored: $(CACHE_RESTORED)"
-        echo "Node version: $(node --version)"
-        echo "npm version: $(npm --version)"
-        echo ""
-        
-        if [ "$(CACHE_RESTORED)" = "true" ]; then
-          echo "✅ Using cached dependencies"
-          npm ci --prefer-offline --no-audit
-        else
-          echo "⬇️  Downloading dependencies (cache miss)"
-          npm ci --no-audit
-        fi
-        
-        echo ""
-        echo "✅ Dependencies installed successfully"
-        echo "════════════════════════════════════════"
-      displayName: 'Install npm Dependencies'
-      env:
-        npm_config_cache: $(npm_config_cache)
-
-    # Validate Environment Variables
-    - script: |
-        set -euo pipefail
-        echo "Validating required environment variables..."
-        required_vars=(
-          VITE_MSAL_CLIENT_ID
-          VITE_MSAL_TENANT_ID
-          VITE_MSAL_REDIRECT_URI
-          VITE_MSAL_SCOPES
-        )
-        for var in "${required_vars[@]}"; do
-          if [ -z "${!var}" ]; then
-            echo "##vso[task.logissue type=error]Environment variable '$var' is not set."
-            exit 1
-          else
-            echo "✓ $var is set"
-          fi
-        done
-      displayName: 'Validate Vite Environment Variables'
-      env:
-        VITE_MSAL_CLIENT_ID: $(VITE_MSAL_CLIENT_ID)
-        VITE_MSAL_TENANT_ID: $(VITE_MSAL_TENANT_ID)
-        VITE_MSAL_REDIRECT_URI: $(VITE_MSAL_REDIRECT_URI)
-        VITE_MSAL_SCOPES: $(VITE_MSAL_SCOPES)
-
-    # Create .env file
-    - script: |
-        echo "Creating .env file..."
-        {
-          echo "VITE_MSAL_CLIENT_ID=$VITE_MSAL_CLIENT_ID"
-          echo "VITE_MSAL_TENANT_ID=$VITE_MSAL_TENANT_ID"
-          echo "VITE_MSAL_REDIRECT_URI=$VITE_MSAL_REDIRECT_URI"
-          echo "VITE_MSAL_SCOPES=$VITE_MSAL_SCOPES"
-        } > .env
-        echo "✓ .env file created"
-      displayName: 'Create .env File'
-      env:
-        VITE_MSAL_CLIENT_ID: $(VITE_MSAL_CLIENT_ID)
-        VITE_MSAL_TENANT_ID: $(VITE_MSAL_TENANT_ID)
-        VITE_MSAL_REDIRECT_URI: $(VITE_MSAL_REDIRECT_URI)
-        VITE_MSAL_SCOPES: $(VITE_MSAL_SCOPES)
-
-    # # ===========================
-    # # NPM AUDIT (SECURITY)
-    # # ===========================
-    # - task: Bash@3
-    #   displayName: 'npm audit (Security Check)'
-    #   inputs:
-    #     targetType: 'inline'
-    #     script: |
-    #       set -euo pipefail
-          
-    #       echo "Running npm security audit..."
-    #       mkdir -p security-reports
-          
-    #       # Run audit without fixing (to avoid modifying package-lock.json)
-    #       npm audit --json --omit=dev > security-reports/npm-audit-report.json || true
-          
-    #       echo "✓ Security audit completed"
-
-    # # Check for HIGH/CRITICAL vulnerabilities - Branch logic inside
-    # - task: Bash@3
-    #   displayName: 'Check HIGH/CRITICAL Vulnerabilities'
-    #   inputs:
-    #     targetType: 'inline'
-    #     script: |
-    #       set -euo pipefail
-          
-    #       if [ ! -s security-reports/npm-audit-report.json ]; then
-    #         echo "##vso[task.logissue type=warning]npm-audit-report.json missing or empty"
-    #         exit 0
-    #       fi
-          
-    #       # Determine if we're on main branch
-    #       if [[ "$(Build.SourceBranch)" == "refs/heads/main" ]] || [[ "$(Build.SourceBranch)" == "refs/heads/master" ]]; then
-    #         export IS_MAIN="true"
-    #       else
-    #         export IS_MAIN="false"
-    #       fi
-          
-    #       node <<'EOF'
-    #       const fs = require('fs');
-    #       const data = JSON.parse(fs.readFileSync('security-reports/npm-audit-report.json', 'utf8'));
-    #       const meta = data?.metadata?.vulnerabilities || {};
-          
-    #       const high = Number(meta.high || 0);
-    #       const critical = Number(meta.critical || 0);
-          
-    #       console.log('\n📊 Vulnerability Summary:');
-    #       console.log('   High: ' + high);
-    #       console.log('   Critical: ' + critical + '\n');
-          
-    #       const isMainBranch = process.env.IS_MAIN === 'true';
-          
-    #       if (high > 0 || critical > 0) {
-    #         if (isMainBranch) {
-    #           console.error('❌ HIGH/CRITICAL vulnerabilities found in main branch - FAILING BUILD');
-    #           process.exit(1);
-    #         } else {
-    #           console.warn('⚠️  HIGH/CRITICAL vulnerabilities found in dev branch - continuing (non-blocking)');
-    #           process.exit(0);
-    #         }
-    #       } else {
-    #         console.log('✅ No HIGH/CRITICAL vulnerabilities found');
-    #       }
-    #       EOF
-
-    # # Publish npm audit report
-    # - task: PublishBuildArtifacts@1
-    #   displayName: 'Publish npm Audit Report'
-    #   condition: always()
-    #   inputs:
-    #     pathToPublish: 'security-reports'
-    #     artifactName: 'SecurityReports-npm'
-
-    # ===========================
-    # CODE QUALITY - ESLint
-    # ===========================
-    - task: Bash@3
-      displayName: 'Install ESLint Dependencies'
-      inputs:
-        targetType: 'inline'
-        script: |
-          echo "Installing ESLint formatters..."
-          npm install --no-save eslint-junit
-          echo "✅ Dependencies installed"
-
-    - task: Bash@3
-      displayName: 'Run ESLint Analysis'
-      inputs:
-        targetType: 'inline'
-        script: |
-          set -euo pipefail
-          
-          echo "Running ESLint..."
-          mkdir -p lint-reports
-          
-          # Run with JSON for detailed analysis
-          npx eslint . \
-            --format json \
-            --output-file lint-reports/eslint-report.json \
-            || ESLINT_EXIT_CODE=$?
-          
-          # Run with JUnit for Azure DevOps
-          npx eslint . \
-            --format ./node_modules/eslint-junit/index.js \
-            --output-file lint-reports/eslint-report.xml \
-            || true
-          
-          # Show summary
-          if [ -f "lint-reports/eslint-report.json" ]; then
-            echo ""
-            echo "📊 ESLint Summary:"
-            node -e "
-              const report = require('./lint-reports/eslint-report.json');
-              const errors = report.reduce((sum, f) => sum + f.errorCount, 0);
-              const warnings = report.reduce((sum, f) => sum + f.warningCount, 0);
-              console.log('   Errors: ' + errors);
-              console.log('   Warnings: ' + warnings);
-            "
-          fi
-          
-          exit ${ESLINT_EXIT_CODE:-0}
-      continueOnError: true
-
-    - task: PublishTestResults@2
-      displayName: 'Publish ESLint Results'
-      condition: always()
-      inputs:
-        testResultsFormat: 'JUnit'
-        testResultsFiles: '**/eslint-report.xml'
-        searchFolder: '$(System.DefaultWorkingDirectory)/lint-reports'
-        testRunTitle: 'ESLint Code Quality'
-        mergeTestResults: true
-        failTaskOnFailedTests: false
-
-    - task: PublishBuildArtifacts@1
-      displayName: 'Publish ESLint Reports'
-      condition: always()
-      inputs:
-        PathtoPublish: 'lint-reports'
-        ArtifactName: 'CodeQualityReports-ESLint'
-
-    # Fail on ESLint errors - Branch logic inside
-    - task: Bash@3
-      displayName: 'Validate ESLint Results'
-      inputs:
-        targetType: 'inline'
-        script: |
-          set -euo pipefail
-          
-          if [ ! -f lint-reports/eslint-report.json ]; then
-            echo "##vso[task.logissue type=warning]ESLint report not found"
-            exit 0
-          fi
-          
-          # Determine if we're on main branch
-          if [[ "$(Build.SourceBranch)" == "refs/heads/main" ]] || [[ "$(Build.SourceBranch)" == "refs/heads/master" ]]; then
-              IS_MAIN="true"
-          else
-            IS_MAIN="false"
-          fi
-          
-          # Export for node process
-          export IS_MAIN  
-          
-          node <<'EOF'
-          const fs = require('fs');
-          const report = JSON.parse(fs.readFileSync('lint-reports/eslint-report.json', 'utf8'));
-          
-          const errorCount = report.reduce((sum, file) => sum + file.errorCount, 0);
-          const warningCount = report.reduce((sum, file) => sum + file.warningCount, 0);
-          
-          console.log('\n📊 ESLint Results:');
-          console.log('   Errors: ' + errorCount);
-          console.log('   Warnings: ' + warningCount + '\n');
-          
-          const isMainBranch = process.env.IS_MAIN === 'true';
-          
-          if (errorCount > 0) {
-            if (isMainBranch) {
-              console.error('❌ ESLint errors found in main branch - FAILING BUILD');
-              process.exit(1);
-            } else {
-              console.warn('⚠️  ESLint errors found in dev branch - continuing (non-blocking)');
-              process.exit(0);
-            }
-          } else {
-            console.log('✅ No ESLint errors found');
-          }
-          EOF
-      env:
-        IS_MAIN: ${{ variables.IS_MAIN }}
-
-    # Publish ESLint Results
-    - task: PublishTestResults@2
-      displayName: 'Publish ESLint Results'
-      condition: always()
-      inputs:
-        testResultsFiles: '**/eslint-report.xml'
-        testRunTitle: 'ESLint Code Quality'
-        mergeTestResults: true
-
-    # ===========================
-    # CODE QUALITY - Prettier
-    # ===========================
-    - script: |
-        echo "Checking code formatting with Prettier..."
-        mkdir -p lint-reports
-        npm run prettier:check > lint-reports/prettier-report.txt 2>&1 || true
-      displayName: 'Run Prettier Check'
-
-    # Fail on Prettier issues - Branch logic inside
-    - task: Bash@3
-      displayName: 'Validate Prettier Results'
-      inputs:
-        targetType: 'inline'
-        script: |
-          set -euo pipefail
-          
-          if [[ "$(Build.SourceBranch)" == "refs/heads/main" ]] || [[ "$(Build.SourceBranch)" == "refs/heads/master" ]]; then
-            echo "🔒 Running Prettier in BLOCKING mode (main/master branch)"
-            if ! npm run prettier:check; then
-              echo "##vso[task.logissue type=error]Prettier formatting issues found - FAILING BUILD"
-              exit 1
-            fi
-            echo "✅ Code formatting is correct"
-          else
-            echo "✓ Prettier check completed (non-blocking in dev)"
-          fi
-
-    # Publish Lint Reports
-    - task: PublishBuildArtifacts@1
-      displayName: 'Publish Lint Reports'
-      condition: always()
-      inputs:
-        PathtoPublish: 'lint-reports'
-        ArtifactName: 'CodeQualityReports'
-
-    # ===========================
-    # UNIT TESTS
-    # ===========================
-    - script: |
-        echo "Installing test dependencies..."
-        npm install --save-dev jest-junit
-      displayName: 'Install Test Dependencies'
-
-    - script: |
-        echo "Running unit tests with coverage..."
-        npm test -- --coverage --coverageReporters=cobertura --coverageReporters=html --reporters=default --reporters=jest-junit || true
-      displayName: 'Run Unit Tests with Coverage'
-      continueOnError: true
-
-    # Publish Test Results
-    - task: PublishTestResults@2
-      displayName: 'Publish Unit Test Results'
-      condition: always()
-      inputs:
-        testResultsFiles: '**/junit.xml'
-        testRunTitle: 'Unit Tests'
-        mergeTestResults: true
-
-    # Publish Coverage Report
-    - task: PublishCodeCoverageResults@1
-      displayName: 'Publish Code Coverage'
-      condition: always()
-      inputs:
-        codeCoverageTool: 'Cobertura'
-        summaryFileLocation: '$(System.DefaultWorkingDirectory)/coverage/cobertura-coverage.xml'
-        reportDirectory: '$(System.DefaultWorkingDirectory)/coverage'
-
-    # NEW: Validate Test Results Based on Branch
-    - task: Bash@3
-      displayName: 'Validate Test Results'
-      condition: always()
-      inputs:
-        targetType: 'inline'
-        script: |
-          set -euo pipefail
-          
-          echo "Validating unit test results..."
-          
-          # Find junit.xml
-          JUNIT_FILE=""
-          if [ -f junit.xml ]; then
-            JUNIT_FILE="junit.xml"
-          elif [ -f test-results/junit.xml ]; then
-            JUNIT_FILE="test-results/junit.xml"
-          else
-            echo "##vso[task.logissue type=warning]Test results file not found"
-            
-            if [[ "$(Build.SourceBranch)" == "refs/heads/main" ]] || [[ "$(Build.SourceBranch)" == "refs/heads/master" ]]; then
-              echo "##vso[task.logissue type=error]FAILING BUILD - Test results missing in main/master"
-              exit 1
-            else
-              echo "⚠️  Continuing - Test results missing in development (non-blocking)"
-              exit 0
-            fi
-          fi
-          
-          # Parse test results
-          FAILURES=$(grep -oP 'failures="\K[0-9]+' "$JUNIT_FILE" | head -1 || echo "0")
-          ERRORS=$(grep -oP 'errors="\K[0-9]+' "$JUNIT_FILE" | head -1 || echo "0")
-          TESTS=$(grep -oP 'tests="\K[0-9]+' "$JUNIT_FILE" | head -1 || echo "0")
-          
-          echo ""
-          echo "📊 Test Results Summary:"
-          echo "   Total Tests: $TESTS"
-          echo "   Failures: $FAILURES"
-          echo "   Errors: $ERRORS"
-          echo ""
-          
-          TOTAL_ISSUES=$((FAILURES + ERRORS))
-          
-          if [ $TOTAL_ISSUES -gt 0 ]; then
-            if [[ "$(Build.SourceBranch)" == "refs/heads/main" ]] || [[ "$(Build.SourceBranch)" == "refs/heads/master" ]]; then
-              echo "##vso[task.logissue type=error]❌ $TOTAL_ISSUES test(s) failed in main/master - FAILING BUILD"
-              exit 1
-            else
-              echo "##vso[task.logissue type=warning]⚠️  $TOTAL_ISSUES test(s) failed in development - continuing (non-blocking)"
-              echo "⚡ Please fix these tests before merging to main!"
-              exit 0
-            fi
-          else
-            echo "✅ All $TESTS tests passed"
-          fi
-
-    # Enforce Coverage Threshold - Branch logic inside
-    - task: Bash@3
-      displayName: 'Validate Coverage Threshold (80%)'
-      condition: always()
-      inputs:
-        targetType: 'inline'
-        script: |
-          set -euo pipefail
-          
-          echo "Validating code coverage threshold..."
-          
-          if [ ! -f coverage/cobertura-coverage.xml ]; then
-            echo "##vso[task.logissue type=warning]Coverage report not found"
-            
-            if [[ "$(Build.SourceBranch)" == "refs/heads/main" ]] || [[ "$(Build.SourceBranch)" == "refs/heads/master" ]]; then
-              echo "##vso[task.logissue type=error]Coverage report missing in main/master - FAILING BUILD"
-              exit 1
-            else
-              echo "⚠️  Coverage report missing in development - continuing (non-blocking)"
-              exit 0
-            fi
-          fi
-          
-          # Determine branch mode
-          if [[ "$(Build.SourceBranch)" == "refs/heads/main" ]] || [[ "$(Build.SourceBranch)" == "refs/heads/master" ]]; then
-            IS_MAIN="true"
-            echo "🔒 Running coverage validation in BLOCKING mode (main/master)"
-          else
-            IS_MAIN="false"
-            echo "🔓 Running coverage validation in NON-BLOCKING mode (development)"
-          fi
-          
-          # Parse coverage
-          LINE_RATE=$(grep -oP 'line-rate="\K[0-9.]+' coverage/cobertura-coverage.xml | head -1)
-          COVERAGE=$(echo "$LINE_RATE * 100" | bc)
-          THRESHOLD=80
-          
-          echo ""
-          echo "📊 Code Coverage Report:"
-          printf "   Line Coverage: %.2f%%\n" "$COVERAGE"
-          echo "   Required Threshold: ${THRESHOLD}%"
-          echo "   Branch: $(Build.SourceBranchName)"
-          echo ""
-          
-          # Compare coverage
-          if (( $(echo "$COVERAGE < $THRESHOLD" | bc -l) )); then
-            DEFICIT=$(echo "$THRESHOLD - $COVERAGE" | bc)
-            
-            if [ "$IS_MAIN" = "true" ]; then
-              echo "##vso[task.logissue type=error]❌ COVERAGE CHECK FAILED"
-              printf "##vso[task.logissue type=error]Line coverage (%.2f%%) is below ${THRESHOLD}%% threshold\n" "$COVERAGE"
-              printf "##vso[task.logissue type=error]Need %.2f%% more coverage - FAILING BUILD\n" "$DEFICIT"
-              exit 1
-            else
-              echo "##vso[task.logissue type=warning]⚠️  COVERAGE WARNING"
-              printf "##vso[task.logissue type=warning]Line coverage (%.2f%%) is below ${THRESHOLD}%% threshold\n" "$COVERAGE"
-              printf "##vso[task.logissue type=warning]Need %.2f%% more coverage\n" "$DEFICIT"
-              echo "⚡ Action Required: Add more tests before merging to main!"
-              exit 0
-            fi
-          else
-            SURPLUS=$(echo "$COVERAGE - $THRESHOLD" | bc)
-            echo "✅ COVERAGE CHECK PASSED"
-            printf "   Line coverage (%.2f%%) meets ${THRESHOLD}%% threshold\n" "$COVERAGE"
-            printf "   Surplus: +%.2f%%\n" "$SURPLUS"
-          fi
-
-    - task: Bash@3
-      displayName: 'Quality Gates Summary'
-      condition: always()
-      inputs:
-        targetType: 'inline'
-        script: |
-          echo ""
-          echo "════════════════════════════════════════════════════════════"
-          echo "                    QUALITY GATES SUMMARY"
-          echo "════════════════════════════════════════════════════════════"
-          echo ""
-          echo "Branch: $(Build.SourceBranchName)"
-          echo "Build: $(Build.BuildNumber)"
-          echo ""
-          
-          if [[ "$(Build.SourceBranch)" == "refs/heads/main" ]] || [[ "$(Build.SourceBranch)" == "refs/heads/master" ]]; then
-            echo "🔒 MODE: PRODUCTION (All checks BLOCKING)"
-            echo ""
-            echo "Required Quality Standards:"
-            echo "  ✓ Unit Tests: MUST PASS (0 failures)"
-            echo "  ✓ Coverage: MUST BE ≥ 80%"
-            echo "  ✓ ESLint: 0 errors"
-            echo "  ✓ Security: No HIGH/CRITICAL"
-          else
-            echo "🔓 MODE: DEVELOPMENT (Checks NON-BLOCKING)"
-            echo ""
-            echo "Quality Monitoring:"
-            echo "  📊 Unit Tests: Report generated"
-            echo "  📊 Coverage: Report generated"
-            echo "  ⚠️  Fix issues before merging to main!"
-          fi
-          
-          echo ""
-          echo "════════════════════════════════════════════════════════════" 
-
-    # ===========================
-    # BUILD APPLICATION
-    # ===========================
-    - script: |
-        set -euo pipefail
-        echo "Building application..."
-        npm run build
-        echo "✅ Build completed successfully"
-      displayName: 'Build Application'
-
-    # Publish Build Artifacts
-    - task: PublishBuildArtifacts@1
-      displayName: 'Publish Build Artifacts'
-      inputs:
-        PathtoPublish: 'dist'
-        ArtifactName: 'build-output'
-
-# ===========================
-# STAGE 4: DEPLOYMENT
-# ===========================
-- stage: Deploy
-  displayName: 'Deploy to Azure Static Web Apps'
-  dependsOn: BuildAndCodeQuality
-  condition: |
-    or(
-      and(
-        succeeded(),
-        eq(variables['Build.SourceBranchName'], 'main')
-      ),
-      and(
-        in(dependencies.BuildAndCodeQuality.result, 'Succeeded', 'SucceededWithIssues', 'Failed'),
-        eq(variables['Build.SourceBranchName'], 'development')
-      )
-    )
-  # condition: |
-  #   and(
-  #     succeeded(),
-  #     or(
-  #       eq(variables['Build.Reason'], 'Manual'),
-  #       eq(variables['Build.Reason'], 'PullRequest'),
-  #       eq(variables['Build.Reason'], 'IndividualCI')
-  #     )
-  #   )
-  jobs:
-  # ===========================
-  # DIAGNOSTIC JOB
-  # ===========================
-  - job: deployment_diagnostics
-    displayName: 'Deployment Diagnostics'
-    pool:
-      vmImage: ubuntu-latest
-    steps:
-    - task: Bash@3
-      displayName: 'Show Deployment Variables'
-      inputs:
-        targetType: 'inline'
-        script: |
-          echo "════════════════════════════════════════════════════════"
-          echo "  DEPLOYMENT CONDITION DIAGNOSTICS"
-          echo "════════════════════════════════════════════════════════"
-          echo ""
-          echo "Build Information:"
-          echo "  Build.Reason:           '$(Build.Reason)'"
-          echo "  Build.SourceBranch:     '$(Build.SourceBranch)'"
-          echo "  Build.SourceBranchName: '$(Build.SourceBranchName)'"
-          echo "  Build.RequestedFor:     '$(Build.RequestedFor)'"
-          echo "  Build.DefinitionName:   '$(Build.DefinitionName)'"
-          echo ""
-          echo "System Information:"
-          echo "  System.PullRequest.IsFork: '$(System.PullRequest.IsFork)'"
-          echo "  System.PullRequest.PullRequestId: '$(System.PullRequest.PullRequestId)'"
-          echo ""
-          echo "Agent Information:"
-          echo "  Agent.JobStatus: '$(Agent.JobStatus)'"
-          echo ""
-          echo "Previous Stage:"
-          echo "  BuildAndCodeQuality Result: In Progress/Not Available at this point"
-          echo ""
-          echo "════════════════════════════════════════════════════════"
-          echo ""
-          echo "Checking Build.Reason against your conditions:"
-          echo ""
-          
-          case "$(Build.Reason)" in
-            "Manual")
-              echo "  ✅ Matches: Manual"
-              ;;
-            "PullRequest")
-              echo "  ✅ Matches: PullRequest"
-              ;;
-            "IndividualCI")
-              echo "  ✅ Matches: IndividualCI"
-              ;;
-            "BatchedCI")
-              echo "  ⚠️  Build.Reason is 'BatchedCI' (not in your condition)"
-              ;;
-            "Schedule")
-              echo "  ⚠️  Build.Reason is 'Schedule' (not in your condition)"
-              ;;
-            "BuildCompletion")
-              echo "  ⚠️  Build.Reason is 'BuildCompletion' (not in your condition)"
-              ;;
-            *)
-              echo "  ❌ Build.Reason is '$(Build.Reason)' - UNKNOWN/NOT MATCHED"
-              ;;
-          esac
-          
-          echo ""
-          echo "Branch Check:"
-          if [[ "$(Build.SourceBranchName)" == "development" ]]; then
-            echo "  ✅ Branch is 'development' - OK for deployment"
-          elif [[ "$(Build.SourceBranchName)" == "main" ]] || [[ "$(Build.SourceBranchName)" == "master" ]]; then
-            echo "  ✅ Branch is '$(Build.SourceBranchName)' - OK for deployment"
-          else
-            echo "  ⚠️  Branch is '$(Build.SourceBranchName)' - May not be configured"
-          fi
-          
-          echo ""
-          echo "════════════════════════════════════════════════════════"
-
-  # ===========================
-  # DEVELOPMENT DEPLOYMENT
-  # ===========================
-  - deployment: deploy_development
-    displayName: Deploy to Development
-    dependsOn: deployment_diagnostics
-    condition: |
-      and(
-        succeeded(),
-        or(
-          eq(variables['Build.SourceBranchName'], 'development'),
-          eq(variables['Build.SourceBranch'], 'refs/heads/development')
-        )
-      )
-    environment: development
-    pool:
-      vmImage: ubuntu-latest
-    variables:
-    - group: azure-static-web-apps-ashy-beach-variable-group
-    
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          - checkout: self
-            displayName: 'Checkout Repository'
-
-          - task: NodeTool@0
-            inputs:
-              versionSpec: '20.x'
-            displayName: 'Install Node.js v20'
-
-          # Download to System.DefaultWorkingDirectory
-          - task: DownloadPipelineArtifact@2
-            displayName: 'Download Build Artifacts'
-            inputs:
-              buildType: 'current'
-              artifactName: 'build-output'
-              targetPath: '$(System.DefaultWorkingDirectory)/dist'
-
-          - task: Bash@3
-            displayName: 'Verify Build Artifacts'
-            inputs:
-              targetType: 'inline'
-              script: |
-                set -euo pipefail
-                
-                echo "════════════════════════════════════════════════"
-                echo "  BUILD ARTIFACTS VERIFICATION"
-                echo "════════════════════════════════════════════════"
-                echo ""
-                
-                DIST_PATH="$(System.DefaultWorkingDirectory)/dist"
-                echo "📂 Artifact Path: $DIST_PATH"
-                echo ""
-                
-                if [ ! -d "$DIST_PATH" ]; then
-                  echo "##vso[task.logissue type=error]❌ Artifacts directory not found"
-                  echo "Working Directory Contents:"
-                  ls -la "$(System.DefaultWorkingDirectory)" || true
-                  echo ""
-                  echo "Pipeline Workspace Contents:"
-                  ls -la "$(Pipeline.Workspace)" || true
-                  exit 1
-                fi
-                
-                echo "✅ Artifacts directory found"
-                echo ""
-                echo "📊 Contents:"
-                ls -lah "$DIST_PATH"
-                echo ""
-                
-                if [ ! -f "$DIST_PATH/index.html" ]; then
-                  echo "##vso[task.logissue type=error]❌ index.html not found"
-                  exit 1
-                fi
-                
-                echo "✅ index.html found"
-                TOTAL_SIZE=$(du -sh "$DIST_PATH" | cut -f1)
-                echo "📦 Total Size: $TOTAL_SIZE"
-                FILE_COUNT=$(find "$DIST_PATH" -type f | wc -l)
-                echo "📄 File Count: $FILE_COUNT"
-                echo ""
-                echo "════════════════════════════════════════════════"
-
-          # app_location path
-          - task: AzureStaticWebApp@0
-            displayName: 'Deploy to Azure Static Web Apps (Development)'
-            inputs:
-              azure_static_web_apps_api_token: $(AZURE_STATIC_WEB_APPS_API_TOKEN_ASHY_BEACH)
-              app_location: 'dist'  # ✅ Relative to working directory
-              api_location: ''
-              output_location: ''
-              skip_app_build: true
-
-          - task: Bash@3
-            displayName: 'Deployment Summary'
-            condition: always()
-            inputs:
-              targetType: 'inline'
-              script: |
-                echo ""
-                echo "════════════════════════════════════════════════════════"
-                if [ "$AGENT_JOBSTATUS" = "Succeeded" ]; then
-                  echo "  ✅ DEVELOPMENT DEPLOYMENT SUCCESSFUL"
-                  echo ""
-                  echo "Your app should be available at:"
-                  echo "  https://<your-static-web-app>.azurestaticapps.net"
-                else
-                  echo "  ❌ DEPLOYMENT FAILED"
-                  echo ""
-                  echo "Check the logs above for error details"
-                fi
-                echo "════════════════════════════════════════════════════════"
-                echo ""
-                echo "Environment:    Development"
-                echo "Branch:         $(Build.SourceBranchName)"
-                echo "Build Number:   $(Build.BuildNumber)"
-                echo "Commit:         $(Build.SourceVersion)"
-                echo ""
-                echo "════════════════════════════════════════════════════════"
-
-  # # ===========================
-  # # PRODUCTION DEPLOYMENT
-  # # ===========================
-  # - deployment: deploy_production
-  #   displayName: Deploy to Production
-  #   condition: or(eq(variables['Build.SourceBranchName'], 'main'), eq(variables['Build.SourceBranchName'], 'master'))
-  #   environment: production
-  #   pool:
-  #     vmImage: ubuntu-latest
-  #   variables:
-  #   - group: azure-static-web-apps-production-variable-group
-  #   strategy:
-  #     runOnce:
-  #       deploy:
-  #         steps:
-  #         - checkout: self
-
-  #         - task: NodeTool@0
-  #           inputs:
-  #             versionSpec: '20.x'
-  #           displayName: 'Install Node.js v20'
-
-  #         # Download Pipeline Artifact
-  #         - task: DownloadPipelineArtifact@2
-  #           displayName: 'Download Build Artifacts'
-  #           inputs:
-  #             buildType: 'current'
-  #             artifactName: 'build-output'
-  #             targetPath: '$(Pipeline.Workspace)/app'
-
-  #         # Verify artifact contents
-  #         - task: Bash@3
-  #           displayName: 'Verify Build Artifacts'
-  #           inputs:
-  #             targetType: 'inline'
-  #             script: |
-  #               echo "Verifying downloaded build artifacts..."
-                
-  #               if [ ! -d "$(Pipeline.Workspace)/app" ]; then
-  #                 echo "##vso[task.logissue type=error]Build artifacts directory not found"
-  #                 exit 1
-  #               fi
-                
-  #               if [ ! -f "$(Pipeline.Workspace)/app/index.html" ]; then
-  #                 echo "##vso[task.logissue type=error]index.html not found in build output"
-  #                 exit 1
-  #               fi
-                
-  #               echo "✅ Build artifacts verified"
-
-  #         # Production deployment
-  #         - task: AzureStaticWebApp@0
-  #           displayName: 'Deploy to Azure Static Web Apps (Production)'
-  #           inputs:
-  #             azure_static_web_apps_api_token: $(AZURE_STATIC_WEB_APPS_API_TOKEN_PRODUCTION)
-  #             app_location: "$(Pipeline.Workspace)/app"
-  #             api_location: ""
-  #             output_location: ""
-  #             skip_app_build: true
-
-  #         # Create deployment tag
-  #         - task: Bash@3
-  #           displayName: 'Create Deployment Tag'
-  #           inputs:
-  #             targetType: 'inline'
-  #             script: |
-  #               git config user.email "devops@company.com"
-  #               git config user.name "Azure DevOps"
-  #               git tag -a "deploy-prod-$(Build.BuildNumber)" -m "Production deployment $(Build.BuildNumber) - $(Build.SourceVersion)"
-  #               git push origin "deploy-prod-$(Build.BuildNumber)" || echo "Failed to push tag (non-critical)"
-  #           condition: succeeded()
-
-  #         # Production deployment summary
-  #         - task: Bash@3
-  #           displayName: 'Production Deployment Summary'
-  #           inputs:
-  #             targetType: 'inline'
-  #             script: |
-  #               echo ""
-  #               echo "════════════════════════════════════════════════"
-  #               echo "  ✅ PRODUCTION DEPLOYMENT SUCCESSFUL"
-  #               echo "════════════════════════════════════════════════"
-  #               echo ""
-  #               echo "Environment: Production"
-  #               echo "Branch: $(Build.SourceBranchName)"
-  #               echo "Build Number: $(Build.BuildNumber)"
-  #               echo "Commit: $(Build.SourceVersion)"
-  #               echo "Tag: deploy-prod-$(Build.BuildNumber)"
-  #               echo ""
-  #               echo "Deployed to: Azure Static Web Apps (Production)"
-  #               echo ""
-  #               echo "════════════════════════════════════════════════"
-
-# name: Azure Static Web Apps CI/CD
-
-# pr:
-#   branches:
-#     include:
-#       - development
-# trigger:
-#   branches:
-#     include:
-#       - development
-
-# variables:
-#   runTests: true   # Change to false to skip unit tests
-#   runRenovate: true   # Change to false to skip Renovate
-
-# # Default pool
-# pool:
-#   vmImage: ubuntu-latest
-
-# jobs:
-# # Job 1: Renovate Dependency Updates
-# - job: renovate
-#   displayName: Run Renovate Bot
-#   condition: and(succeeded(), eq(variables['runRenovate'], 'true'))   # <-- Only runs if true
-#   steps:
-#   - checkout: self
-
-# # Verify PAT Authentication (Cross-Platform PowerShell)
-#   - task: PowerShell@2
-#     displayName: 'Verify Azure DevOps PAT Authentication (Cross-Platform)'
-#     env:
-#       AZURE_DEVOPS_PAT: $(AZURE_DEVOPS_PAT)   # <-- map pipeline secret to env var
-#     inputs:
-#       targetType: 'inline'
-#       script: |
-#         Write-Host "Checking Azure DevOps PAT authentication..."  
-#         # Get PAT from pipeline variable
-#         $pat = $env:AZURE_DEVOPS_PAT
-#         if ([string]::IsNullOrEmpty($pat)) {
-#           Write-Host "PAT variable is empty or not linked to this job."
-#           exit 1
-#         }
-#         # Build basic auth header
-#         $base64AuthInfo = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(":$pat"))
-#         $url = "https://dev.azure.com/tts-devops-prod/_apis/projects?api-version=6.0"
-
-#         try {
-#           $response = Invoke-RestMethod -Uri $url -Headers @{Authorization=("Basic {0}" -f $base64AuthInfo)} -Method Get
-#           Write-Host "PAT authentication successful! Projects retrieved:"
-#           $response.value | ForEach-Object { Write-Host $_.name }
-#         }
-#         catch {
-#           Write-Host "PAT authentication failed."
-#           Write-Host "Error details: $($_.Exception.Message)"
-#           exit 1
-#         }
-
-# # Cache npm so global install of Renovate is faster
-#   - task: Cache@2
-#     displayName: 'Cache npm (global) for Renovate CLI'
-#     inputs:
-#       key: 'npm | "$(Agent.OS)" | renovate-cli-v2'
-#       path: '$(Pipeline.Workspace)/.npm-cache'
-#       restoreKeys: |
-#         npm | "$(Agent.OS)"
-#         npm
-
-# # Write Renovate config with hostRules (uses PAT)
-#   - task: Bash@3
-#     displayName: 'Write Renovate Config'
-#     env:
-#       AZURE_DEVOPS_PAT: $(AZURE_DEVOPS_PAT)
-#     inputs:
-#       targetType: 'inline'
-#       script: |
-#         set -euo pipefail
-#         cat > renovate.global.json <<'JSON'
-#         {
-#           "platform": "azure",
-#           "endpoint": "https://dev.azure.com/tts-devops-prod/",
-#           "hostRules": [
-#             { "matchHost": "dev.azure.com", "username": "pat", "password": "{{ env AZURE_DEVOPS_PAT }}" },
-#             { "matchHost": "pkgs.dev.azure.com", "username": "pat", "password": "{{ env AZURE_DEVOPS_PAT }}" }
-#           ],
-#           "repositories": [
-#             "tts-devops-prod/Security AI Dashboard/_git/soc_watchtower_frontend"
-#           ]
-#         }
-#         JSON
-#         echo "Global Renovate config written to ./renovate.global.json"
-
-# # Install and run Renovate
-#   - task: Bash@3
-#     displayName: 'Install Renovate & Run'
-#     env:
-#       RENOVATE_PLATFORM: azure
-#       RENOVATE_TOKEN: $(AZURE_DEVOPS_PAT) # secret variable mapped to env
-#       RENOVATE_ENDPOINT: https://dev.azure.com/tts-devops-prod/
-#       RENOVATE_LOG_LEVEL: debug  # <-- use env var, not CLI flag      
-#       RENOVATE_LOG_FORMAT: json
-#       RENOVATE_CONFIG_FILE: $(System.DefaultWorkingDirectory)/renovate.global.json
-#       npm_config_cache: $(Pipeline.Workspace)/.npm-cache
-#     inputs:
-#       targetType: 'inline'
-#       script: |
-#         set -euo pipefail
-#         echo "Installing Renovate CLI (using cached npm directory)..."
-#         npm install -g renovate
-
-#         echo "Validating config file..."
-#         ls -l
-#         cat renovate.global.json
-
-#         echo "Running Renovate for repository (config via RENOVATE_CONFIG_FILE)......"
-#         # Repo path: org/project/_git/repo
-#         renovate tts-devops-prod/Security%20AI%20Dashboard/_git/soc_watchtower_frontend
-#         # renovate
-#         # renovate "tts-devops-prod/Security AI Dashboard/_git/soc_watchtower_frontend"
-#     continueOnError: true   # Allow pipeline to continue if Renovate fails
-
-# # Job 2: Build and Deploy
-# - job: build_and_deploy_job
-#   displayName: Build and Deploy Job
-#   condition: or(eq(variables['Build.Reason'], 'Manual'),or(eq(variables['Build.Reason'], 'PullRequest'),eq(variables['Build.Reason'], 'IndividualCI')))
-#   pool:
-#     vmImage: ubuntu-latest
-#   variables:
-#   - group: azure-static-web-apps-ashy-beach-variable-group
-#   - name: npmAuditForce                   # toggle aggressive fixes if needed
-#     value: false
-#   steps:
-#   - checkout: self
-#     submodules: true
-
-# # GitLeaks Integration
-#   - task: Bash@3
-#     displayName: 'Install GitLeaks'
-#     inputs:
-#       targetType: 'inline'
-#       script: |
-#         set -euo pipefail
-#         GITLEAKS_VERSION=$(curl -s https://api.github.com/repos/gitleaks/gitleaks/releases/latest | grep tag_name | cut -d '"' -f 4)
-#         echo "Downloading GitLeaks version $GITLEAKS_VERSION"
-#         curl -L "https://github.com/gitleaks/gitleaks/releases/download/$GITLEAKS_VERSION/gitleaks_${GITLEAKS_VERSION#v}_linux_x64.tar.gz" -o gitleaks.tar.gz
-#         tar -xzf gitleaks.tar.gz
-#         chmod +x gitleaks
-#         ./gitleaks version
-
-#   - task: Bash@3
-#     displayName: 'Run GitLeaks Scan'
-#     inputs:
-#       targetType: 'inline'
-#       script: |
-#         set -euo pipefail
-#         ./gitleaks detect --source . --report-path gitleaks-report.json --exit-code 0 --redact
-#       # change exit code to 0 to make it git leak scan optional and not to stop build
-
-#   # - task: PublishBuildArtifacts@1
-#   #   displayName: 'Publish GitLeaks Report'
-#   #   condition: always()   # <-- This ensures it runs even if previous step fails
-#   #   inputs:
-#   #     pathToPublish: 'gitleaks-report.json'
-#   #     artifactName: 'GitLeaksReport'
-    
-# # Node.js Setup
-#   - task: NodeTool@0
-#     inputs:
-#       versionSpec: '20.x'
-#     displayName: 'Install Node.js v20'
-
-# # Cache npm for app build (speeds up npm ci and audit)
-#   - task: Cache@2
-#     displayName: 'Cache npm (app build)'
-#     inputs:
-#       key: 'npm | "$(Agent.OS)" | package-lock | $(Build.SourcesDirectory)/package-lock.json'
-#       path: '$(Pipeline.Workspace)/.npm-cache'
-#       restoreKeys: |
-#         npm | "$(Agent.OS)"
-#         npm
-
-# # Validate Environment Variables for Vite
-#   - script: |
-#       set -euo pipefail
-#       echo "Validating required environment variables..."
-#       required_vars=(
-#         VITE_MSAL_CLIENT_ID
-#         VITE_MSAL_TENANT_ID
-#         VITE_MSAL_REDIRECT_URI
-#         VITE_MSAL_SCOPES
-#       )
-#       for var in "${required_vars[@]}"; do
-#         if [ -z "${!var}" ]; then
-#           echo "ERROR: Environment variable '$var' is not set."
-#           exit 1
-#         else
-#           echo "$var is set"
-#         fi
-#       done
-#     displayName: 'Validate Vite Environment Variables'
-
-#   # Create .env file
-#   - script: |
-#       echo "Creating .env file..."
-#       echo "VITE_MSAL_CLIENT_ID=$VITE_MSAL_CLIENT_ID" >> .env
-#       echo "VITE_MSAL_TENANT_ID=$VITE_MSAL_TENANT_ID" >> .env
-#       echo "VITE_MSAL_REDIRECT_URI=$VITE_MSAL_REDIRECT_URI" >> .env
-#       # echo "VITE_MSAL_REDIRECT_URI=https://soc-watchtower.com/dashboard" >> .env
-#       echo "VITE_MSAL_SCOPES=$VITE_MSAL_SCOPES" >> .env
-#     displayName: 'Create .env File for Vite'
-
-# # Install Dependencies (uses cache)
-#   - script: |
-#       set -euo pipefail
-#       echo "Installing dependencies..."
-#       npm ci
-#     displayName: 'Install Dependencies'
-#     env:
-#       npm_config_cache: $(Pipeline.Workspace)/.npm-cache
-
-
-# # Audit Fix (safe by default; optional --force via variable)
-#   # - task: Bash@3
-#   #   displayName: 'npm audit fix'
-#   #   env:
-#   #     npm_config_cache: $(Pipeline.Workspace)/.npm-cache
-#   #   inputs:
-#   #     targetType: 'inline'
-#   #     script: |
-#   #       set -euo pipefail
-
-#   #       if [ "$(npmAuditForce)" = "true" ]; then
-#   #         echo "Running npm audit fix --force (may introduce breaking changes)…"
-#   #         npm audit fix --force || true
-#   #       else
-#   #         echo "Running npm audit fix (semver-safe)…"
-#   #         npm audit fix || true
-#   #       fi
-
-#   #       echo "Generating npm audit report (JSON)…"
-#   #       # If you only care about prod deps, uncomment:
-#   #       AUDIT_FLAGS="--omit=dev"
-#   #       # AUDIT_FLAGS=""
-#   #       if ! npm audit ${AUDIT_FLAGS} --json > npm-audit-report.json; then
-#   #         echo "npm audit completed with findings; JSON report saved to npm-audit-report.json"
-#   #       fi
-
-
-# # Fail only if critical vulnerabilities remain after fix (Node-based parsing; no jq)
-#   - task: Bash@3
-#     displayName: 'Fail on remaining critical vulnerabilities'
-#     inputs:
-#       targetType: 'inline'
-#       script: |
-#         set -euo pipefail
-#         if [ ! -s npm-audit-report.json ]; then
-#           echo "WARNING: npm-audit-report.json missing or empty; skipping critical check."
-#           exit 0
-#         fi
-#         node <<'EOF'
-#         const fs = require('fs');
-#         const path = 'npm-audit-report.json';
-#         const data = JSON.parse(fs.readFileSync(path, 'utf8'));
-#         const meta = data?.metadata?.vulnerabilities || {};
-#         const critical = Number(meta.critical || 0);
-#         //console.log(`Critical vulnerabilities remaining: ${critical}`);
-#         if (critical > 0) {
-#           console.error('Build failed: critical vulnerabilities remain after audit fix.');
-#           process.exit(1);
-#         } else {
-#           //console.log('No critical vulnerabilities remain.');
-#         }
-#         EOF
-
-
-#   # - task: PublishBuildArtifacts@1
-#   #   displayName: 'Publish npm audit report'
-#   #   condition: always()
-#   #   inputs:
-#   #     pathToPublish: 'npm-audit-report.json'
-#   #     artifactName: 'NpmAuditReport'
-
-#   # Run Unit Tests with Coverage (Optional)
-#   - script: |
-#       set -euo pipefail
-#       echo "Running unit tests with coverage and JUnit report..."
-#       npm install --save-dev jest-junit
-#       echo "Running unit tests with coverage (Cobertura) and JUnit report..."
-#       npm test -- --coverage --coverageReporters=cobertura --reporters=default --reporters=jest-junit 
-#     displayName: 'Run Unit Tests with Coverage and JUnit Report'
-#     condition: eq(variables['runTests'], 'true')
-#     continueOnError: true   # Do not fail pipeline if tests fail
-    
-# # Publish Unit Test Results
-#   - task: PublishTestResults@2
-#     displayName: 'Publish Unit Test Results'
-#     condition: eq(variables['runTests'], 'true')
-#     inputs:
-#       testResultsFiles: '**/junit.xml'        # Output from jest-junit
-#       testRunTitle: 'Unit Tests'
-#       mergeTestResults: true
-#       # failTaskOnFailedTests: true            # Optional- fail pipeline if tests fail
-
-# # Publish Coverage Report
-#   - task: PublishCodeCoverageResults@1
-#     displayName: 'Publish Coverage Report'
-#     condition: eq(variables['runTests'], 'true')
-#     inputs:
-#       codeCoverageTool: 'Cobertura'
-#       summaryFileLocation: '$(System.DefaultWorkingDirectory)/coverage/cobertura-coverage.xml'
-
-# # Enforce Coverage Threshold
-#   - script: |
-#       set -euo pipefail
-#       echo "Checking coverage threshold..."
-#       coverage=$(grep 'line-rate' coverage/cobertura-coverage.xml | sed 's/.*line-rate="\(.*\)".*/\1/')
-#       coverage_percent=$(echo "$coverage*100" | bc)
-#       echo "Coverage: $coverage_percent%"
-#       threshold=80
-#       if (( $(echo "$coverage_percent < $threshold" | bc -l) )); then
-#         echo "Coverage below $threshold%. Failing build."
-#         exit 1
-#       else
-#         echo "Coverage meets threshold."
-#       fi
-#     displayName: 'Enforce Coverage Threshold'
-   
-
-#   # Run ESLint (Non-blocking + JSON Report)
-#   - script: |
-#       echo "Running ESLint..."
-#       npm run lint -- --format json --output-file eslint-report.json || true
-#     displayName: 'Run ESLint (Non-blocking)'
-
-#   # Convert ESLint JSON → JUnit (so it appears in Test tab)
-#   - script: |
-#       echo "Converting ESLint report to JUnit format..."
-#       npm install -g eslint-formatter-junit
-#       npx eslint -f junit -o eslint-report.xml . || true
-#     displayName: 'Convert ESLint Report to JUnit'
-
-#   # Publish ESLint Test Results (visible in Azure DevOps UI)
-#   - task: PublishTestResults@2
-#     displayName: 'Publish ESLint Results'
-#     condition: always()
-#     inputs:
-#       testResultsFiles: '**/eslint-report.xml'
-#       testRunTitle: 'ESLint Results'
-#       mergeTestResults: true
-
-#   # Run Prettier (Non-blocking + text report)
-#   - script: |
-#       echo "Checking Prettier formatting..."
-#       npm run prettier:check > prettier-report.txt || true
-#     displayName: 'Run Prettier Check (Non-blocking)'
-  
-#   - script: |
-#       echo "Collecting lint reports..."
-#       mkdir -p lint-reports
-#       mv eslint-report.json lint-reports/ 2>/dev/null || true
-#       mv eslint-report.xml lint-reports/ 2>/dev/null || true
-#       mv prettier-report.txt lint-reports/ 2>/dev/null || true
-#       ls -l lint-reports
-#     displayName: 'Prepare Lint Reports Folder'
-
-#   # Publish Reports as Artifacts
-#   - task: PublishBuildArtifacts@1
-#     displayName: 'Publish Lint Reports'
-#     condition: always()
-#     inputs:
-#       PathtoPublish: 'lint-reports'
-#       ArtifactName: 'lint-reports'
-#       publishLocation: 'Container'
-
-# # Deploy to Azure Static Web App
-#   - task: AzureStaticWebApp@0
-#     inputs:
-#       azure_static_web_apps_api_token: $(AZURE_STATIC_WEB_APPS_API_TOKEN_ASHY_BEACH)
-# ###### Repository/Build Configurations - These values can be configured to match your app requirements. ######
-# # For more information regarding Static Web App workflow configurations, please visit: https://aka.ms/swaworkflowconfig
-#       app_location: "/" # App source code path
-#       api_location: "" # Api source code path - optional
-#       output_location: "dist" # Built app content directory - optional
-# ###### End of Repository/Build Configurations ######
+        ]
+
+  - bash: |
+      set -euo pipefail
+
+      echo "======================================"
+      echo "Renovate Summary"
+      echo "======================================"
+
+      if [ ! -f "renovate.log" ]; then
+        echo "No Renovate log file was generated."
+        exit 0
+      fi
+
+      echo ""
+      echo "Base branch details:"
+      grep -i \
+        "baseBranch\|Setting current branch\|Dependency extraction complete" \
+        renovate.log \
+        | head -30 || echo "No base branch details found."
+
+      echo ""
+      echo "Statistics:"
+      grep -i \
+        "repository started\|repository finished\|pr created\|branch created\|updates found" \
+        renovate.log \
+        | head -20 || echo "No statistics found."
+
+      echo ""
+      echo "Warnings, last 5:"
+      grep "WARN" renovate.log \
+        | tail -5 || echo "No warnings found."
+
+      echo ""
+      echo "Errors, last 5:"
+      grep "ERROR" renovate.log \
+        | tail -5 || echo "No errors found."
+
+      echo ""
+      echo "======================================"
+    displayName: Show Summary
+    condition: always()
+
+  - task: PublishPipelineArtifact@1
+    displayName: Publish Renovate Log
+    condition: always()
+    inputs:
+      targetPath: "$(System.DefaultWorkingDirectory)/renovate.log"
+      artifactName: "renovate-log-$(Build.BuildId)"
+
+  - bash: |
+      set -euo pipefail
+
+      echo ""
+      echo "=============================================="
+      echo "          RENOVATE RUN COMPLETED"
+      echo "=============================================="
+      echo ""
+      echo "Build ID:     $(Build.BuildId)"
+      echo "Repository:   $(Build.Repository.Name)"
+      echo "Base branch:  demolocal"
+      echo ""
+      echo "Check Pull Requests:"
+      echo "$(System.CollectionUri)$(System.TeamProject)/_git/$(Build.Repository.Name)/pullrequests"
+      echo ""
+      echo "=============================================="
+    displayName: Final Summary
+    condition: succeeded()
