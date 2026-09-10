@@ -1,31 +1,21 @@
-I have the users 
-Sai Asish, Pranay, Pradeep Kumar, Samarth, Gopi, Vineeth, ganeshm, Chaitanya amit, swathi, Pranjal goal, hibah Fathima, amogh
 
-Groups under branch security and members in it
-Build administrators – none
-Contributors -- Pranay, Samarth, Vineeth, Chaitanya amit, swathi, Pranjal goal, hibah Fathima, amogh, Security AI Dashboard Team
-Project Administrators – ganeshm, Pradeep, sai ashish
-Readers –None
-Project Collection Administrators – sai ashish, Pradeep, project collection service accounts.
-Project Collection Build Service Accounts –None
-Project Collection Service Accounts -- Enterprise Service Accounts (None)
-Security AI Dashboard Team –Amogh, GopiR, Sai Asish, 
-                                      Security AI Dashboard Build Service (tts-devops-prod)
-
-Security
-User permissions 
-Inheritance –On
-Permissions which need to be Not set, allow, deny.
-1.	Bypass policies when completing pull requests
-2.	Bypass policies when pushing
-3.	Contribute
-4.	Edit policies
-5.	Force push (rewrite history, delete branches and tags)
-6.	Manage permissions
-7.	Remove others' locks
-
-Above are details of the users and groups under my repositories,
-Now my consideration was, no body can directly push their code to development and main branches. Only ganesh, Pradeep, sai asish will have access to direct push code access for the development and main branch. Also for the development PR, any of 1 mandatory member among 3 members amogh, sai asish, Samarth can approve for the merge, for the main branch only  only sai asish mandatory for the approval.
-
-Now we start development branch, give in detail step by step process tod o that.
-
+Search for users or groups
+[Security AI Dashboard]\Project Administrators
+Advanced Security: manage and dismiss alerts
+Advanced Security: manage settings
+Advanced Security: view alerts
+Bypass policies when completing pull requests
+Bypass policies when pushing
+Contribute
+Contribute to pull requests
+Create branch
+Create tag
+Delete or disable repository
+Edit policies
+Enterprise Live Migration: manage migrations
+Force push (rewrite history, delete branches and tags)
+Manage notes
+Manage permissions
+Read
+Remove others' locks
+Rename repository
