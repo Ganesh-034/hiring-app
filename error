@@ -177,6 +177,7 @@ steps:
           {
             "matchManagers": [".*"],
             "groupName": "all-dependencies"
+            "groupSlug": "all-dependencies"
           }
         ]
 
