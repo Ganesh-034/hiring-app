@@ -1,37 +1,129 @@
-{
-  "name": "Microsoft.ApplicationInsights.Event",
-  "time": "2026-09-11T15:30:00.000Z",
-  "iKey": "<your DEV instrumentation key>",
-  "tags": {
-    "ai.cloud.role": "watchtower-dev-apim-test"
-  },
-  "data": {
-    "baseType": "EventData",
-    "baseData": {
-      "ver": 2,
-      "name": "APIMProxyTest",
-      "properties": {
-        "source": "APIM",
-        "environment": "DEV",
-        "testId": "APIM-TEST-001"
-      }
-    }
-  }
-}
 
-
-
-union isfuzzy=true
-    AppEvents,
-    AppPageViews,
-    AppRequests,
-    AppDependencies,
-    AppExceptions,
-    AppTraces,
-    AppMetrics
-| where TimeGenerated > ago(1h)
-| where tostring(Properties) contains "APIMProxyTest"
-    or tostring(Properties) contains "APIM-TEST-001"
-    or tostring(Name) contains "APIMProxyTest"
-| project TimeGenerated, Type, Name, Properties, AppRoleName
-| order by TimeGenerated desc
+TenantId
+ab5c8889-115d-4eea-ac9a-6cc228bb9077
+TimeGenerated [UTC]
+2026-09-11T15:33:33.4069879Z
+Name
+POST /dev/v2/track/
+Properties
+{"API Revision":"1","Service ID":"soc-watchtower-api","HTTP Method":"POST","API Type":"http","Service Name":"soc-watchtower-api","Region":"Southeast Asia","API Name":"soc-watchtower-backend-dev","Cache":"None","Request Id":"5a6f8402-02f1-401d-8794-f30e00c3c518","Service Type":"API Management","Operation Name":"application-insight","Subscription Name":"master"}
+API Name
+soc-watchtower-backend-dev
+API Revision
+1
+API Type
+http
+Cache
+None
+HTTP Method
+POST
+Operation Name
+application-insight
+Region
+Southeast Asia
+Request Id
+5a6f8402-02f1-401d-8794-f30e00c3c518
+Service ID
+soc-watchtower-api
+Service Name
+soc-watchtower-api
+Service Type
+API Management
+Subscription Name
+master
+Measurements
+{"Request Size":0,"Response Size":262,"Client Time (in ms)":0}
+Client Time (in ms)
+0
+Request Size
+0
+Response Size
+262
+OperationName
+soc-watchtower-backend-dev;rev=1 - application-insight
+OperationId
+5bb1f9d9-43dc8e06e12c5fd2
+ParentId
+5bb1f9d9-43dc8e06e12c5fd2
+AppRoleName
+soc-watchtower-api Southeast Asia
+AppRoleInstance
+soc-watchtower-api Southeast Asia
+ClientType
+PC
+ClientIP
+0.0.0.0
+ClientCity
+Fresno
+ClientStateOrProvince
+California
+ClientCountryOrRegion
+United States
+ResourceGUID
+a98599fb-5cfa-4c20-81e3-0b7cfb9b34c6
+IKey
+79a3c5e2-8bc6-4905-a318-3385621406cb
+SDKVersion
+apim:0.52.4150.0
+ItemCount
+1
+SourceSystem
+Azure
+Type
+AppRequests
+_ResourceId
+/subscriptions/0c123281-74e2-43d2-bbc3-8526be0786bc/resourcegroups/appsvc_linux_southeastasia_basic/providers/microsoft.insights/components/soc-watchtower-backend
+Id
+|5bb1f9d9-43dc8e06e12c5fd2.
+Url
+https://soc-watchtower-api.azure-api.net/dev/v2/track/
+DurationMs
+0.8347
+PerformanceBucket
+<250ms
+Success
+true
+ResultCode
+200
+9/11/2026, 9:00:31.651 PM
+{"ProcessId":"43","HostInstanceId":"89ed2218-e5ba-4499-b586-bcda5249f50a","prop__{OriginalFormat}":"Language Worker Process exited. Pid=63.","LogLevel":"Error","Category":"Worker.rpcWorkerProcess.python.65313648-e261-4f48-8767-f38f6c005702"}
+9/11/2026, 9:00:31.651 PM
+{"ProcessId":"43","HostInstanceId":"89ed2218-e5ba-4499-b586-bcda5249f50a","prop__{OriginalFormat}":"Language Worker Process exited. Pid=63.","FormattedMessage":"Language Worker Process exited. Pid=63.","LogLevel":"Error","Category":"Worker.rpcWorkerProcess.python.65313648-e261-4f48-8767-f38f6c005702"}
+9/11/2026, 9:00:31.528 PM
+{"ProcessId":"43","HostInstanceId":"89ed2218-e5ba-4499-b586-bcda5249f50a","prop__{OriginalFormat}":"Call to StopAsync complete, registered listeners are now stopped","LogLevel":"Information","Category":"Microsoft.Azure.WebJobs.Host.DrainModeManager"}
+479e234f376b271aa4f00043d21fce64
+1d94e440e4439e3c
+9/11/2026, 9:00:31.526 PM
+{"prop__functionName":"heartbeat_timer","ProcessId":"43","HostInstanceId":"89ed2218-e5ba-4499-b586-bcda5249f50a","prop__{OriginalFormat}":"Stopped the listener '{listenerName}' for function '{functionName}'","LogLevel":"Information","Category":"Host.Startup","prop__listenerName":"Microsoft.Azure.WebJobs.Host.Listeners.SingletonListener"}
+479e234f376b271aa4f00043d21fce64
+1d94e440e4439e3c
+9/11/2026, 9:00:31.496 PM
+{"prop__functionName":"heartbeat_timer","ProcessId":"43","HostInstanceId":"89ed2218-e5ba-4499-b586-bcda5249f50a","prop__{OriginalFormat}":"Stopping the listener '{listenerName}' for function '{functionName}'","LogLevel":"Information","Category":"Host.Startup","prop__listenerName":"Microsoft.Azure.WebJobs.Host.Listeners.SingletonListener"}
+479e234f376b271aa4f00043d21fce64
+1d94e440e4439e3c
+9/11/2026, 9:00:31.496 PM
+{"ProcessId":"43","HostInstanceId":"89ed2218-e5ba-4499-b586-bcda5249f50a","prop__{OriginalFormat}":"Calling StopAsync on the registered listeners","LogLevel":"Information","Category":"Microsoft.Azure.WebJobs.Host.DrainModeManager"}
+479e234f376b271aa4f00043d21fce64
+1d94e440e4439e3c
+9/11/2026, 9:00:31.496 PM
+{"ProcessId":"43","HostInstanceId":"89ed2218-e5ba-4499-b586-bcda5249f50a","prop__{OriginalFormat}":"DrainMode mode enabled","LogLevel":"Information","Category":"Microsoft.Azure.WebJobs.Host.DrainModeManager"}
+479e234f376b271aa4f00043d21fce64
+1d94e440e4439e3c
+9/11/2026, 9:00:28.113 PM
+{"ProcessId":"44","HostInstanceId":"130a97da-138f-48cc-93da-14a1318e04e7","prop__{OriginalFormat}":"Job host stopped","LogLevel":"Information","Category":"Host.Startup"}
+9/11/2026, 9:00:28.113 PM
+{"ProcessId":"44","HostInstanceId":"130a97da-138f-48cc-93da-14a1318e04e7","prop__{OriginalFormat}":"Stopping JobHost","LogLevel":"Information","Category":"Microsoft.Azure.WebJobs.Hosting.JobHostService"}
+9/11/2026, 9:00:28.104 PM
+{"ProcessId":"44","HostInstanceId":"130a97da-138f-48cc-93da-14a1318e04e7","prop__{OriginalFormat}":"Language Worker Process exited. Pid=65.","LogLevel":"Error","Category":"Worker.rpcWorkerProcess.python.94424c1d-b48d-45b0-b437-398fbe9ee0cf"}
+9/11/2026, 9:00:28.104 PM
+{"ProcessId":"44","HostInstanceId":"130a97da-138f-48cc-93da-14a1318e04e7","prop__{OriginalFormat}":"Language Worker Process exited. Pid=65.","FormattedMessage":"Language Worker Process exited. Pid=65.","LogLevel":"Error","Category":"Worker.rpcWorkerProcess.python.94424c1d-b48d-45b0-b437-398fbe9ee0cf"}
+9/11/2026, 9:00:27.889 PM
+{"ProcessId":"44","HostInstanceId":"130a97da-138f-48cc-93da-14a1318e04e7","prop__{OriginalFormat}":"Call to StopAsync complete, registered listeners are now stopped","LogLevel":"Information","Category":"Microsoft.Azure.WebJobs.Host.DrainModeManager"}
+34c75925a8c56a1d1f472318979a112c
+1700dcdbf378df5d
+9/11/2026, 9:00:27.884 PM
+{"prop__functionName":"device_monitoring_timer","ProcessId":"44","HostInstanceId":"130a97da-138f-48cc-93da-14a1318e04e7","prop__{OriginalFormat}":"Stopped the listener '{listenerName}' for function '{functionName}'","LogLevel":"Information","Category":"Host.Startup","prop__listenerName":"Microsoft.Azure.WebJobs.Host.Listeners.SingletonListener"}
+34c75925a8c56a1d1f472318979a112c
+1700dcdbf378df5d
+1s 423ms
+Display time (UTC+05:30)
