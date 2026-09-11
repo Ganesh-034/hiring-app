@@ -1,14 +1,41 @@
 union isfuzzy=true
     AppEvents,
-    AppPageViews,
     AppRequests,
     AppDependencies,
     AppExceptions,
     AppTraces,
-    AppMetrics
-| where TimeGenerated > ago(1h)
-| where tostring(Properties) contains "APIM-TEST-002"
-    or tostring(Properties) contains "APIMProxyTest"
-    or tostring(Name) contains "APIMProxyTest"
-| project TimeGenerated, Type, Name, Properties, AppRoleName
+    AppMetrics,
+    AppPageViews
+| where TimeGenerated > ago(2h)
+| where tostring(Properties) contains "APIM"
+    or tostring(Properties) contains "Watchtower"
+    or tostring(Properties) contains "ProxyTest"
+    or tostring(Name) contains "APIM"
+    or tostring(Name) contains "Proxy"
+| project TimeGenerated, Type, Name, ResultCode, Success, AppRoleName, Properties
+| order by TimeGenerated desc
+
+
+union isfuzzy=true
+    AppRequests,
+    AppDependencies,
+    AppExceptions,
+    AppTraces,
+    AppMetrics,
+    AppPageViews
+| where TimeGenerated > ago(30m)
+| summarize Count=count() by Type
+| order by Count desc
+
+AppRequests
+| where TimeGenerated > ago(2h)
+| where Url contains "/dev/v2/track"
+| project
+    TimeGenerated,
+    Url,
+    ResultCode,
+    Success,
+    AppRoleName,
+    OperationName,
+    DurationMs
 | order by TimeGenerated desc
