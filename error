@@ -1,41 +1,92 @@
-union isfuzzy=true
-    AppEvents,
-    AppRequests,
-    AppDependencies,
-    AppExceptions,
-    AppTraces,
-    AppMetrics,
-    AppPageViews
-| where TimeGenerated > ago(2h)
-| where tostring(Properties) contains "APIM"
-    or tostring(Properties) contains "Watchtower"
-    or tostring(Properties) contains "ProxyTest"
-    or tostring(Name) contains "APIM"
-    or tostring(Name) contains "Proxy"
-| project TimeGenerated, Type, Name, ResultCode, Success, AppRoleName, Properties
-| order by TimeGenerated desc
 
-
-union isfuzzy=true
-    AppRequests,
-    AppDependencies,
-    AppExceptions,
-    AppTraces,
-    AppMetrics,
-    AppPageViews
-| where TimeGenerated > ago(30m)
-| summarize Count=count() by Type
-| order by Count desc
-
+9/11/2026, 10:01:44.940 PM
 AppRequests
-| where TimeGenerated > ago(2h)
-| where Url contains "/dev/v2/track"
-| project
-    TimeGenerated,
-    Url,
-    ResultCode,
-    Success,
-    AppRoleName,
-    OperationName,
-    DurationMs
-| order by TimeGenerated desc
+POST /dev/v2/track/
+200
+true
+soc-watchtower-api Southeast Asia
+{"API Revision":"1","Service ID":"soc-watchtower-api","HTTP Method":"POST","API Type":"http","Service Name":"soc-watchtower-api","Region":"Southeast Asia","API Name":"soc-watchtower-backend-dev","Cache":"None","Request Id":"37d0767f-22a2-445d-bb3f-c6b009b2cfd2","Service Type":"API Management","Operation Name":"application-insight","Subscription Name":"master"}
+TimeGenerated [UTC]
+2026-09-11T16:31:44.9409014Z
+Type
+AppRequests
+Name
+POST /dev/v2/track/
+ResultCode
+200
+Success
+true
+AppRoleName
+soc-watchtower-api Southeast Asia
+Properties
+{"API Revision":"1","Service ID":"soc-watchtower-api","HTTP Method":"POST","API Type":"http","Service Name":"soc-watchtower-api","Region":"Southeast Asia","API Name":"soc-watchtower-backend-dev","Cache":"None","Request Id":"37d0767f-22a2-445d-bb3f-c6b009b2cfd2","Service Type":"API Management","Operation Name":"application-insight","Subscription Name":"master"}
+TimeGenerated [UTC]
+2026-09-11T16:31:40.7759389Z
+Type
+AppRequests
+Name
+POST /dev/v2/track/
+ResultCode
+200
+Success
+true
+AppRoleName
+soc-watchtower-api Southeast Asia
+Properties
+{"API Revision":"1","Service ID":"soc-watchtower-api","HTTP Method":"POST","API Type":"http","Service Name":"soc-watchtower-api","Region":"Southeast Asia","API Name":"soc-watchtower-backend-dev","Cache":"None","Request Id":"9f0f718d-56b0-462b-b640-934312d85b2f","Service Type":"API Management","Operation Name":"application-insight","Subscription Name":"master"}
+9/11/2026, 9:33:05.049 PM
+AppMetrics
+HeartbeatState
+soc-watchtower-backend-dev
+{"appSrv_ResourceGroup":"soc-watchtower-dev","appSrv_wsOwner":"0c123281-74e2-43d2-bbc3-8526be0786bc+appsvc_linux_southeastasia_basic-SoutheastAsiawebspace-Linux","osVersion":"6.6.143.1-1.azl3","osType":"Linux","sdkVersion":"2.9.6","appSrv_wsHost":"soc-watchtower-backend-dev-epfsh5f4fcbgbsd4.southeastasia-01.azurewebsites.net","appSrv_wsStamp":"waws-prod-sg1-113","processSessionId":"1696d06272633b6bc2af19b6ef43ebe5","appSrv_SiteName":"soc-watchtower-backend-dev"}
+9/11/2026, 9:33:02.786 PM
+AppMetrics
+HeartbeatState
+
+
+
+AppTraces
+489
+AppMetrics
+148
+AppRequests
+94
+AppExceptions
+4
+AppDependencies
+4
+
+9/11/2026, 10:01:44.940 PM
+https://soc-watchtower-api.azure-api.net/dev/v2/track/
+200
+true
+soc-watchtower-api Southeast Asia
+soc-watchtower-backend-dev;rev=1 - application-insight
+1.1069
+TimeGenerated [UTC]
+2026-09-11T16:31:44.9409014Z
+Url
+https://soc-watchtower-api.azure-api.net/dev/v2/track/
+ResultCode
+200
+Success
+true
+AppRoleName
+soc-watchtower-api Southeast Asia
+OperationName
+soc-watchtower-backend-dev;rev=1 - application-insight
+DurationMs
+1.1069
+9/11/2026, 10:01:40.775 PM
+https://soc-watchtower-api.azure-api.net/dev/v2/track/
+200
+true
+soc-watchtower-api Southeast Asia
+soc-watchtower-backend-dev;rev=1 - application-insight
+0.8097
+9/11/2026, 9:03:33.406 PM
+https://soc-watchtower-api.azure-api.net/dev/v2/track/
+200
+true
+soc-watchtower-api Southeast Asia
+soc
