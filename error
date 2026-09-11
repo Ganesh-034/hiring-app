@@ -25,9 +25,8 @@ AppEvents
 | project TimeGenerated, Name, Properties, AppRoleName
 | order by TimeGenerated desc
 
-AppEvents
+search "APIM-TEST-003"
 | where TimeGenerated > ago(30m)
-| where Name == "APIMProxyTest"
-| project TimeGenerated, Name, Properties, AppRoleName
+| project TimeGenerated, Type, Name, Properties, AppRoleName
 | order by TimeGenerated desc
 
