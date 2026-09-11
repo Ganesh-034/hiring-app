@@ -1,34 +1,243 @@
+Inbound
+(0.982 ms)
+api-inspector (0.549 ms)
 {
-  "name": "Microsoft.ApplicationInsights.Event",
-  "time": "2026-09-11T15:40:00.000Z",
-  "iKey": "<your DEV iKey>",
-  "tags": {
-    "ai.cloud.role": "watchtower-dev-apim-test"
-  },
-  "data": {
-    "baseType": "EventData",
-    "baseData": {
-      "ver": 2,
-      "name": "APIMProxyTest",
-      "properties": {
-        "source": "APIM",
-        "environment": "DEV",
-        "testId": "APIM-TEST-002"
-      }
+    "request": {
+        "scheme": {
+            "received": "https",
+            "original": "https"
+        },
+        "method": "POST",
+        "url": "https://soc-watchtower-api.azure-api.net/dev/v2/track/",
+        "headers": [
+            {
+                "name": "Accept",
+                "value": "*/*"
+            },
+            {
+                "name": "Accept-Encoding",
+                "value": "gzip,deflate,br,zstd"
+            },
+            {
+                "name": "Accept-Language",
+                "value": "en-US,en;q=0.9,en-IN;q=0.8"
+            },
+            {
+                "name": "Cache-Control",
+                "value": "no-cache, no-store"
+            },
+            {
+                "name": "Content-Length",
+                "value": "439"
+            },
+            {
+                "name": "Content-Type",
+                "value": "application/json"
+            },
+            {
+                "name": "Host",
+                "value": "soc-watchtower-api.azure-api.net"
+            },
+            {
+                "name": "Max-Forwards",
+                "value": "10"
+            },
+            {
+                "name": "Referer",
+                "value": "https://apimanagement.hosting.portal.azure.net/"
+            },
+            {
+                "name": "ocp-apim-subscription-key",
+                "value": "b0b6d91681a045f5bd79c0cfc5ae7dfa"
+            },
+            {
+                "name": "sec-ch-ua-platform",
+                "value": "\"Windows\""
+            },
+            {
+                "name": "sec-ch-ua",
+                "value": "\"Chromium\";v=\"152\",\"Not?A_Brand\";v=\"24\",\"Microsoft Edge\";v=\"152\""
+            },
+            {
+                "name": "sec-ch-ua-mobile",
+                "value": "?0"
+            },
+            {
+                "name": "X-Forwarded-For",
+                "value": "167.103.26.253,13.91.254.72:2048"
+            },
+            {
+                "name": "Sec-Fetch-Site",
+                "value": "cross-site"
+            },
+            {
+                "name": "Sec-Fetch-Mode",
+                "value": "cors"
+            },
+            {
+                "name": "Sec-Fetch-Dest",
+                "value": "empty"
+            },
+            {
+                "name": "X-ARR-LOG-ID",
+                "value": "a649e6ed-6c2f-439b-bc75-f19f6d6bd107"
+            },
+            {
+                "name": "CLIENT-IP",
+                "value": "13.91.254.72:2048"
+            },
+            {
+                "name": "DISGUISED-HOST",
+                "value": "soc-watchtower-api.azure-api.net"
+            },
+            {
+                "name": "X-SITE-DEPLOYMENT-ID",
+                "value": "apimwebapppOFCDlq8vq7naPa93sEMaw4e34TPt9de7ioig6tz__9b8a"
+            },
+            {
+                "name": "WAS-DEFAULT-HOSTNAME",
+                "value": "apimwebapppofcdlq8vq7napa93semaw4e34tpt9de7ioig6tz.azurewebsites.net"
+            },
+            {
+                "name": "X-Forwarded-Proto",
+                "value": "https"
+            },
+            {
+                "name": "X-AppService-Proto",
+                "value": "https"
+            },
+            {
+                "name": "X-ARR-SSL",
+                "value": "2048|256|CN=Microsoft TLS G2 RSA CA OCSP 04,O=Microsoft Corporation,C=US|CN=*.azure-api.net,O=Microsoft Corporation,L=Redmond,S=WA,C=US"
+            },
+            {
+                "name": "X-Forwarded-TlsVersion",
+                "value": "1.3"
+            },
+            {
+                "name": "X-Original-URL",
+                "value": "/dev/v2/track/"
+            },
+            {
+                "name": "X-WAWS-Unencoded-URL",
+                "value": "/dev/v2/track/"
+            },
+            {
+                "name": "X-Azure-JA4-Fingerprint",
+                "value": "t13d201200_2b729b4bf6f3_89322cc15493"
+            }
+        ]
     }
-  }
+}
+api-inspector (0.007 ms)
+{
+    "configuration": {
+        "api": {
+            "from": "/dev",
+            "to": {
+                "scheme": "https",
+                "host": "soc-watchtower-api.azure-api.net",
+                "port": 443,
+                "path": "/dev",
+                "queryString": "",
+                "query": {},
+                "isDefaultPort": true
+            },
+            "version": null,
+            "revision": "1"
+        },
+        "operation": {
+            "method": "POST",
+            "uriTemplate": "/v2/track/"
+        },
+        "user": "-",
+        "product": "-"
+    }
+}
+graphql-configuration-setup (0.023 ms)
+"Skipping GraphQL creation for non-GraphQL API request"
+cors (0.020 ms)
+"Origin header was missing or empty and the request was classified as not cross-domain. CORS policy was not applied."
+set-backend-service (0.010 ms)
+"Backend was changed to backend with ID 'WebApp_soc-watchtower-backend-dev' (type: Single)."
+authentication-managed-identity (0.256 ms)
+{
+    "message": "Obtaining managed identity token using clientId:ddd0465b-b2db-4113-9fcd-8c2912f72199 AAD Authority:https://login.windows.net/fe8c6234-bf85-48c7-b462-1eefe98d567d for https://monitor.azure.com audience succeeded.",
+    "errorResponse": null
+}
+authentication-managed-identity (0.008 ms)
+{
+    "message": "Managed identity token is added to msi-access-token context variable."
+}
+set-header (0.019 ms)
+{
+    "message": "Expression was successfully evaluated.",
+    "expression": "\"Bearer \" + (string)context.Variables[\"msi-access-token\"]",
+    "value": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IlQ1aDQwcTdHMHg0OXFuNDFsTTkta0tqcEQ5OCIsImtpZCI6IlQ1aDQwcTdHMHg0OXFuNDFsTTkta0tqcEQ5OCJ9.eyJhdWQiOiJodHRwczovL21vbml0b3IuYXp1cmUuY29tIiwiaXNzIjoiaHR0cHM6Ly9zdHMud2luZG93cy5uZXQvZmU4YzYyMzQtYmY4NS00OGM3LWI0NjItMWVlZmU5OGQ1NjdkLyIsImlhdCI6MTc4OTEzNzU1MywibmJmIjoxNzg5MTM3NTUzLCJleHAiOjE3ODkyMjQyNTMsImFpbyI6IkFTUUEyLzhlQUFBQXNNSlpyKy9BRDN6ZjI0R1Nsclg1eFVHcjNMSzN0RS9TQnpSQ21MdFhqY0U9IiwiYXBwaWQiOiJkZGQwNDY1Yi1iMmRiLTQxMTMtOWZjZC04YzI5MTJmNzIxOTkiLCJhcHBpZGFjciI6IjIiLCJpZHAiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC9mZThjNjIzNC1iZjg1LTQ4YzctYjQ2Mi0xZWVmZTk4ZDU2N2QvIiwiaWR0eXAiOiJhcHAiLCJvaWQiOiJiNjI3MmZlOC05M2Q3LTQzNTctODc1Ny0zYmFmNDJjMGM0OTIiLCJyaCI6IjEuQVNzQU5HS01fb1dfeDBpMFloN3Y2WTFXZlFlOU0tbnUwaDFQa3p3M1VyZ1pWbnNBQUFBckFBLiIsInN1YiI6ImI2MjcyZmU4LTkzZDctNDM1Ny04NzU3LTNiYWY0MmMwYzQ5MiIsInRpZCI6ImZlOGM2MjM0LWJmODUtNDhjNy1iNDYyLTFlZWZlOThkNTY3ZCIsInV0aSI6IjNaenZiYXlZcmsya2dtNWp0V3hNQUEiLCJ2ZXIiOiIxLjAiLCJ4bXNfYWN0X2ZjdCI6IjMgOSIsInhtc19mdGQiOiJCWGc3eFBDRkJ6MGV0X2pWT2hwNE1uS25NeVRuM096NHRxTlVzNU9OWFdnQllYTnBZWE52ZFhSb1pXRnpkQzFrYzIxeiIsInhtc19pZHJlbCI6IjcgMTIiLCJ4bXNfbWlyaWQiOiIvc3Vic2NyaXB0aW9ucy8wYzEyMzI4MS03NGUyLTQzZDItYmJjMy04NTI2YmUwNzg2YmMvcmVzb3VyY2Vncm91cHMvc29jLXdhdGNodG93ZXItcHJvZC9wcm92aWRlcnMvTWljcm9zb2Z0LkFwaU1hbmFnZW1lbnQvc2VydmljZS9zb2Mtd2F0Y2h0b3dlci1hcGkiLCJ4bXNfcmQiOiIwLkFVa0F0djhLQlFnQ0VnRXJFaFFJQ1JJUWtGV0lrbW9pbWtXcmI2cS1ZQWxKYUJJVUNBZ1NFQWU5TS1udTBoMVBrenczVXJnWlZuc1NGQWdMRWhCcG4wZDgtSUxuOEQtN3ZQUzQzbFUtIiwieG1zX3N1Yl9mY3QiOiI5IDMifQ.Kt6YGML_DnWa2fJwL9joFoXgjzJI_BsykDLvzpqGoCZ3w6ot9X_4NcLklAWU07deNDCD-ZrfyxhGQYb9SIewM8dy8VJaaQYd5CsANrOvBugcKqvhjTn_HuvJu4VM5uyLY_RH3-lVShmhOhNI_Dpq-O204YErGBKvi0wdyD_qYyz6Q0CuXSGNmlputdvhMaRJHuPOyXRH-tsDwxFW_KXYFNLz6Z_1kJOBZsw16jtZM05oeUEoL_5TGQ41M0PuyoOpjpBV3r2L9QHUEWqEtyDzMpllct125wtZ10GAtPUYWowzneROx5vlpMxj4OOjurtd8e3VFYz2iGHVUrvvglmLpw"
+}
+set-header (0.071 ms)
+{
+    "message": "Specified value was assigned to the header (see below).",
+    "header": {
+        "name": "Authorization",
+        "value": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IlQ1aDQwcTdHMHg0OXFuNDFsTTkta0tqcEQ5OCIsImtpZCI6IlQ1aDQwcTdHMHg0OXFuNDFsTTkta0tqcEQ5OCJ9.eyJhdWQiOiJodHRwczovL21vbml0b3IuYXp1cmUuY29tIiwiaXNzIjoiaHR0cHM6Ly9zdHMud2luZG93cy5uZXQvZmU4YzYyMzQtYmY4NS00OGM3LWI0NjItMWVlZmU5OGQ1NjdkLyIsImlhdCI6MTc4OTEzNzU1MywibmJmIjoxNzg5MTM3NTUzLCJleHAiOjE3ODkyMjQyNTMsImFpbyI6IkFTUUEyLzhlQUFBQXNNSlpyKy9BRDN6ZjI0R1Nsclg1eFVHcjNMSzN0RS9TQnpSQ21MdFhqY0U9IiwiYXBwaWQiOiJkZGQwNDY1Yi1iMmRiLTQxMTMtOWZjZC04YzI5MTJmNzIxOTkiLCJhcHBpZGFjciI6IjIiLCJpZHAiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC9mZThjNjIzNC1iZjg1LTQ4YzctYjQ2Mi0xZWVmZTk4ZDU2N2QvIiwiaWR0eXAiOiJhcHAiLCJvaWQiOiJiNjI3MmZlOC05M2Q3LTQzNTctODc1Ny0zYmFmNDJjMGM0OTIiLCJyaCI6IjEuQVNzQU5HS01fb1dfeDBpMFloN3Y2WTFXZlFlOU0tbnUwaDFQa3p3M1VyZ1pWbnNBQUFBckFBLiIsInN1YiI6ImI2MjcyZmU4LTkzZDctNDM1Ny04NzU3LTNiYWY0MmMwYzQ5MiIsInRpZCI6ImZlOGM2MjM0LWJmODUtNDhjNy1iNDYyLTFlZWZlOThkNTY3ZCIsInV0aSI6IjNaenZiYXlZcmsya2dtNWp0V3hNQUEiLCJ2ZXIiOiIxLjAiLCJ4bXNfYWN0X2ZjdCI6IjMgOSIsInhtc19mdGQiOiJCWGc3eFBDRkJ6MGV0X2pWT2hwNE1uS25NeVRuM096NHRxTlVzNU9OWFdnQllYTnBZWE52ZFhSb1pXRnpkQzFrYzIxeiIsInhtc19pZHJlbCI6IjcgMTIiLCJ4bXNfbWlyaWQiOiIvc3Vic2NyaXB0aW9ucy8wYzEyMzI4MS03NGUyLTQzZDItYmJjMy04NTI2YmUwNzg2YmMvcmVzb3VyY2Vncm91cHMvc29jLXdhdGNodG93ZXItcHJvZC9wcm92aWRlcnMvTWljcm9zb2Z0LkFwaU1hbmFnZW1lbnQvc2VydmljZS9zb2Mtd2F0Y2h0b3dlci1hcGkiLCJ4bXNfcmQiOiIwLkFVa0F0djhLQlFnQ0VnRXJFaFFJQ1JJUWtGV0lrbW9pbWtXcmI2cS1ZQWxKYUJJVUNBZ1NFQWU5TS1udTBoMVBrenczVXJnWlZuc1NGQWdMRWhCcG4wZDgtSUxuOEQtN3ZQUzQzbFUtIiwieG1zX3N1Yl9mY3QiOiI5IDMifQ.Kt6YGML_DnWa2fJwL9joFoXgjzJI_BsykDLvzpqGoCZ3w6ot9X_4NcLklAWU07deNDCD-ZrfyxhGQYb9SIewM8dy8VJaaQYd5CsANrOvBugcKqvhjTn_HuvJu4VM5uyLY_RH3-lVShmhOhNI_Dpq-O204YErGBKvi0wdyD_qYyz6Q0CuXSGNmlputdvhMaRJHuPOyXRH-tsDwxFW_KXYFNLz6Z_1kJOBZsw16jtZM05oeUEoL_5TGQ41M0PuyoOpjpBV3r2L9QHUEWqEtyDzMpllct125wtZ10GAtPUYWowzneROx5vlpMxj4OOjurtd8e3VFYz2iGHVUrvvglmLpw"
+    }
+}
+rewrite-uri (0.017 ms)
+{
+    "message": "Updated request URL per specified rewrite template.",
+    "request": {
+        "url": "https://soc-watchtower-api.azure-api.net/dev/v2.1/track"
+    }
+}
+cors (0.002 ms)
+"Origin header was missing or empty and the request was classified as not cross-domain. CORS policy was not applied."
+Backend
+(0.008 ms)↑ Back to top
+set-backend-service (0.008 ms)
+{
+    "message": "Backend service URL was changed.",
+    "oldBackendServiceUrl": "https://soc-watchtower-api.azure-api.net/dev",
+    "newBackendServiceUrl": "https://southeastasia-1.in.applicationinsights.azure.com/",
+    "request": {
+        "url": "https://southeastasia-1.in.applicationinsights.azure.com/v2.1/track"
+    }
+}
+Outbound
+(0.078 ms)↑ Back to top
+transfer-response (0.078 ms)
+{
+    "message": "Response has been sent to the caller in full"
 }
 
-AppRequests
-| where TimeGenerated > ago(30m)
-| where Url contains "/dev/v2/track"
-| project
-    TimeGenerated,
-    Name,
-    Url,
-    Success,
-    ResultCode,
-    DurationMs,
-    Measurements,
-    Properties
-| order by TimeGenerated desc
+9/11/2026, 10:01:44.940 PM
+POST /dev/v2/track/
+https://soc-watchtower-api.azure-api.net/dev/v2/track/
+true
+200
+1.1069
+{"Request Size":0,"Response Size":262,"Client Time (in ms)":0}
+{"API Revision":"1","Service ID":"soc-watchtower-api","HTTP Method":"POST","API Type":"http","Service Name":"soc-watchtower-api","Region":"Southeast Asia","API Name":"soc-watchtower-backend-dev","Cache":"None","Request Id":"37d0767f-22a2-445d-bb3f-c6b009b2cfd2","Service Type":"API Management","Operation Name":"application-insight","Subscription Name":"master"}
+POST /dev/v2/track/
+https://soc-watchtower-api.azure-api.net/dev/v2/track/
+true
+200
+0.8097
+{"Request Size":0,"Response Size":93,"Client Time (in ms)":0}
+{"API Revision":"1","Service ID":"soc-watchtower-api","HTTP Method":"POST","API Type":"http","Service Name":"soc-watchtower-api","Region":"Southeast Asia","API Name":"soc-watchtower-backend-dev","Cache":"None","Request Id":"9f0f718d-56b0-462b-b640-934312d85b2f","Service Type":"API Management","Operation Name":"application-insight","Subscription Name":"master"}
+TimeGenerated [UTC]
+2026-09-11T16:31:40.7759389Z
+Name
+POST /dev/v2/track/
+Url
+https://soc-watchtower-api.azure-api.net/dev/v2/track/
+Success
+true
+ResultCode
+200
+DurationMs
+0.8097
+Measurements
+{"Request Size":0,"Response Size":93,"Client Time (in ms)":0}
+Properties
+{"API Revision":"1","Service ID":"soc-watchtower-api","HTTP Method":"POST","API Type":"http","Service Name":"soc-watchtower-api","Region":"Southeast Asia","API Name":"soc-watchtower-backend-d
