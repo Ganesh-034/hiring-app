@@ -1,21 +1,38 @@
+// src/services/appInsights.js
+import { ApplicationInsights } from "@microsoft/applicationinsights-web";
+import { ReactPlugin } from "@microsoft/applicationinsights-react-js";
 
-Search for users or groups
-[Security AI Dashboard]\Project Administrators
-Advanced Security: manage and dismiss alerts
-Advanced Security: manage settings
-Advanced Security: view alerts
-Bypass policies when completing pull requests
-Bypass policies when pushing
-Contribute
-Contribute to pull requests
-Create branch
-Create tag
-Delete or disable repository
-Edit policies
-Enterprise Live Migration: manage migrations
-Force push (rewrite history, delete branches and tags)
-Manage notes
-Manage permissions
-Read
-Remove others' locks
-Rename repository
+const reactPlugin = new ReactPlugin();
+let appInsights = null;
+
+export function initAppInsights() {
+  if (appInsights) return appInsights; // already initialized
+
+  const connectionString = import.meta.env.VITE_APPINSIGHTS_CONNECTION_STRING;
+  if (!connectionString) return null; // disabled (e.g. local dev where var is blank)
+
+  appInsights = new ApplicationInsights({
+    config: {
+      connectionString,
+      extensions: [reactPlugin],
+      enableAutoRouteTracking: true, // page views on SPA route change (React Router v6)
+      autoTrackPageVisitTime: true, // page load / time-on-page
+      disableFetchTracking: false, // track fetch() calls -> failed AJAX
+      disableAjaxTracking: false, // track axios/XHR -> failed AJAX
+      enableAjaxErrorStatusText: true, // include status text on failed calls
+      enableUnhandledPromiseRejectionTracking: true,
+      enableCorsCorrelation: false, // ⚠️ keep false — see note below
+      loggingLevelConsole: 0,
+    },
+  });
+
+  appInsights.loadAppInsights();
+  appInsights.trackPageView(); // initial load
+  return appInsights;
+}
+
+export function getAppInsights() {
+  return appInsights;
+}
+
+export { reactPlugin };
