@@ -1,19 +1,66 @@
+POST https://soc-watchtower-api.azure-api.net/dev/v2/track HTTP/1.1
+Host: soc-watchtower-api.azure-api.net
+Content-Type: application/json
+Ocp-Apim-Subscription-Key: <Place subscription key here>
+
 {
-  "name": "Microsoft.ApplicationInsights.Event",
-  "time": "2026-09-11T00:00:00.000Z",
-  "iKey": "YOUR_INSTRUMENTATION_KEY",
-  "tags": {
-    "ai.cloud.role": "watchtower-dev-apim-test"
-  },
-  "data": {
-    "baseType": "EventData",
-    "baseData": {
-      "ver": 2,
-      "name": "APIMProxyTest",
-      "properties": {
-        "source": "APIM",
-        "environment": "DEV"
-      }
-    }
-  }
+"name": "Microsoft.ApplicationInsights.Event",
+"time": "2026-09-11T00:00:00.000Z",
+"iKey": "023893ab-bb35-432b-8964-a6106cdeb9d6",
+"tags": {
+"ai.cloud.role": "watchtower-dev-apim-test"
+},
+"data": {
+"baseType": "EventData",
+"baseData": {
+"ver": 2,
+"name": "APIMProxyTest",
+"properties": {
+"source": "APIM",
+"environment": "DEV"
 }
+}
+}
+}
+
+HTTP/1.1 200 OK
+content-length: 0
+date: Fri, 11 Sep 2026 14:54:08 GMT
+request-context: appId=cid-v1:a98599fb-5cfa-4c20-81e3-0b7cfb9b34c6
+vary: Origin
+
+POST https://soc-watchtower-api.azure-api.net/dev/v2/track HTTP/1.1
+Host: soc-watchtower-api.azure-api.net
+Content-Type: application/json
+Ocp-Apim-Subscription-Key: <Place subscription key here>
+
+{
+"name": "Microsoft.ApplicationInsights.Event",
+"time": "2026-09-11T00:00:00.000Z",
+"iKey": "023893ab-bb35-432b-8964-a6106cdeb9d6",
+"tags": {
+"ai.cloud.role": "watchtower-dev-apim-test"
+},
+"data": {
+"baseType": "EventData",
+"baseData": {
+"ver": 2,
+"name": "APIMProxyTest",
+"properties": {
+"source": "APIM",
+"environment": "DEV"
+}
+}
+}
+}
+
+HTTP/1.1 200 OK
+apim-trace-id: 7a828e27a10c42e29208f56227809e93
+content-length: 0
+date: Fri, 11 Sep 2026 14:54:27 GMT
+ocp-apim-apiid: soc-watchtower-backend-dev
+ocp-apim-operationid: application-insight
+ocp-apim-subscriptionid: master
+request-context: appId=cid-v1:a98599fb-5cfa-4c20-81e3-0b7cfb9b34c6
+vary: Origin
+    
