@@ -1,66 +1,11 @@
-POST https://soc-watchtower-api.azure-api.net/dev/v2/track HTTP/1.1
-Host: soc-watchtower-api.azure-api.net
-Content-Type: application/json
-Ocp-Apim-Subscription-Key: <Place subscription key here>
 
-{
-"name": "Microsoft.ApplicationInsights.Event",
-"time": "2026-09-11T00:00:00.000Z",
-"iKey": "023893ab-bb35-432b-8964-a6106cdeb9d6",
-"tags": {
-"ai.cloud.role": "watchtower-dev-apim-test"
-},
-"data": {
-"baseType": "EventData",
-"baseData": {
-"ver": 2,
-"name": "APIMProxyTest",
-"properties": {
-"source": "APIM",
-"environment": "DEV"
-}
-}
-}
-}
-
-HTTP/1.1 200 OK
-content-length: 0
-date: Fri, 11 Sep 2026 14:54:08 GMT
-request-context: appId=cid-v1:a98599fb-5cfa-4c20-81e3-0b7cfb9b34c6
-vary: Origin
-
-POST https://soc-watchtower-api.azure-api.net/dev/v2/track HTTP/1.1
-Host: soc-watchtower-api.azure-api.net
-Content-Type: application/json
-Ocp-Apim-Subscription-Key: <Place subscription key here>
-
-{
-"name": "Microsoft.ApplicationInsights.Event",
-"time": "2026-09-11T00:00:00.000Z",
-"iKey": "023893ab-bb35-432b-8964-a6106cdeb9d6",
-"tags": {
-"ai.cloud.role": "watchtower-dev-apim-test"
-},
-"data": {
-"baseType": "EventData",
-"baseData": {
-"ver": 2,
-"name": "APIMProxyTest",
-"properties": {
-"source": "APIM",
-"environment": "DEV"
-}
-}
-}
-}
-
-HTTP/1.1 200 OK
-apim-trace-id: 7a828e27a10c42e29208f56227809e93
-content-length: 0
-date: Fri, 11 Sep 2026 14:54:27 GMT
-ocp-apim-apiid: soc-watchtower-backend-dev
-ocp-apim-operationid: application-insight
-ocp-apim-subscriptionid: master
-request-context: appId=cid-v1:a98599fb-5cfa-4c20-81e3-0b7cfb9b34c6
-vary: Origin
-    
+9/11/2026, 8:45:37.693 PM
+POST /dev/v2/track/
+{"API Revision":"1","Service ID":"soc-watchtower-api","HTTP Method":"POST","API Type":"http","Service Name":"soc-watchtower-api","Region":"Southeast Asia","API Name":"soc-watchtower-backend-dev","Cache":"None","Request Id":"9f98c92e-8e00-4583-bb47-1e0c6e4cd831","Service Type":"API Management","Operation Name":"application-insight","Subscription Name":"master"}
+{"Request Size":0,"Response Size":93,"Client Time (in ms)":0}
+soc-watchtower-backend-dev;rev=1 - application-insight
+5bb1f9d1-43dc8e06e12c5fd2
+5bb1f9d1-43dc8e06e12c5fd2
+9/11/2026, 8:45:36.661 PM
+GET /
+{"_MS.ProcessedByMetricExtractors":"(Name:'Requests', Ver:'1.1')"}
