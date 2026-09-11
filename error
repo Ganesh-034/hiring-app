@@ -1,11 +1,15 @@
 <policies>
     <inbound>
         <base />
-        <authentication-managed-identity resource="https://monitor.azure.com" output-token-variable-name="msi-access-token" />
+
+        <authentication-managed-identity
+            resource="https://monitor.azure.com"
+            output-token-variable-name="msi-access-token" />
+
         <set-header name="Authorization" exists-action="override">
             <value>@("Bearer " + (string)context.Variables["msi-access-token"])</value>
         </set-header>
-        <rewrite-uri template="/v2.1/track" copy-unmatched-params="false" />
+
         <cors allow-credentials="false">
             <allowed-origins>
                 <origin>https://demo.soc-watchtower.com</origin>
@@ -19,12 +23,22 @@
             </allowed-headers>
         </cors>
     </inbound>
+
     <backend>
-        <set-backend-service base-url="https://southeastasia-1.in.applicationinsights.azure.com" />
+        <base />
+
+        <set-backend-service
+            base-url="https://southeastasia-1.in.applicationinsights.azure.com" />
+
+        <rewrite-uri
+            template="/v2.1/track"
+            copy-unmatched-params="false" />
     </backend>
+
     <outbound>
         <base />
     </outbound>
+
     <on-error>
         <base />
     </on-error>
