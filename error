@@ -10,6 +10,10 @@
             <value>@("Bearer " + (string)context.Variables["msi-access-token"])</value>
         </set-header>
 
+        <rewrite-uri
+            template="/v2.1/track"
+            copy-unmatched-params="false" />
+
         <cors allow-credentials="false">
             <allowed-origins>
                 <origin>https://demo.soc-watchtower.com</origin>
@@ -25,14 +29,8 @@
     </inbound>
 
     <backend>
-        <base />
-
         <set-backend-service
             base-url="https://southeastasia-1.in.applicationinsights.azure.com" />
-
-        <rewrite-uri
-            template="/v2.1/track"
-            copy-unmatched-params="false" />
     </backend>
 
     <outbound>
